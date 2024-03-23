@@ -1,4 +1,4 @@
-# Pomegranate-Engine
+# Pomegranate-Editor
 A simple customizable 2D Game Engine. Still WIP.
 
 # About
