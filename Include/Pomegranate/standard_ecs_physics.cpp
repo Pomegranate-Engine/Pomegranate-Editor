@@ -133,8 +133,9 @@ namespace Pomegranate
         auto *p = entity->get_component<PhysicsObject>();
         auto *c = entity->get_component<CollisionShape>();
 #pragma omp parallel for
-        for (auto & object : PhysicsObject::objects) //TODO: test range-based loop on windows may break OMP
+        for (int i = 0; i < PhysicsObject::objects.size(); ++i) //TODO: test range-based loop on windows may break OMP
         {
+            Entity *object = PhysicsObject::objects[i];
             if (object != entity)
             {
                 auto *other = object;

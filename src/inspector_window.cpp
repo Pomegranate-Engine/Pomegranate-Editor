@@ -23,7 +23,11 @@ void InspectorWindow::render()
 
                     //Add a break
                     ImGui::Separator();
+#ifdef __APPLE__
                     ImGui::Text( "%s", abi::__cxa_demangle(name.c_str(), nullptr, nullptr, nullptr));
+#else
+                    ImGui::Text( "%s", name.c_str());
+#endif
                     //Add X button to remove component
                     ImGui::SameLine();
                     //Move it to the end of the line
@@ -96,9 +100,15 @@ void InspectorWindow::render()
             if(ImGui::BeginPopup("Add Component"))
             {
                 for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
+#ifdef __APPLE__
                     if (ImGui::MenuItem(abi::__cxa_demangle(i->first.c_str(), nullptr, nullptr, nullptr))) {
                         entity->add_component(i->first.c_str());
                     }
+#else
+                    if (ImGui::MenuItem(i->first.c_str())) {
+                        entity->add_component(i->first.c_str());
+                    }
+#endif
                 }
                 ImGui::EndPopup();
             }

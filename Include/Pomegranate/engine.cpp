@@ -8,30 +8,27 @@ namespace Pomegranate
         auto* compiled = (SDL_version*)malloc(sizeof(SDL_version));
         SDL_GetVersion(compiled);
         print_info(std::to_string(compiled->major) + "." + std::to_string(compiled->minor) + "." + std::to_string(compiled->patch));
-        if(video)
-        {
-            if (SDL_Init(SDL_INIT_VIDEO) < 0)
-            {
-                print_error("Failed to initialize the SDL2 library");
-                return -1;
-            }
-        }
         if(audio)
         {
             if (SDL_Init(SDL_INIT_AUDIO) < 0)
             {
                 print_error("Failed to initialize the SDL2 audio");
-                return -1;
             }
-            if(Mix_Init(MIX_INIT_WAVPACK))
+            if(Mix_Init(MIX_INIT_WAVPACK)<0)
             {
                 print_error("Failed to initialize the SDL2 mixer");
-                return -1;
             }
-            if(Mix_OpenAudio( 0, nullptr))
+            //Debug audio devices to console
+            if(Mix_OpenAudio(0,nullptr)<0)
             {
                 print_error("Failed to initialize the SDL2 mixer");
-                return -1;
+            }
+        }
+        if(video)
+        {
+            if (SDL_Init(SDL_INIT_VIDEO) < 0)
+            {
+                print_error("Failed to initialize the SDL2 library");
             }
         }
         if(input)

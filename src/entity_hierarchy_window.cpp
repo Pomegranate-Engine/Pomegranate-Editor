@@ -318,7 +318,11 @@ void Window_EntityHierarchy::draw_node(Node* n)
     }
     if(n->system != nullptr)
     {
+#ifdef __APPLE__
         name =  abi::__cxa_demangle(typeid(*n->system).name(), nullptr, nullptr, nullptr);
+#else
+        name = typeid(*n->system).name();
+#endif
     }
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
     TTFFont* font = ResourceManager::load<TTFFont>("engine_res/zed_font.ttf");

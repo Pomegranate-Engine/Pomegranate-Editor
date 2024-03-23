@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
 project(Pomegranate_Engine)
-project(Pomegranate_Library)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -84,20 +83,11 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_image.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_mixer.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_ttf.dylib
-            ${CMAKE_SOURCE_DIR}/Lib/libPomegranate_Library.dylib
             ${LUAJIT_LIBRARY}
     )
 elseif(WIN32)
     find_package(OpenMP)
     target_link_libraries(Pomegranate_Engine PRIVATE
-            ${SDL_LIBRARY_DIR}/SDL3.lib
-            ${SDL_LIBRARY_DIR}/SDL3_ttf.lib
-            ${SDL_LIBRARY_DIR}/SDL3_image.lib
-            ${SDL_LIBRARY_DIR}/SDL3_mixer.lib
-            ${SDL_LIBRARY_DIR}/lua51.lib
-            OpenMP::OpenMP_CXX
-    )
-    target_link_libraries(Pomegranate_Library PRIVATE
             ${SDL_LIBRARY_DIR}/SDL3.lib
             ${SDL_LIBRARY_DIR}/SDL3_ttf.lib
             ${SDL_LIBRARY_DIR}/SDL3_image.lib

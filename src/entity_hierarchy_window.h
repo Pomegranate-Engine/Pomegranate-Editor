@@ -6,7 +6,11 @@
 #include "Pomegranate/ecs.h"
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
+
+//Only use #include <cxxabi.h> if mac
+#ifdef __APPLE__
 #include <cxxabi.h>
+#endif
 #include <cstdlib>
 #include<memory>
 using namespace Pomegranate;

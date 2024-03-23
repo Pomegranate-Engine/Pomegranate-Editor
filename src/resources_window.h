@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include<vector>
 
 using namespace Pomegranate;
 class ResourcesWindow : public EditorWindow
