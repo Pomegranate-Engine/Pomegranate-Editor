@@ -7,8 +7,9 @@
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
 
+#define GCC_COMPILER (defined(__GNUC__) && !defined(__clang__))
 //Only use #include <cxxabi.h> if mac for demangling
-#ifdef __APPLE__
+#ifdef GCC_COMPILER
 #include <cxxabi.h>
 #endif
 #include <cstdlib>

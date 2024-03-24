@@ -200,7 +200,7 @@ void Window_EntityHierarchy::render()
         }
         if(ImGui::BeginMenu("Create System")) {
             for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
-#ifdef __APPLE__
+#ifdef GCC_COMPILER
                 if (ImGui::MenuItem(abi::__cxa_demangle(i->first.c_str(), nullptr, nullptr, nullptr))) {
                     //Add the system as child to selected node
                     if(selected_node != nullptr)
@@ -213,7 +213,14 @@ void Window_EntityHierarchy::render()
                 }
 #else
                 if (ImGui::MenuItem(i->first.c_str())) {
-                    selected_node->group->add_system(i->first.c_str());
+                    //Add the system as child to selected node
+                    if(selected_node != nullptr)
+                    {
+                        if(selected_node->group != nullptr)
+                        {
+                            selected_node->group->add_system(i->second());
+                        }
+                    }
                 }
 #endif
             }
@@ -327,7 +334,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     }
     if(n->system != nullptr)
     {
-#ifdef __APPLE__
+#ifdef GCC_COMPILER
         name =  abi::__cxa_demangle(typeid(*n->system).name(), nullptr, nullptr, nullptr);
 #else
         name = typeid(*n->system).name();
