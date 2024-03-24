@@ -186,7 +186,7 @@ namespace Pomegranate
 
     Render::Render()
     {
-        register_system<Render>();
+        register_system(Render);
     }
 
     Tilemap::Tilemap()

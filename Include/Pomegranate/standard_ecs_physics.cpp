@@ -124,7 +124,7 @@ namespace Pomegranate
 
     RigidBody::RigidBody()
     {
-        register_system<RigidBody>();
+        register_system(RigidBody);
     }
 
     void RigidBody::solve_collisions(Entity *entity)

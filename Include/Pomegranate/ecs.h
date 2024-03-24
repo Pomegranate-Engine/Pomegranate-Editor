@@ -81,9 +81,10 @@ namespace Pomegranate
         static void remove_global_system(System*);
         static void global_system_tick();
         static void global_system_draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
-        static std::unordered_map<const char*, std::function<System*()>> system_types;
-        template<typename T> static void register_system();
+        static std::unordered_map<std::string, std::function<System*()>> system_types;
+        template<typename T> static void register_system_with_name(std::string name);
     };
+#define register_system(T) System::register_system_with_name<T>(typeid(T()).name())
 
     class Entity
     {

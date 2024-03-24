@@ -80,6 +80,6 @@ namespace Pomegranate
 
     TransformLinkages::TransformLinkages()
     {
-        register_system<TransformLinkages>();
+        register_system(TransformLinkages);
     }
 }

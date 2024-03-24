@@ -6,7 +6,7 @@ namespace Pomegranate
     std::vector<System*> System::global_systems = std::vector<System*>();
     std::unordered_map<uint32_t ,Entity*> Entity::entities = std::unordered_map<uint32_t,Entity*>();
     std::unordered_map<std::string, std::function<Component*()>> Component::component_types = std::unordered_map<std::string, std::function<Component*()>>();
-    std::unordered_map<const char*, std::function<System*()>> System::system_types = std::unordered_map<const char*, std::function<System*()>>();
+    std::unordered_map<std::string, std::function<System*()>> System::system_types = std::unordered_map<std::string, std::function<System*()>>();
     std::unordered_map<std::string, int> LuaComponent::lua_component_types = std::unordered_map<std::string, int>();
     LuaComponent* LuaComponent::current = nullptr;
     uint32_t Entity::entity_count = 0;

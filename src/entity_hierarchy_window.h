@@ -7,7 +7,7 @@
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
 
-//Only use #include <cxxabi.h> if mac
+//Only use #include <cxxabi.h> if mac for demangling
 #ifdef __APPLE__
 #include <cxxabi.h>
 #endif

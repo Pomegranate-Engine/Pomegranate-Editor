@@ -9,6 +9,7 @@ namespace Pomegranate
         else
         {
             auto* r = new T(path.c_str());
+            ((Resource*)r)->path = path;
             resources[path] = r;
             return r;
         }

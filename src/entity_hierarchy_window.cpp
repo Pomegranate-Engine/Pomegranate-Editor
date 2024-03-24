@@ -94,7 +94,7 @@ void Window_EntityHierarchy::render()
     }
 
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), graph_texture);
-    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 22, 22, 22, 255);
+    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 34, 39, 44, 255);
     SDL_RenderClear(Window::current->get_sdl_renderer());
 
     //Check if window is focused
@@ -174,43 +174,52 @@ void Window_EntityHierarchy::render()
     if(ImGui::BeginPopupContextWindow())
     {
         if(ImGui::MenuItem("Create Entity")) {
-            //Create a new entity
-            Entity *entity = new Entity();
-            entity->name = "New Entity";
             //Add the entity as child to selected node
             if(selected_node != nullptr)
             {
                 if(selected_node->group != nullptr)
                 {
+                    //Create a new entity
+                    Entity *entity = new Entity();
+                    entity->name = "New Entity";
                     selected_node->group->add_entity(entity);
                 }
             }
         }
-        else if(ImGui::MenuItem("Create Group")) {
-            //Create a new group
-            EntityGroup *group = new EntityGroup("New Group");
+        if(ImGui::MenuItem("Create Group")) {
             //Add the group as child to selected node
             if(selected_node != nullptr)
             {
                 if(selected_node->group != nullptr)
                 {
+                    //Create a new group
+                    EntityGroup *group = new EntityGroup("New Group");
                     selected_node->group->add_group(group);
                 }
             }
         }
-        else if(ImGui::MenuItem("Create System")) {
-            //Create a new system
-            System *system = new System();
-            //Add the system as child to selected node
-            if(selected_node != nullptr)
-            {
-                if(selected_node->group != nullptr)
-                {
-                    selected_node->group->add_system(system);
+        if(ImGui::BeginMenu("Create System")) {
+            for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
+#ifdef __APPLE__
+                if (ImGui::MenuItem(abi::__cxa_demangle(i->first.c_str(), nullptr, nullptr, nullptr))) {
+                    //Add the system as child to selected node
+                    if(selected_node != nullptr)
+                    {
+                        if(selected_node->group != nullptr)
+                        {
+                            selected_node->group->add_system(i->second());
+                        }
+                    }
                 }
+#else
+                if (ImGui::MenuItem(i->first.c_str())) {
+                    selected_node->group->add_system(i->first.c_str());
+                }
+#endif
             }
+            ImGui::EndMenu();
         }
-        else if(ImGui::MenuItem("Delete Node"))
+        if(ImGui::MenuItem("Delete Node"))
         {
             if(selected_node != nullptr)
             {

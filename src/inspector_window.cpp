@@ -187,7 +187,7 @@ void InspectorWindow::property_field(const char *name, Texture **value)
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource"))
         {
             Texture* texture = *(Texture**)payload->Data;
-            value = &texture;
+            *value = texture;
             print_info("Texture Dropped");
         }
         ImGui::EndDragDropTarget();

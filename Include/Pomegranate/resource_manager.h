@@ -10,6 +10,7 @@ namespace Pomegranate
 {
     struct Resource
     {
+    public:
         std::string path;
     };
 

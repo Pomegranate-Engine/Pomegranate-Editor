@@ -126,8 +126,8 @@ namespace Pomegranate
         Component::component_types[name] = []() -> Component* { return new T(); };
     }
 
-    template<typename T> inline void System::register_system()
+    template<typename T> inline void System::register_system_with_name(std::string name)
     {
-        System::system_types[typeid(T).name()] = []() -> System* { return new T(); };
+        System::system_types[name] = []() -> System* { return new T(); };
     }
 }

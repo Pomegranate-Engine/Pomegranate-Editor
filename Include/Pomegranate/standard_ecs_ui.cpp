@@ -108,7 +108,7 @@ namespace Pomegranate
 
     UIController::UIController()
     {
-        register_system<UIController>();
+        register_system(UIController);
     }
 
     UIText::UIText()
