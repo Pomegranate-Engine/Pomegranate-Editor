@@ -200,7 +200,7 @@ void Window_EntityHierarchy::render()
         }
         if(ImGui::BeginMenu("Create System")) {
             for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
-                if (ImGui::MenuItem(boost::core::demangle(i->first.c_str()).c_str())) {
+                if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
                     //Add the system as child to selected node
                     if(selected_node != nullptr)
                     {
@@ -321,7 +321,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     }
     if(n->system != nullptr)
     {
-        name = boost::core::demangle(typeid(*n->system).name());
+        name = scuffy_demangle(typeid(*n->system).name());
     }
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
     TTFFont* font = ResourceManager::load<TTFFont>("engine_res/zed_font.ttf");

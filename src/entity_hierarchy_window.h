@@ -7,7 +7,7 @@
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
 
-#include<boost/core/demangle.hpp>
+#include"utils.h"
 #include <cstdlib>
 #include<memory>
 using namespace Pomegranate;

@@ -69,6 +69,8 @@ set(IMGUI_SOURCES
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
         src/menu_bar.cpp
         src/menu_bar.h
+        src/utils.cpp
+        src/utils.h
 )
 
 # Add executable
