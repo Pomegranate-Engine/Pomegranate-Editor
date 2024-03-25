@@ -2,7 +2,7 @@
 
 std::string save_branch(EntityGroup* group, int depth = 0)
 {
-
+    return "";
 }
 
 std::string save_scene(EntityGroup* group)
