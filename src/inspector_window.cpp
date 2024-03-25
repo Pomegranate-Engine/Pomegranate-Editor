@@ -23,11 +23,7 @@ void InspectorWindow::render()
 
                     //Add a break
                     ImGui::Separator();
-#ifdef __APPLE__
-                    ImGui::Text( "%s", abi::__cxa_demangle(name.c_str(), nullptr, nullptr, nullptr));
-#else
-                    ImGui::Text( "%s", name.c_str());
-#endif
+                    ImGui::Text( "%s",scuffy_demangle(name.c_str()).c_str());
                     //Add X button to remove component
                     ImGui::SameLine();
                     //Move it to the end of the line
