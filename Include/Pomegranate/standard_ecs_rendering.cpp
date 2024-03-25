@@ -14,6 +14,11 @@ namespace Pomegranate
         push_data<Texture*>("texture", &this->texture);
     }
 
+    void Sprite::init(Entity *entity)
+    {
+        entity->require_component<Transform>();
+    }
+
     void Sprite::load_texture(const char *path) {
         this->texture = ResourceManager::load<Texture>(path);
     }

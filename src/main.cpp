@@ -17,6 +17,7 @@ using namespace Pomegranate;
 #include "scene_window.h"
 #include "inspector_window.h"
 #include "resources_window.h"
+#include "menu_bar.h"
 
 //Main window
 Window main_window = Window("Window", 1024, 720);
@@ -223,7 +224,7 @@ int main(int argc, char* argv[])
         ImGui::NewFrame();
 
 
-
+        draw_menu_bar(scene_root);
         windows_manager.render(); //Render windows
 
         //Draw imgui

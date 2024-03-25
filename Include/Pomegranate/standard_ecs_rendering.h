@@ -25,6 +25,7 @@ namespace Pomegranate
         Texture* texture;
         Color color;
         Sprite();
+        void init(Pomegranate::Entity *) override;
         void load_texture(const char* path);
     };
 

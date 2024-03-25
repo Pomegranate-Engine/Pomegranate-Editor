@@ -67,6 +67,8 @@ set(IMGUI_SOURCES
         ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer3.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
+        src/menu_bar.cpp
+        src/menu_bar.h
 )
 
 # Add executable
