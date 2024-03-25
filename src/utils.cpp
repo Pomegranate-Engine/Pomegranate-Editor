@@ -15,9 +15,12 @@ std::string scuffy_demangle(const char* name)
 	if (pos != std::string::npos)
 		demangled_name.erase(pos, cdecl_str.length());
 
-	// Remove the parentheses if they exist at the end
-	while (!demangled_name.empty() && demangled_name.back() == '(')
-		demangled_name.pop_back();
+	if(demangled_name.back() == ')')
+	{
+		// Remove after last (
+		size_t last_open_paren = demangled_name.find_last_of('(');
+		demangled_name.erase(last_open_paren);
+	}
 
 	return demangled_name;
 }
