@@ -100,15 +100,9 @@ void InspectorWindow::render()
             if(ImGui::BeginPopup("Add Component"))
             {
                 for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
-#ifdef __APPLE__
-                    if (ImGui::MenuItem(abi::__cxa_demangle(i->first.c_str(), nullptr, nullptr, nullptr))) {
+                    if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
                         entity->add_component(i->first.c_str());
                     }
-#else
-                    if (ImGui::MenuItem(i->first.c_str())) {
-                        entity->add_component(i->first.c_str());
-                    }
-#endif
                 }
                 ImGui::EndPopup();
             }
