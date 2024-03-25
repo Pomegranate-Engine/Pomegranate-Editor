@@ -3,6 +3,12 @@ std::string scuffy_demangle(const char* name)
 {
 	std::string demangled_name = boost::core::demangle(name);
 
+#ifdef _WIN32
+	// Check if the demangled name starts with "class "
+	if (demangled_name.substr(0, 6) == "class ")
+		demangled_name.erase(0, 6); // Remove "class " from the beginning
+#endif
+
 	// Remove __cdecl(void) from the end
 	std::string cdecl_str = "__cdecl(void)";
 	size_t pos = demangled_name.find(cdecl_str);
