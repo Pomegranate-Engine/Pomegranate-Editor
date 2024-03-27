@@ -10,7 +10,9 @@ namespace Pomegranate
     std::unordered_map<std::string, int> LuaComponent::lua_component_types = std::unordered_map<std::string, int>();
     LuaComponent* LuaComponent::current = nullptr;
     uint32_t Entity::entity_count = 0;
+    uint32_t EntityGroup::group_count = 0;
     std::unordered_map<std::string, EntityGroup*> EntityGroup::groups = std::unordered_map<std::string, EntityGroup*>();
+    std::unordered_map<uint32_t, EntityGroup*> EntityGroup::groups_id = std::unordered_map<uint32_t, EntityGroup*>();
     std::vector<Entity*> Entity::destroy_queue = std::vector<Entity*>();
 
     Entity::Entity()
@@ -39,7 +41,7 @@ namespace Pomegranate
         return nullptr;
     }
 
-    void Entity::add_component(const char *name)
+    Component* Entity::add_component(const char *name)
     {
         //Check if it starts with "class"
         std::string n = std::string(name);
@@ -47,6 +49,7 @@ namespace Pomegranate
         component->init(this);
         std::pair<const std::type_info*, Component *> pair(&typeid(*component), component);
         this->components.insert(pair);
+        return component;
     }
 
     bool Entity::has_component(const char * name)
@@ -161,6 +164,8 @@ namespace Pomegranate
         this->child_groups = std::vector<EntityGroup*>();
         this->name = name;
         groups.emplace(name,this);
+        this->id = EntityGroup::group_count++;
+        groups_id.emplace(this->id,this);
     }
 
     EntityGroup::~EntityGroup()

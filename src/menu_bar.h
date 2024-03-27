@@ -8,9 +8,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include "scene.h"
 using namespace Pomegranate;
-
-std::string save_scene(EntityGroup* group);
-void draw_menu_bar(EntityGroup* group);
+void draw_menu_bar();
 
 #endif //POMEGRANATE_ENGINE_MENU_BAR_H

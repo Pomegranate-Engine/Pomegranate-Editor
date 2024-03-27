@@ -9,6 +9,7 @@
 
 #include"utils.h"
 #include <cstdlib>
+#include "scene.h"
 #include<memory>
 using namespace Pomegranate;
 class Node
@@ -33,15 +34,14 @@ public:
 class Window_EntityHierarchy : public EditorWindow
 {
 public:
-    EntityGroup* scene_root;
     Texture* entity_texture;
     Texture* group_texture;
     SDL_Texture* graph_texture;
     Vec2 cam_pos;
     float zoom;
     static std::vector<Node*> nodes;
-    Node* selected_node;
-    Node* dragging_node;
+    static Node* selected_node;
+    static Node* dragging_node;
     Window_EntityHierarchy();
     void build_graph(EntityGroup* group, Node* parent = nullptr);
     void draw_node(Node*n);

@@ -6,13 +6,21 @@
 #include "Pomegranate/ecs.h"
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/standard_ecs_rendering.h"
+#include"scene.h"
 using namespace Pomegranate;
 
 class Window_SceneView : public EditorWindow
 {
 public:
     Vec2 position;
-    EntityGroup* scene_root;
+
+    Vec2 selected_entity_arrow_hor_pos = Vec2(0, 0);
+    Vec2 selected_entity_arrow_hor_half = Vec2(0, 0);
+    Vec2 selected_entity_arrow_vert_pos = Vec2(0, 0);
+    Vec2 selected_entity_arrow_vert_half = Vec2(0, 0);
+    bool dragging_entity = false;
+    bool dragging_entity_horizontal = false;
+    bool dragging_entity_vertical = false;
     SDL_Texture* render_texture;
     Window_SceneView();
     void update() override;

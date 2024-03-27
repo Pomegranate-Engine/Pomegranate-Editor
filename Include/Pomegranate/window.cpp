@@ -44,10 +44,10 @@ namespace Pomegranate
 #if defined(__APPLE__) //TODO: Implement better solution for HIGH_DPI
         HIGH_DPI = true;
 #endif
-        int flags = SDL_WINDOW_RESIZABLE;
+        int flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
         if(HIGH_DPI)
         {
-            flags = flags | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_MAXIMIZED;
+            flags = flags | SDL_WINDOW_HIGH_PIXEL_DENSITY;
         }
         this->window = SDL_CreateWindow(this->title, this->width, this->height, flags); //TODO: Add HIGH_DPI support
         if (!this->window)

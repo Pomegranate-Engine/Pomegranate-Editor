@@ -2,6 +2,8 @@
 
 std::vector<Node*> Window_EntityHierarchy::nodes = std::vector<Node*>();
 Node* Node::selected = nullptr;
+Node* Window_EntityHierarchy::selected_node = nullptr;
+Node* Window_EntityHierarchy::dragging_node = nullptr;
 
 void draw_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
@@ -81,7 +83,7 @@ void Window_EntityHierarchy::render()
             i--;
         }
     }
-    build_graph(scene_root);
+    build_graph(currently_opened_scene);
     Vec2i tex_size;
     SDL_QueryTexture(graph_texture, NULL, NULL, &tex_size.x, &tex_size.y);
 
@@ -327,12 +329,11 @@ void Window_EntityHierarchy::draw_node(Node* n)
     TTFFont* font = ResourceManager::load<TTFFont>("engine_res/zed_font.ttf");
     SDL_Surface* surface = TTF_RenderText_Solid(font->get_ttf_font(), name.c_str(), {255, 255, 255, 255});
     SDL_Texture* texture = SDL_CreateTextureFromSurface(Window::current->get_sdl_renderer(), surface);
-    SDL_DestroySurface(surface);
     Vec2i tex_size;
     SDL_QueryTexture(texture, NULL, NULL, &tex_size.x, &tex_size.y);
     SDL_RenderTexture(Window::current->get_sdl_renderer(), texture, nullptr, new SDL_FRect{node_pos.x-tex_size.x/8, node_pos.y+node_size, (float)tex_size.x/4, (float)tex_size.y/4});
+    SDL_DestroySurface(surface);
     SDL_DestroyTexture(texture);
-
 
 
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 127, 127, 127, 80);

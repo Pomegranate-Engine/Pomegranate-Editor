@@ -169,15 +169,13 @@ int main(int argc, char* argv[])
     register_system(RigidBody);
     register_system(KinematicBody);
 
-    EntityGroup* scene_root = new EntityGroup("root");
+    currently_opened_scene = new EntityGroup("root");
 
     //Create windows
     WindowsManager windows_manager;
     auto* entity_hierarchy = new Window_EntityHierarchy();
-    entity_hierarchy->scene_root = scene_root;
     windows_manager.open_window(entity_hierarchy);
     auto* scene_view = new Window_SceneView();
-    scene_view->scene_root = scene_root;
     windows_manager.open_window(scene_view);
     windows_manager.open_window(new InspectorWindow());
     windows_manager.open_window(new ResourcesWindow());
@@ -224,7 +222,7 @@ int main(int argc, char* argv[])
         ImGui::NewFrame();
 
 
-        draw_menu_bar(scene_root);
+        draw_menu_bar();
         windows_manager.render(); //Render windows
 
         //Draw imgui

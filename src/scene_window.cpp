@@ -1,11 +1,30 @@
 #include "scene_window.h"
 
+#include "entity_hierarchy_window.h"
+
 Window_SceneView::Window_SceneView()
 {
-    scene_root = nullptr;
     render_texture = SDL_CreateTexture(Pomegranate::Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1, 1);
     this->name = "Scene View";
     this->flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+}
+
+void draw_bezier(Vec2 a, Vec2 b, Vec2 c, Vec2 position, Color color)
+{
+    //Adjust for camera position
+    a -= position;
+    b -= position;
+    c -= position;
+
+    //Draw bezier curve
+    SDL_SetRenderDrawColor(Pomegranate::Window::current->get_sdl_renderer(), color.r, color.g, color.b, 255);
+    std::vector<SDL_FPoint> points;
+    for(float t = 0; t < 1; t+=0.01)
+    {
+        Vec2 p = a*pow(1-t,2) + b*2*(1-t)*t + c*pow(t,2);
+        points.push_back({p.x, p.y});
+    }
+    SDL_RenderLines(Pomegranate::Window::current->get_sdl_renderer(), points.data(), points.size());
 }
 
 void Window_SceneView::render() {
@@ -19,7 +38,7 @@ void Window_SceneView::render() {
         SDL_DestroyTexture(render_texture);
         render_texture = SDL_CreateTexture(Pomegranate::Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
     }
-    if(scene_root != nullptr)
+    if(currently_opened_scene != nullptr)
     {
         SDL_SetRenderTarget(Pomegranate::Window::current->get_sdl_renderer(), render_texture);
         SDL_SetRenderDrawColor(Pomegranate::Window::current->get_sdl_renderer(), 0, 0, 0, 255);
@@ -31,15 +50,93 @@ void Window_SceneView::render() {
 
         camera->get_component<Transform>()->pos = this->position;
 
+        //Axis
+        SDL_SetRenderDrawColor(Pomegranate::Window::current->get_sdl_renderer(), 0, 255, 0, 255);
+        SDL_SetRenderDrawBlendMode(Pomegranate::Window::current->get_sdl_renderer(), SDL_BLENDMODE_BLEND);
+        SDL_RenderLine(Pomegranate::Window::current->get_sdl_renderer(), 0-this->position.x, 0, 0-this->position.x, ImGui::GetWindowHeight());
+        SDL_SetRenderDrawColor(Pomegranate::Window::current->get_sdl_renderer(), 255, 0, 0, 255);
+        SDL_RenderLine(Pomegranate::Window::current->get_sdl_renderer(), 0, 0-this->position.y, ImGui::GetWindowWidth(), 0-this->position.y);
+
+
+
         //Render scene
-        scene_root->draw(nullptr);
+        currently_opened_scene->draw(nullptr);
+
+        Vec2 mouse_world_pos = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y) + this->position;
+        //Draw movement arrows around selected entity
+        if (Node::selected != nullptr)
+        {
+            if(Node::selected->entity != nullptr)
+            {
+                if(Node::selected->entity->get_component<Transform>())
+                {
+                    Entity* entity = Node::selected->entity.get();
+                    auto* transform = entity->get_component<Transform>();
+                    SDL_SetRenderDrawColor(Pomegranate::Window::current->get_sdl_renderer(), 255, 0, 0, 255);
+                    //Draw arrow
+                    selected_entity_arrow_hor_pos = selected_entity_arrow_hor_pos.lerp(transform->pos + Vec2(64, 0),20*delta_time);
+                    selected_entity_arrow_hor_half = selected_entity_arrow_hor_half.lerp(transform->pos + Vec2(32, 0),30*delta_time);
+                    draw_bezier(transform->pos,selected_entity_arrow_hor_half,selected_entity_arrow_hor_pos, this->position, Color(255,0,0));
+                    //Draw arrow tip
+                    SDL_RenderLine(Pomegranate::Window::current->get_sdl_renderer(), selected_entity_arrow_hor_pos.x-this->position.x, selected_entity_arrow_hor_pos.y-this->position.y, selected_entity_arrow_hor_pos.x-8-this->position.x, selected_entity_arrow_hor_pos.y-8-this->position.y);
+                    SDL_RenderLine(Pomegranate::Window::current->get_sdl_renderer(), selected_entity_arrow_hor_pos.x-this->position.x, selected_entity_arrow_hor_pos.y-this->position.y, selected_entity_arrow_hor_pos.x-8-this->position.x, selected_entity_arrow_hor_pos.y+8-this->position.y);
+
+                    SDL_SetRenderDrawColor(Pomegranate::Window::current->get_sdl_renderer(), 0, 255, 0, 255);
+                    //Draw arrow
+                    selected_entity_arrow_vert_pos = selected_entity_arrow_vert_pos.lerp(transform->pos + Vec2(0, -64),20*delta_time);
+                    selected_entity_arrow_vert_half = selected_entity_arrow_vert_half.lerp(transform->pos + Vec2(0, -32),30*delta_time);
+                    draw_bezier(transform->pos,selected_entity_arrow_vert_half,selected_entity_arrow_vert_pos, this->position, Color(0,255,0));
+                    //Draw arrow tip
+                    SDL_RenderLine(Pomegranate::Window::current->get_sdl_renderer(), selected_entity_arrow_vert_pos.x-this->position.x, selected_entity_arrow_vert_pos.y-this->position.y, selected_entity_arrow_vert_pos.x-8-this->position.x, selected_entity_arrow_vert_pos.y+8-this->position.y);
+                    SDL_RenderLine(Pomegranate::Window::current->get_sdl_renderer(), selected_entity_arrow_vert_pos.x-this->position.x, selected_entity_arrow_vert_pos.y-this->position.y, selected_entity_arrow_vert_pos.x+8-this->position.x, selected_entity_arrow_vert_pos.y+8-this->position.y);
+
+                    //Move entity
+                    if(ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity && !dragging_entity_horizontal && !dragging_entity_vertical)
+                    {
+                        if(transform->pos.distance_to(mouse_world_pos) < 16)
+                        {
+                            dragging_entity = true;
+                        }
+                        if(selected_entity_arrow_hor_pos.distance_to(mouse_world_pos) < 16)
+                        {
+                            dragging_entity_horizontal = true;
+                        }
+                        if(selected_entity_arrow_vert_pos.distance_to(mouse_world_pos) < 16)
+                        {
+                            dragging_entity_vertical = true;
+                        }
+                    }
+                    if(dragging_entity)
+                    {
+                        transform->pos = mouse_world_pos;
+                    }
+                    if(dragging_entity_horizontal)
+                    {
+                        transform->pos.x = mouse_world_pos.x - 64;
+                        selected_entity_arrow_hor_pos.x = mouse_world_pos.x;
+                    }
+                    if(dragging_entity_vertical)
+                    {
+                        transform->pos.y = mouse_world_pos.y + 64;
+                        selected_entity_arrow_vert_pos.y = mouse_world_pos.y;
+                    }
+                }
+            }
+        }
+        if(!ImGui::IsWindowFocused() || !InputManager::get_mouse_button(1))
+        {
+            dragging_entity = false;
+            dragging_entity_horizontal = false;
+            dragging_entity_vertical = false;
+        }
         //Destroy camera entity
         camera->force_destroy();
+        Entity::entity_count--;
         SDL_SetRenderTarget(Pomegranate::Window::current->get_sdl_renderer(), nullptr);
     }
 
     //Move camera
-    if(ImGui::IsWindowFocused() && InputManager::get_mouse_button(1))
+    if(ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity && !dragging_entity_horizontal && !dragging_entity_vertical)
     {
         this->position -= InputManager::mouse_delta;
     }

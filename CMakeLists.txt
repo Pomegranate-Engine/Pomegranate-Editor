@@ -71,6 +71,8 @@ set(IMGUI_SOURCES
         src/menu_bar.h
         src/utils.cpp
         src/utils.h
+        src/scene.cpp
+        src/scene.h
 )
 
 # Add executable
