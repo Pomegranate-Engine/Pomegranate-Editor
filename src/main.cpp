@@ -20,7 +20,7 @@ using namespace Pomegranate;
 #include "menu_bar.h"
 
 //Main window
-Window main_window = Window("Window", 1024, 720);
+Window main_window = Window("Pomegranate Editor", 1024, 720);
 
 class PlayerComponent : public Component
 {

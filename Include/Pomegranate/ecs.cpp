@@ -33,7 +33,7 @@ namespace Pomegranate
     {
         for (auto c : components)
         {
-            if (std::string(c.first->name()) == "class " + std::string(name))
+            if (std::string(c.first->name()) == std::string(name))
             {
                 return c.second;
             }
@@ -56,7 +56,7 @@ namespace Pomegranate
     {
         for (auto c : components)
         {
-            if (std::string(c.first->name()) == "class " + std::string(name))
+            if (std::string(c.first->name()) == std::string(name))
             {
                 return true;
             }
@@ -204,7 +204,26 @@ namespace Pomegranate
 
     void EntityGroup::remove_system(System * system)
     {
-        //TODO: Implement system removal
+        for (int i = 0; i < systems.size(); ++i)
+        {
+            if(systems[i] == system)
+            {
+                delete system;
+                systems.erase(systems.begin() + i);
+                return;
+            }
+        }
+    }
+    bool EntityGroup::has_system(System * system)
+    {
+        for (auto & sys : systems)
+        {
+            if (sys == system)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     void EntityGroup::add_group(EntityGroup* entityGroup)

@@ -175,89 +175,109 @@ void Window_EntityHierarchy::render()
     //open Context menu
     if(ImGui::BeginPopupContextWindow())
     {
-        if(ImGui::MenuItem("Create Entity")) {
-            //Add the entity as child to selected node
-            if(selected_node != nullptr)
+        if(selected_node != nullptr)
+        {
+            if(selected_node->group != nullptr)
             {
-                if(selected_node->group != nullptr)
+                if(ImGui::MenuItem("Create Entity"))
                 {
-                    //Create a new entity
-                    Entity *entity = new Entity();
-                    entity->name = "New Entity";
-                    selected_node->group->add_entity(entity);
-                }
-            }
-        }
-        if(ImGui::MenuItem("Create Group")) {
-            //Add the group as child to selected node
-            if(selected_node != nullptr)
-            {
-                if(selected_node->group != nullptr)
-                {
-                    //Create a new group
-                    EntityGroup *group = new EntityGroup("New Group");
-                    selected_node->group->add_group(group);
-                }
-            }
-        }
-        if(ImGui::BeginMenu("Create System")) {
-            for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
-                if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
-                    //Add the system as child to selected node
+                    //Add the entity as child to selected node
                     if(selected_node != nullptr)
                     {
                         if(selected_node->group != nullptr)
                         {
-                            selected_node->group->add_system(i->second());
+                            //Create a new entity
+                            Entity *entity = new Entity();
+                            entity->name = "New Entity";
+                            selected_node->group->add_entity(entity);
                         }
                     }
+                }
+                if(ImGui::MenuItem("Create Group")) {
+                    //Add the group as child to selected node
+                    if(selected_node != nullptr)
+                    {
+                        if(selected_node->group != nullptr)
+                        {
+                            //Create a new group
+                            EntityGroup *group = new EntityGroup("New Group");
+                            selected_node->group->add_group(group);
+                        }
+                    }
+                }
+                if(ImGui::BeginMenu("Create System")) {
+                    for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
+                        if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
+                            //Add the system as child to selected node
+                            if(selected_node != nullptr)
+                            {
+                                if(selected_node->group != nullptr)
+                                {
+                                    selected_node->group->add_system(i->second());
+                                }
+                            }
+                        }
+                    }
+                    ImGui::EndMenu();
                 }
             }
-            ImGui::EndMenu();
-        }
-        if(ImGui::MenuItem("Delete Node"))
-        {
-            if(selected_node != nullptr)
+            if(ImGui::MenuItem("Delete Node"))
             {
-                //Delete the entity/group/system from the scene remove the node and all linked nodes
-                if(selected_node->entity != nullptr)
+                if(selected_node != nullptr)
                 {
-                    selected_node->entity->force_destroy();
-                }
-                if(selected_node->group != nullptr)
-                {
-                    //Get the nodes parent EntityGroup* and remove the group from it
-                    EntityGroup* parent = selected_node->group->get_parent();
-                    if(parent != nullptr)
+                    //Delete the entity/group/system from the scene remove the node and all linked nodes
+                    if(selected_node->entity != nullptr)
                     {
-                        EntityGroup* group = selected_node->group.get();
-                        parent->remove_group(group);
+                        selected_node->entity->force_destroy();
                     }
-                }
-                if(selected_node->system != nullptr)
-                {
-                    //Get the node parent EntityGroup* and remove the system from it
-
-                }
-
-                for (int i = 0; i < nodes.size(); ++i) {
-                    for (int j = 0; j < nodes[i]->linked.size(); ++j) {
-                        if(nodes[i]->linked[j] == selected_node)
+                    if(selected_node->group != nullptr)
+                    {
+                        //Get the nodes parent EntityGroup* and remove the group from it
+                        EntityGroup* parent = selected_node->group->get_parent();
+                        if(parent != nullptr)
                         {
-                            nodes[i]->linked.erase(nodes[i]->linked.begin() + j);
-                            j--;
+                            EntityGroup* group = selected_node->group.get();
+                            parent->remove_group(group);
                         }
                     }
-                }
-                for (int i = 0; i < nodes.size(); ++i) {
-                    if(nodes[i] == selected_node)
+                    if(selected_node->system != nullptr)
                     {
-                        nodes.erase(nodes.begin() + i);
-                        i--;
+                        //Get the node parent EntityGroup* and remove the system from it
+                        //Sort through nodes to find the parent group
+                        EntityGroup* parent = nullptr;
+                        for (int i = 0; i < nodes.size(); ++i) {
+                            if(nodes[i]->group != nullptr)
+                            {
+                                if(nodes[i]->group->has_system(selected_node->system.get()))
+                                {
+                                    parent = nodes[i]->group.get();
+                                    //Remove the system from the parent group
+                                    parent->remove_system(selected_node->system.get());
+                                    break;
+                                }
+                            }
+                        }
                     }
+
+                    for (int i = 0; i < nodes.size(); ++i) {
+                        for (int j = 0; j < nodes[i]->linked.size(); ++j) {
+                            if(nodes[i]->linked[j] == selected_node)
+                            {
+                                nodes[i]->linked.erase(nodes[i]->linked.begin() + j);
+                                j--;
+                            }
+                        }
+                    }
+                    for (int i = 0; i < nodes.size(); ++i) {
+                        if(nodes[i] == selected_node)
+                        {
+                            nodes.erase(nodes.begin() + i);
+                            i--;
+                        }
+                    }
+                    selected_node = nullptr;
+                    Node::selected = nullptr;
                 }
-                selected_node = nullptr;
-                Node::selected = nullptr;
             }
         }
         ImGui::EndPopup();

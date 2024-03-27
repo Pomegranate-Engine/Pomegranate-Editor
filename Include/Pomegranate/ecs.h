@@ -142,6 +142,7 @@ namespace Pomegranate
         void remove_entity(Entity*);
         void add_system(System*);
         void remove_system(System*);
+        bool has_system(System*);
         void add_group(EntityGroup*);
         void remove_group(EntityGroup*);
         void tick();

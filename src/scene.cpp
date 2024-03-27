@@ -252,7 +252,11 @@ EntityGroup *open_scene(const char *path)
 			}
 			for (auto& [type, component] : entity["components"].items())
 			{
-				Component* c = e->add_component(type.c_str());
+				if(!e->has_component(type.c_str()))
+				{
+					e->add_component(type.c_str());
+				}
+				Component* c = e->get_component(type.c_str());
 
 				for (auto& [name, data] : component.items())
 				{
