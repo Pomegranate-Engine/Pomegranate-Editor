@@ -221,6 +221,36 @@ void Window_EntityHierarchy::render()
                     ImGui::EndMenu();
                 }
             }
+            if(selected_node->entity != nullptr)
+            {
+                if(ImGui::MenuItem("Duplicate"))
+                {
+                    //Duplicate the entity
+                    if(selected_node != nullptr)
+                    {
+                        if(selected_node->entity != nullptr)
+                        {
+                            std::vector<EntityGroup*> groups = std::vector<EntityGroup*>();
+                            for (int i = 0; i < nodes.size(); ++i) {
+                                if(nodes[i]->group != nullptr)
+                                {
+                                    if(std::find(nodes[i]->group->get_entities()->begin(),
+                                                 nodes[i]->group->get_entities()->end(),selected_node->entity.get()) != nodes[i]->group->get_entities()->end())
+                                    {
+                                        groups.push_back(nodes[i]->group.get());
+                                    }
+                                }
+                            }
+                            Entity* entity = selected_node->entity->duplicate();
+                            //Link it
+                            for (int i = 0; i < groups.size(); ++i) {
+                                groups[i]->add_entity(entity);
+                            }
+                        }
+                    }
+
+                }
+            }
             if(ImGui::MenuItem("Delete Node"))
             {
                 if(selected_node != nullptr)

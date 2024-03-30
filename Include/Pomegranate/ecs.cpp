@@ -385,5 +385,69 @@ namespace Pomegranate
         return components;
     }
 
+    Entity *Entity::duplicate()
+    {
+        auto* entity = new Entity();
+        entity->name = this->name;
+        for (auto & component : this->components)
+        {
+            if(entity->get_component(component.first->name()) == nullptr)
+            {
+                entity->add_component(component.first->name());
+            }
+            //Set data
+            auto* my = this->get_component(component.first->name());
+            auto* c = entity->get_component(component.first->name());
+            for (auto& [type,data] : c->component_data)
+            {
+                if(data.first == &typeid(int))
+                {
+                    *(int*)data.second = *(int*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(float))
+                {
+                    *(float*)data.second = *(float*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(double))
+                {
+                    *(double*)data.second = *(double*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(bool))
+                {
+                    *(bool*)data.second = *(bool*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(std::string))
+                {
+                    *(std::string*)data.second = *(std::string*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(Vec2))
+                {
+                    *(Vec2*)data.second = *(Vec2*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(Vec3))
+                {
+                    *(Vec3*)data.second = *(Vec3*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(Color))
+                {
+                    *(Color*)data.second = *(Color*)my->component_data[type].second;
+                }
+                if(data.first == &typeid(Texture*))
+                {
+                    *(Texture**)data.second = *(Texture**)my->component_data[type].second;
+                }
+                if(data.first == &typeid(Audio*))
+                {
+                    *(Audio**)data.second = *(Audio**)my->component_data[type].second;
+                }
+                if(data.first == &typeid(TTFFont*))
+                {
+                    *(TTFFont**)data.second = *(TTFFont**)my->component_data[type].second;
+                }
+            }
+        }
+        return entity;
+    }
+
     void Component::init(Entity *){}
 }

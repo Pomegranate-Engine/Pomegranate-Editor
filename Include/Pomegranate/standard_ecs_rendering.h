@@ -60,6 +60,7 @@ namespace Pomegranate
     public:
         float zoom = 1.0;
         Camera();
+        void init(Pomegranate::Entity *) override;
         static void make_current(Entity*entity);
         static Entity* current;
     };

@@ -87,7 +87,6 @@ void Window_SceneView::render() {
         currently_opened_scene->draw(nullptr);
 
         Vec2 mouse_world_pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(screen_w/2,screen_h/2))/zoom+this->position;
-        print_info("Mouse world pos: %f %f", mouse_world_pos.x, mouse_world_pos.y);
         //Draw movement arrows around selected entity
         if (Node::selected != nullptr)
         {
@@ -189,7 +188,7 @@ void Window_SceneView::render() {
     }
     if (InputManager::get_mouse_scrolled())
     {
-        this->zoom_target += InputManager::mouse_scroll.y * 0.1;
+        this->zoom_target += (InputManager::mouse_scroll.y * 0.1)*zoom_target;
     }
     if(zoom_target < 0.1)
     {

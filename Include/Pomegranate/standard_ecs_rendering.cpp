@@ -58,6 +58,10 @@ namespace Pomegranate
         current = entity;
     }
 
+    void Camera::init(Pomegranate::Entity *) {
+        push_data<float>("zoom", &this->zoom);
+    }
+
     DebugCircle::DebugCircle()
     {
         this->radius = 16.0;

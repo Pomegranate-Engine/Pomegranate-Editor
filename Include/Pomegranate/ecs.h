@@ -13,6 +13,10 @@
 #include <functional>
 #include <utility>
 #include <typeindex>
+#include "color.h"
+#include "texture.h"
+#include "audio.h"
+#include "ttf_font.h"
 
 extern "C"
 {
@@ -109,6 +113,7 @@ namespace Pomegranate
         template <typename T> T* require_component();
         template <typename T> bool has_component(const char* lua_type = nullptr);
         bool has_component(const char*);
+        Entity* duplicate();
         Entity();
         ~Entity();
         [[nodiscard]] uint32_t get_id() const;
