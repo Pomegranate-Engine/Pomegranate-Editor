@@ -18,6 +18,7 @@ using namespace Pomegranate;
 #include "inspector_window.h"
 #include "resources_window.h"
 #include "menu_bar.h"
+#include "theme.h"
 
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
@@ -56,57 +57,6 @@ class PlayerController : public System
         }
     }
 };
-struct ImVec3 { float x, y, z; ImVec3(float _x = 0.0f, float _y = 0.0f, float _z = 0.0f) { x = _x; y = _y; z = _z; } };
-void imgui_easy_theming(ImVec3 color_for_text, ImVec3 color_for_head, ImVec3 color_for_area, ImVec3 color_for_body, ImVec3 color_for_pops, ImVec3 color_for_hover, ImVec3 color_for_frame)
-{
-    ImGuiStyle& style = ImGui::GetStyle();
-
-    style.Colors[ImGuiCol_Text] = ImVec4( color_for_text.x, color_for_text.y, color_for_text.z, 1.00f );
-    style.Colors[ImGuiCol_TextDisabled] = ImVec4( color_for_text.x, color_for_text.y, color_for_text.z, 0.58f );
-    style.Colors[ImGuiCol_WindowBg] = ImVec4( color_for_body.x, color_for_body.y, color_for_body.z, 0.95f );
-    style.Colors[ImGuiCol_Border] = ImVec4( color_for_body.x, color_for_body.y, color_for_body.z, 0.00f );
-    style.Colors[ImGuiCol_BorderShadow] = ImVec4( color_for_body.x, color_for_body.y, color_for_body.z, 0.00f );
-    style.Colors[ImGuiCol_FrameBg] = ImVec4( color_for_frame.x, color_for_frame.y, color_for_frame.z, 1.00f );
-    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_FrameBgActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_TitleBg] = ImVec4( color_for_area.x, color_for_area.y, color_for_area.z, 1.00f );
-    style.Colors[ImGuiCol_TitleBgCollapsed] = ImVec4( color_for_area.x, color_for_area.y, color_for_area.z, 0.75f );
-    style.Colors[ImGuiCol_TitleBgActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_MenuBarBg] = ImVec4( color_for_area.x, color_for_area.y, color_for_area.z, 0.47f );
-    style.Colors[ImGuiCol_ScrollbarBg] = ImVec4( color_for_area.x, color_for_area.y, color_for_area.z, 1.00f );
-    style.Colors[ImGuiCol_ScrollbarGrab] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.21f );
-    style.Colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_ScrollbarGrabActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_CheckMark] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.80f );
-    style.Colors[ImGuiCol_SliderGrab] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.50f );
-    style.Colors[ImGuiCol_SliderGrabActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_Button] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.50f );
-    style.Colors[ImGuiCol_ButtonHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_ButtonActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_Header] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.76f );
-    style.Colors[ImGuiCol_HeaderHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_HeaderActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_ResizeGrip] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.15f );
-    style.Colors[ImGuiCol_ResizeGripHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_ResizeGripActive] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 1.00f );
-    style.Colors[ImGuiCol_PlotLines] = ImVec4( color_for_text.x, color_for_text.y, color_for_text.z, 0.63f );
-    style.Colors[ImGuiCol_PlotLinesHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_PlotHistogram] = ImVec4( color_for_text.x, color_for_text.y, color_for_text.z, 0.63f );
-    style.Colors[ImGuiCol_PlotHistogramHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );
-    style.Colors[ImGuiCol_TextSelectedBg] = ImVec4( color_for_head.x, color_for_head.y, color_for_head.z, 0.43f );
-    style.Colors[ImGuiCol_PopupBg] = ImVec4( color_for_pops.x, color_for_pops.y, color_for_pops.z, 0.92f );
-}
-
-ImVec3 imgui_color_from_hex(const char* hex)
-{
-    unsigned int hex_color = std::stoul(hex, nullptr, 16);
-    ImVec3 color;
-    color.x = ((hex_color >> 16) & 0xFF) / 255.0f;
-    color.y = ((hex_color >> 8) & 0xFF) / 255.0f;
-    color.z = (hex_color & 0xFF) / 255.0f;
-    return color;
-}
-
 int main(int argc, char* argv[])
 {
     //region init
@@ -127,23 +77,7 @@ int main(int argc, char* argv[])
     //Set font
     io.Fonts->AddFontFromFileTTF("engine_res/zed_font.ttf", 18.0f);
 
-    ImGuiStyle * style = &ImGui::GetStyle();
-    style->WindowRounding = 8.0f;
-    style->FrameRounding = 8.0f;
-    style->ScrollbarRounding = 8.0f;
-    style->GrabRounding = 8.0f;
-    style->TabRounding = 8.0f;
-    style->ChildRounding = 8.0f;
-    style->PopupRounding = 8.0f;
-
-    ImVec3 color_for_text = imgui_color_from_hex("ffffff"); //Color for text
-    ImVec3 color_for_head = imgui_color_from_hex("1e2428"); //Color for header which is the top bar
-    ImVec3 color_for_area = imgui_color_from_hex("24292e"); //Color for area which is the background
-    ImVec3 color_for_body = imgui_color_from_hex("24292e"); //Color for body which is the main area
-    ImVec3 color_for_pops = imgui_color_from_hex("4dc59a");
-    ImVec3 color_for_hover = imgui_color_from_hex("559bd4");
-    ImVec3 color_for_frame = imgui_color_from_hex("32363c");
-    imgui_easy_theming(color_for_text, color_for_head, color_for_area, color_for_body, color_for_pops, color_for_hover, color_for_frame);
+    EditorTheme::load("engine_res/theme.json");
 
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLRenderer(main_window.get_sdl_window(),main_window.get_sdl_renderer());

@@ -96,7 +96,7 @@ void Window_EntityHierarchy::render()
     }
 
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), graph_texture);
-    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 34, 39, 44, 255);
+    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::editor_body.x,EditorTheme::editor_body.y,EditorTheme::editor_body.z, 255);
     SDL_RenderClear(Window::current->get_sdl_renderer());
 
     //Check if window is focused
@@ -522,24 +522,13 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     }
 }
 
-Color colors[] = {
-        {214,92,92,255},
-        {92,214,92,255},
-        {92,92,214,255},
-        {214,173,92,255},
-};
-
-Color rand_color()
-{
-    return colors[rand()%4];
-}
 
 Node::Node(Entity *entity)
 {
     this->pos = Vec2(Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
     this->size = 8;
-    this->color = colors[2];
+    this->color = Color((int)EditorTheme::scene_hierarchy_entity.x,(int)EditorTheme::scene_hierarchy_entity.y,(int)EditorTheme::scene_hierarchy_entity.z,255);
     this->texture = ResourceManager::load<Texture>("engine_res/entity.png");
     this->entity = std::unique_ptr<Entity>(entity);
     this->system = nullptr;
@@ -551,7 +540,7 @@ Node::Node(Pomegranate::System *system)
     this->pos = Vec2(Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
     this->size = 8;
-    this->color = colors[0];
+    this->color = Color((int)EditorTheme::scene_hierarchy_system.x,(int)EditorTheme::scene_hierarchy_system.y,(int)EditorTheme::scene_hierarchy_system.z,255);
     this->texture = ResourceManager::load<Texture>("engine_res/system.png");
     this->entity = nullptr;
     this->system = std::unique_ptr<System>(system);
@@ -563,7 +552,7 @@ Node::Node(Pomegranate::EntityGroup *group)
     this->pos = Vec2(Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
     this->size = 8;
-    this->color = colors[3];
+    this->color = Color((int)EditorTheme::scene_hierarchy_group.x,(int)EditorTheme::scene_hierarchy_group.y,(int)EditorTheme::scene_hierarchy_group.z,255);
     this->texture = ResourceManager::load<Texture>("engine_res/group.png");
     this->entity = nullptr;
     this->system = nullptr;

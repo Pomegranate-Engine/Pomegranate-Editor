@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include "scene.h"
 #include<memory>
+#include "theme.h"
 using namespace Pomegranate;
 class Node
 {

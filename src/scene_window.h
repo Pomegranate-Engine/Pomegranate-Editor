@@ -6,7 +6,8 @@
 #include "Pomegranate/ecs.h"
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/standard_ecs_rendering.h"
-#include"scene.h"
+#include "scene.h"
+#include "theme.h"
 using namespace Pomegranate;
 
 class Window_SceneView : public EditorWindow

@@ -17,6 +17,7 @@ void draw_menu_bar()
         }
         if (ImGui::MenuItem("Open"))
         {
+            unload_all();
             currently_opened_scene = open_scene("test.pscn");
         }
         if(currently_opened_scene!= nullptr) {
@@ -26,5 +27,19 @@ void draw_menu_bar()
         }
         ImGui::EndMenu();
     }
+if (ImGui::BeginMenu("Edit"))
+    {
+        if (ImGui::MenuItem("Undo", "Ctrl+Z"))
+        {
+            // Undo
+        }
+        if (ImGui::MenuItem("Redo", "Ctrl+Y"))
+        {
+            // Redo
+        }
+        ImGui::EndMenu();
+    }
+
+
     ImGui::EndMainMenuBar();
 }

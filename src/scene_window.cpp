@@ -41,7 +41,7 @@ void Window_SceneView::render() {
     if(currently_opened_scene != nullptr)
     {
         SDL_SetRenderTarget(Window::current->get_sdl_renderer(), render_texture);
-        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_background.x,EditorTheme::scene_view_background.y,EditorTheme::scene_view_background.z, 255);
         SDL_RenderClear(Window::current->get_sdl_renderer());
         //Create camera entity
         Entity* camera = new Entity();
@@ -51,10 +51,10 @@ void Window_SceneView::render() {
         camera->get_component<Transform>()->pos = this->position;
 
         //Axis
-        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 255, 0, 255);
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_y.x,EditorTheme::scene_view_y.y,EditorTheme::scene_view_y.z, 255);
         SDL_SetRenderDrawBlendMode(Window::current->get_sdl_renderer(), SDL_BLENDMODE_BLEND);
         SDL_RenderLine(Window::current->get_sdl_renderer(), 0-this->position.x, 0, 0-this->position.x, ImGui::GetWindowHeight());
-        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 255, 0, 0, 255);
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_x.x,EditorTheme::scene_view_x.y,EditorTheme::scene_view_x.z, 255);
         SDL_RenderLine(Window::current->get_sdl_renderer(), 0, 0-this->position.y, ImGui::GetWindowWidth(), 0-this->position.y);
 
 
@@ -80,20 +80,20 @@ void Window_SceneView::render() {
                     entity_selected = Node::selected->entity.get();
                     Entity* entity = Node::selected->entity.get();
                     auto* transform = entity->get_component<Transform>();
-                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 255, 0, 0, 255);
+                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_x.x,EditorTheme::scene_view_x.y,EditorTheme::scene_view_x.z, 255);
                     //Draw arrow
                     if(!dragging_entity_horizontal)
-                        selected_entity_arrow_hor_pos = selected_entity_arrow_hor_pos.lerp(transform->pos + Vec2(64, 0),20*delta_time);
+                        selected_entity_arrow_hor_pos = selected_entity_arrow_hor_pos.lerp(transform->pos + Vec2(64, 0),15*delta_time);
                     selected_entity_arrow_hor_half = selected_entity_arrow_hor_half.lerp(transform->pos + Vec2(32, 0),30*delta_time);
                     draw_bezier(transform->pos,selected_entity_arrow_hor_half,selected_entity_arrow_hor_pos, this->position, Color(255,0,0));
                     //Draw arrow tip
                     SDL_RenderLine(Window::current->get_sdl_renderer(), selected_entity_arrow_hor_pos.x-this->position.x, selected_entity_arrow_hor_pos.y-this->position.y, selected_entity_arrow_hor_pos.x-8-this->position.x, selected_entity_arrow_hor_pos.y-8-this->position.y);
                     SDL_RenderLine(Window::current->get_sdl_renderer(), selected_entity_arrow_hor_pos.x-this->position.x, selected_entity_arrow_hor_pos.y-this->position.y, selected_entity_arrow_hor_pos.x-8-this->position.x, selected_entity_arrow_hor_pos.y+8-this->position.y);
 
-                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 255, 0, 255);
+                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_y.x,EditorTheme::scene_view_y.y,EditorTheme::scene_view_y.z, 255);
                     //Draw arrow
                     if(!dragging_entity_vertical)
-                        selected_entity_arrow_vert_pos = selected_entity_arrow_vert_pos.lerp(transform->pos + Vec2(0, -64),20*delta_time);
+                        selected_entity_arrow_vert_pos = selected_entity_arrow_vert_pos.lerp(transform->pos + Vec2(0, -64),15*delta_time);
                     selected_entity_arrow_vert_half = selected_entity_arrow_vert_half.lerp(transform->pos + Vec2(0, -32),30*delta_time);
                     draw_bezier(transform->pos,selected_entity_arrow_vert_half,selected_entity_arrow_vert_pos, this->position, Color(0,255,0));
                     //Draw arrow tip

@@ -73,6 +73,8 @@ set(IMGUI_SOURCES
         src/utils.h
         src/scene.cpp
         src/scene.h
+        src/theme.cpp
+        src/theme.h
 )
 
 # Add executable

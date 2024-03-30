@@ -184,10 +184,8 @@ void save_scene(const char* path, EntityGroup* scene)
 	file.close();
 }
 
-EntityGroup *open_scene(const char *path)
+void unload_all()
 {
-	//Clear entity hierarchy window nodes
-	//Delete them all
 	for (auto& node : Window_EntityHierarchy::nodes)
 	{
 		delete node;
@@ -208,7 +206,7 @@ EntityGroup *open_scene(const char *path)
 		delete group.second;
 	}
 
-    Window_EntityHierarchy::nodes.clear();
+	Window_EntityHierarchy::nodes.clear();
 	//TODO: For some reason can't delete entities or groups, causes crash
 
 	Entity::entities.clear();
@@ -216,7 +214,13 @@ EntityGroup *open_scene(const char *path)
 	EntityGroup::groups.clear();
 	EntityGroup::group_count = 0;
 	Entity::entity_count = 0;
+}
 
+
+EntityGroup *open_scene(const char *path)
+{
+	int id_append_entity = Entity::entity_count;
+	int id_append_group = EntityGroup::group_count;
 	std::ifstream f(path);
 	json data = json::parse(f);
 	if (f.is_open())
@@ -231,7 +235,7 @@ EntityGroup *open_scene(const char *path)
 		for (auto& [id, group] : data["groups"].items())
 		{
 			//Parse id as uint32_t
-			uint32_t d = std::stoul(id);
+			uint32_t d = std::stoul(id) + id_append_group;
 			EntityGroup* g = EntityGroup::groups_id[d];
 			if (group.contains("parent"))
 			{
@@ -248,7 +252,7 @@ EntityGroup *open_scene(const char *path)
 			e->name = entity["name"].get<std::string>();
 			for (auto& parent : entity["parents"])
 			{
-				EntityGroup::groups_id[parent.get<uint32_t>()]->add_entity(e);
+				EntityGroup::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
 			}
 			for (auto& [type, component] : entity["components"].items())
 			{
@@ -313,7 +317,7 @@ EntityGroup *open_scene(const char *path)
 			System* s = System::system_types[type.c_str()]();
 			for (auto& linked : system["linked"])
 			{
-				EntityGroup::groups_id[linked.get<uint32_t>()]->add_system(s);
+				EntityGroup::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
 			}
 		}
 		std::unordered_map<uint32_t,EntityGroup*> groups = EntityGroup::groups_id;

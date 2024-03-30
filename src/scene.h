@@ -8,6 +8,7 @@
 using namespace Pomegranate;
 using json = nlohmann::json;
 inline extern EntityGroup* currently_opened_scene = nullptr;
+void unload_all();
 void save_scene(const char* path, EntityGroup* scene);
 EntityGroup* open_scene(const char* path);
 

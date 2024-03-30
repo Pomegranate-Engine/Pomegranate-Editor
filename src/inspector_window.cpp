@@ -14,6 +14,7 @@ void InspectorWindow::render()
             Entity *entity = Node::selected->entity.get();
             property_field("Name", &entity->name);
             std::unordered_multimap<const std::type_info*,Component*> components = entity->get_components();
+            Component* right_clicked_component = nullptr;
             for(auto i = components.begin(); i != components.end(); i++)
             {
                 Component* component = i->second;
@@ -21,70 +22,57 @@ void InspectorWindow::render()
                 {
                     std::string name = std::string(i->first->name());
 
+                    bool component_open = ImGui::CollapsingHeader(scuffy_demangle(name.c_str()).c_str(), ImGuiTreeNodeFlags_DefaultOpen);
                     //Add a break
-                    ImGui::Separator();
-                    ImGui::Text( "%s",scuffy_demangle(name.c_str()).c_str());
-                    //Add X button to remove component
-                    ImGui::SameLine();
-                    //Move it to the end of the line
-                    ImGui::SetCursorPosX(ImGui::GetWindowWidth() - 40);
-                    //Make it square
-
-                    if(ImGui::Button("X", ImVec2(20,20)))
+                    if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
                     {
-                        entity->remove_component(component);
-                        break;
+                        ImGui::OpenPopup("ComponentSettingsPopup");
+                        right_clicked_component = component;
                     }
-                    ImGui::Separator();
-                    //Display the properties
-                    for(auto j = component->component_data.begin(); j != component->component_data.end(); j++)
-                    {
-                        std::string property_name = std::string(j->first);
-                        if(j->second.second != nullptr)
-                        {
-                            if(j->second.first->hash_code() == typeid(std::string).hash_code())
-                            {
-                                std::string* value = (std::string*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(float).hash_code())
-                            {
-                                float* value = (float*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(int).hash_code())
-                            {
-                                int* value = (int*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(bool).hash_code())
-                            {
-                                bool* value = (bool*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(Vec2).hash_code())
-                            {
-                                Vec2* value = (Vec2*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(Vec3).hash_code())
-                            {
-                                Vec3* value = (Vec3*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(Color).hash_code())
-                            {
-                                Color* value = (Color*)j->second.second;
-                                property_field(property_name.c_str(), value);
-                            }
-                            else if(j->second.first->hash_code() == typeid(Texture*).hash_code())
-                            {
-                                Texture** value = (Texture**)j->second.second;
-                                property_field(property_name.c_str(), value);
+                    if(component_open) {
+                        //Display the properties
+                        for (auto j = component->component_data.begin(); j != component->component_data.end(); j++) {
+                            std::string property_name = std::string(j->first);
+                            if (j->second.second != nullptr) {
+                                if (j->second.first->hash_code() == typeid(std::string).hash_code()) {
+                                    std::string *value = (std::string *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(float).hash_code()) {
+                                    float *value = (float *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(int).hash_code()) {
+                                    int *value = (int *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(bool).hash_code()) {
+                                    bool *value = (bool *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(Vec2).hash_code()) {
+                                    Vec2 *value = (Vec2 *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(Vec3).hash_code()) {
+                                    Vec3 *value = (Vec3 *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(Color).hash_code()) {
+                                    Color *value = (Color *) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                } else if (j->second.first->hash_code() == typeid(Texture *).hash_code()) {
+                                    Texture **value = (Texture **) j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                }
                             }
                         }
                     }
+
                 }
+            }
+            if(ImGui::BeginPopup("ComponentSettingsPopup"))
+            {
+                if(ImGui::MenuItem("Remove Component"))
+                {
+                    //Remove the component
+                    entity->remove_component(right_clicked_component);
+                }
+                ImGui::EndPopup();
             }
             //Button to add components
             //It takes up the full width of the window
@@ -166,7 +154,7 @@ void InspectorWindow::property_field(const char *name, Texture **value)
     ImGui::Text("%s", name);
     //Create button to open file dialog and be drop target
     ImGui::SameLine();
-    if(ImGui::Button("Select Texture"))
+    if(ImGui::Button((*value)->path.c_str()))
     {
         //Open file dialog
         //Set the texture to the selected texture
