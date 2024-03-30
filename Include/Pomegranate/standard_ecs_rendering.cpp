@@ -95,10 +95,13 @@ namespace Pomegranate
         int w = 0;
         int h = 0;
         SDL_QueryTexture(s->texture->get_sdl_texture(), nullptr, nullptr, &w, &h);
-        r.w = (float)w*t->scale.x;
-        r.h = (float)h*t->scale.y;
-        r.x = t->pos.x-r.w/2-Camera::current->get_component<Transform>()->pos.x;
-        r.y = t->pos.y-r.h/2-Camera::current->get_component<Transform>()->pos.y;
+        int screen_w = 0;
+        int screen_h = 0;
+        SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
+        r.w = (float)w*t->scale.x*Camera::current->get_component<Camera>()->zoom;
+        r.h = (float)h*t->scale.y*Camera::current->get_component<Camera>()->zoom;
+        r.x = ((t->pos.x-Camera::current->get_component<Transform>()->pos.x)*Camera::current->get_component<Camera>()->zoom-r.w/2)+screen_w/2;
+        r.y = ((t->pos.y-Camera::current->get_component<Transform>()->pos.y)*Camera::current->get_component<Camera>()->zoom-r.w/2)+screen_h/2;
         auto* center = new SDL_FPoint();
         center->x = r.w/2;
         center->y = r.h/2;

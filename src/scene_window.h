@@ -14,6 +14,8 @@ class Window_SceneView : public EditorWindow
 {
 public:
     Vec2 position;
+    float zoom = 1.0;
+    float zoom_target = 1.0;
 
     Vec2 selected_entity_arrow_hor_pos = Vec2(0, 0);
     Vec2 selected_entity_arrow_hor_half = Vec2(0, 0);
