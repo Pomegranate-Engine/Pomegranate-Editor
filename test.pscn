@@ -1,0 +1,75 @@
+{
+    "entities": {
+        "0": {
+            "components": {
+                "class Pomegranate::Sprite": {
+                    "color": {
+                        "a": 255,
+                        "b": 255,
+                        "g": 255,
+                        "r": 255,
+                        "type": "color"
+                    },
+                    "flip_horizontal": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "flip_vertical": {
+                        "type": "bool",
+                        "value": false
+                    },
+                    "offset": {
+                        "type": "vec2",
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "pivot": {
+                        "type": "vec2",
+                        "x": 0.5,
+                        "y": 0.5
+                    },
+                    "texture": {
+                        "path": "res\\pomegranate.png",
+                        "type": "texture"
+                    }
+                },
+                "class Pomegranate::Transform": {
+                    "pos": {
+                        "type": "vec2",
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "rot": {
+                        "type": "float",
+                        "value": 0.0
+                    },
+                    "scale": {
+                        "type": "vec2",
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "z_index": {
+                        "type": "int",
+                        "value": 0
+                    }
+                }
+            },
+            "name": "New Entity",
+            "parents": [
+                0
+            ]
+        }
+    },
+    "groups": {
+        "0": {
+            "name": "root"
+        }
+    },
+    "systems": {
+        "class Pomegranate::Render": {
+            "linked": [
+                0
+            ]
+        }
+    }
+}

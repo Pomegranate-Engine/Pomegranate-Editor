@@ -2,6 +2,7 @@
 #define POMEGRANATE_LIBRARY_INSPECTOR_WINDOW_H
 #include "entity_hierarchy_window.h"
 #include "Imgui/misc/cpp/imgui_stdlib.h"
+#include "Imgui/imgui_internal.h"
 
 class InspectorWindow : public EditorWindow
 {

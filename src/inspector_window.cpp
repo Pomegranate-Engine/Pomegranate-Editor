@@ -59,6 +59,10 @@ void InspectorWindow::render()
                                     Texture **value = (Texture **) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 }
+                                if(ImGui::IsItemDeactivatedAfterEdit())
+                                {
+                                    Editor::action();
+                                }
                             }
                         }
                     }
@@ -86,6 +90,7 @@ void InspectorWindow::render()
                 for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
                     if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
                         entity->add_component(i->first.c_str());
+                        Editor::action();
                     }
                 }
                 ImGui::EndPopup();
@@ -95,6 +100,10 @@ void InspectorWindow::render()
         {
             EntityGroup *group = Node::selected->group.get();
             property_field("Name", &group->name);
+            if(ImGui::IsItemDeactivatedAfterEdit())
+            {
+                Editor::action();
+            }
         }
     }
 }

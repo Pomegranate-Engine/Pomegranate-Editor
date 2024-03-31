@@ -18,14 +18,14 @@ void draw_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32
     while (x >= y)
     {
         //  Each of the following renders an octant of the circle
-        SDL_RenderPoint(renderer, centreX + x, centreY - y);
-        SDL_RenderPoint(renderer, centreX + x, centreY + y);
-        SDL_RenderPoint(renderer, centreX - x, centreY - y);
-        SDL_RenderPoint(renderer, centreX - x, centreY + y);
-        SDL_RenderPoint(renderer, centreX + y, centreY - x);
-        SDL_RenderPoint(renderer, centreX + y, centreY + x);
-        SDL_RenderPoint(renderer, centreX - y, centreY - x);
-        SDL_RenderPoint(renderer, centreX - y, centreY + x);
+        SDL_RenderPoint(renderer, (float)centreX + (float)x, (float)centreY - (float)y);
+        SDL_RenderPoint(renderer, (float)centreX + (float)x, (float)centreY + (float)y);
+        SDL_RenderPoint(renderer, (float)centreX - (float)x, (float)centreY - (float)y);
+        SDL_RenderPoint(renderer, (float)centreX - (float)x, (float)centreY + (float)y);
+        SDL_RenderPoint(renderer, (float)centreX + (float)y, (float)centreY - (float)x);
+        SDL_RenderPoint(renderer, (float)centreX + (float)y, (float)centreY + (float)x);
+        SDL_RenderPoint(renderer, (float)centreX - (float)y, (float)centreY - (float)x);
+        SDL_RenderPoint(renderer, (float)centreX - (float)y, (float)centreY + (float)x);
 
         if (error <= 0)
         {
@@ -54,10 +54,10 @@ void draw_filled_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY
 
     while (x >= y) {
         //  Each of the following renders an octant of the circle
-        SDL_RenderLine(renderer, centreX - x, centreY - y, centreX + x, centreY - y);
-        SDL_RenderLine(renderer, centreX - x, centreY + y, centreX + x, centreY + y);
-        SDL_RenderLine(renderer, centreX - y, centreY - x, centreX + y, centreY - x);
-        SDL_RenderLine(renderer, centreX - y, centreY + x, centreX + y, centreY + x);
+        SDL_RenderLine(renderer, (float)centreX - (float)x, (float)centreY - (float)y, (float)centreX + (float)x, (float)centreY - (float)y);
+        SDL_RenderLine(renderer, (float)centreX - (float)x, (float)centreY + (float)y, (float)centreX + (float)x, (float)centreY + (float)y);
+        SDL_RenderLine(renderer, (float)centreX - (float)y, (float)centreY - (float)x, (float)centreX + (float)y, (float)centreY - (float)x);
+        SDL_RenderLine(renderer, (float)centreX - (float)y, (float)centreY + (float)x, (float)centreX + (float)y, (float)centreY + (float)x);
 
         if (error <= 0) {
             ++y;
@@ -83,43 +83,43 @@ void Window_EntityHierarchy::render()
             i--;
         }
     }
-    build_graph(currently_opened_scene);
+    build_graph(Editor::current_scene);
     Vec2i tex_size;
-    SDL_QueryTexture(graph_texture, NULL, NULL, &tex_size.x, &tex_size.y);
+    SDL_QueryTexture(graph_texture, nullptr, nullptr, &tex_size.x, &tex_size.y);
 
-    if(tex_size.x != ImGui::GetWindowWidth() || tex_size.y != ImGui::GetWindowHeight())
+    if(tex_size.x != (int)ImGui::GetWindowWidth() || tex_size.y != (int)ImGui::GetWindowHeight())
     {
-        size.x = ImGui::GetWindowWidth();
-        size.y = ImGui::GetWindowHeight();
+        size.x = (int)ImGui::GetWindowWidth();
+        size.y = (int)ImGui::GetWindowHeight();
         SDL_DestroyTexture(graph_texture);
-        graph_texture = SDL_CreateTexture(Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
+        graph_texture = SDL_CreateTexture(Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, (int)ImGui::GetWindowWidth(), (int)ImGui::GetWindowHeight());
     }
 
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), graph_texture);
-    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::editor_body.x,EditorTheme::editor_body.y,EditorTheme::editor_body.z, 255);
+    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), (uint8_t)EditorTheme::editor_body.x,(uint8_t)EditorTheme::editor_body.y,(uint8_t)EditorTheme::editor_body.z, 255);
     SDL_RenderClear(Window::current->get_sdl_renderer());
 
     //Check if window is focused
     if(ImGui::IsWindowFocused()) {
         //Check if mouse is hovering over a node
         bool hovering_node = false;
-        for (int i = 0; i < nodes.size(); ++i) {
+        for (auto & node : nodes) {
             //Calculate screen pos
-            Vec2 node_pos = nodes[i]->pos;
+            Vec2 node_pos = node->pos;
             node_pos.x -= cam_pos.x;
             node_pos.y -= cam_pos.y;
             node_pos.x /= zoom;
             node_pos.y /= zoom;
-            node_pos.x += size.x / 2;
-            node_pos.y += size.y / 2;
+            node_pos.x += (float)size.x / 2;
+            node_pos.y += (float)size.y / 2;
             //Check if mouse is hovering over node
             Vec2 mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-            if (mouse.distance_to(node_pos) < nodes[i]->size) {
+            if (mouse.distance_to(node_pos) < node->size) {
                 hovering_node = true;
                 if (InputManager::get_mouse_button(SDL_BUTTON_LEFT) && dragging_node == nullptr) {
-                    selected_node = nodes[i];
-                    Node::selected = nodes[i];
-                    dragging_node = nodes[i];
+                    selected_node = node;
+                    Node::selected = node;
+                    dragging_node = node;
                 }
             }
         }
@@ -135,8 +135,8 @@ void Window_EntityHierarchy::render()
 
         if (dragging_node != nullptr) {
             Vec2 mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-            mouse.x -= size.x / 2;
-            mouse.y -= size.y / 2;
+            mouse.x -= (float)size.x / 2;
+            mouse.y -= (float)size.y / 2;
             mouse.x *= zoom;
             mouse.y *= zoom;
             mouse.x += cam_pos.x;
@@ -145,15 +145,15 @@ void Window_EntityHierarchy::render()
         }
         if (InputManager::get_mouse_scrolled()) {
             Vec2 old_mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-            old_mouse.x -= size.x / 2;
-            old_mouse.y -= size.y / 2;
+            old_mouse.x -= (float)size.x / 2;
+            old_mouse.y -= (float)size.y / 2;
             old_mouse.x *= zoom;
             old_mouse.y *= zoom;
             //Divide or multiply zoom based on scroll
-            zoom += InputManager::get_mouse_scroll().y * -0.1*zoom;
+            zoom += InputManager::get_mouse_scroll().y * -0.1f*zoom;
             Vec2 new_mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-            new_mouse.x -= size.x / 2;
-            new_mouse.y -= size.y / 2;
+            new_mouse.x -= (float)size.x / 2;
+            new_mouse.y -= (float)size.y / 2;
             new_mouse.x *= zoom;
             new_mouse.y *= zoom;
             cam_pos.x -= (new_mouse.x - old_mouse.x);
@@ -163,12 +163,12 @@ void Window_EntityHierarchy::render()
 
 
 
-    for (int i = 0; i < nodes.size(); ++i) {
-        simulate_node(nodes[i]);
-        draw_node(nodes[i]);
+    for (auto & node : nodes) {
+        simulate_node(node);
+        draw_node(node);
     }
 
-    SDL_SetRenderTarget(Window::current->get_sdl_renderer(), NULL);
+    SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     ImGui::SetCursorPos(ImVec2(0, 0));
     ImGui::Image((void*)graph_texture, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
 
@@ -187,9 +187,10 @@ void Window_EntityHierarchy::render()
                         if(selected_node->group != nullptr)
                         {
                             //Create a new entity
-                            Entity *entity = new Entity();
+                            auto *entity = new Entity();
                             entity->name = "New Entity";
                             selected_node->group->add_entity(entity);
+                            Editor::action();
                         }
                     }
                 }
@@ -200,8 +201,9 @@ void Window_EntityHierarchy::render()
                         if(selected_node->group != nullptr)
                         {
                             //Create a new group
-                            EntityGroup *group = new EntityGroup("New Group");
+                            auto *group = new EntityGroup("New Group");
                             selected_node->group->add_group(group);
+                            Editor::action();
                         }
                     }
                 }
@@ -214,6 +216,7 @@ void Window_EntityHierarchy::render()
                                 if(selected_node->group != nullptr)
                                 {
                                     selected_node->group->add_system(i->second());
+                                    Editor::action();
                                 }
                             }
                         }
@@ -231,21 +234,22 @@ void Window_EntityHierarchy::render()
                         if(selected_node->entity != nullptr)
                         {
                             std::vector<EntityGroup*> groups = std::vector<EntityGroup*>();
-                            for (int i = 0; i < nodes.size(); ++i) {
-                                if(nodes[i]->group != nullptr)
+                            for (auto & node : nodes) {
+                                if(node->group != nullptr)
                                 {
-                                    if(std::find(nodes[i]->group->get_entities()->begin(),
-                                                 nodes[i]->group->get_entities()->end(),selected_node->entity.get()) != nodes[i]->group->get_entities()->end())
+                                    if(std::find(node->group->get_entities()->begin(),
+                                                 node->group->get_entities()->end(),selected_node->entity.get()) != node->group->get_entities()->end())
                                     {
-                                        groups.push_back(nodes[i]->group.get());
+                                        groups.push_back(node->group.get());
                                     }
                                 }
                             }
                             Entity* entity = selected_node->entity->duplicate();
                             //Link it
-                            for (int i = 0; i < groups.size(); ++i) {
-                                groups[i]->add_entity(entity);
+                            for (auto & group : groups) {
+                                group->add_entity(entity);
                             }
+                            Editor::action();
                         }
                     }
 
@@ -259,6 +263,7 @@ void Window_EntityHierarchy::render()
                     if(selected_node->entity != nullptr)
                     {
                         selected_node->entity->force_destroy();
+                        Editor::action();
                     }
                     if(selected_node->group != nullptr)
                     {
@@ -268,32 +273,34 @@ void Window_EntityHierarchy::render()
                         {
                             EntityGroup* group = selected_node->group.get();
                             parent->remove_group(group);
+                            Editor::action();
                         }
                     }
                     if(selected_node->system != nullptr)
                     {
                         //Get the node parent EntityGroup* and remove the system from it
                         //Sort through nodes to find the parent group
-                        EntityGroup* parent = nullptr;
-                        for (int i = 0; i < nodes.size(); ++i) {
-                            if(nodes[i]->group != nullptr)
+                        EntityGroup* parent;
+                        for (auto & node : nodes) {
+                            if(node->group != nullptr)
                             {
-                                if(nodes[i]->group->has_system(selected_node->system.get()))
+                                if(node->group->has_system(selected_node->system.get()))
                                 {
-                                    parent = nodes[i]->group.get();
+                                    parent = node->group.get();
                                     //Remove the system from the parent group
                                     parent->remove_system(selected_node->system.get());
                                     break;
                                 }
                             }
                         }
+                        Editor::action();
                     }
 
-                    for (int i = 0; i < nodes.size(); ++i) {
-                        for (int j = 0; j < nodes[i]->linked.size(); ++j) {
-                            if(nodes[i]->linked[j] == selected_node)
+                    for (auto & node : nodes) {
+                        for (int j = 0; j < node->linked.size(); ++j) {
+                            if(node->linked[j] == selected_node)
                             {
-                                nodes[i]->linked.erase(nodes[i]->linked.begin() + j);
+                                node->linked.erase(node->linked.begin() + j);
                                 j--;
                             }
                         }
@@ -324,7 +331,6 @@ Window_EntityHierarchy::Window_EntityHierarchy()
     this->flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     this->name = "Graph Hierarchy";
     this->open = true;
-    this->docked = false;
     this->position = Vec2i(0, 0);
     this->cam_pos = Vec2(0, 0);
     this->zoom = 1.0;
@@ -348,8 +354,8 @@ void Window_EntityHierarchy::draw_node(Node* n)
     node_pos.x /= zoom;
     node_pos.y /= zoom;
 
-    node_pos.x += size.x / 2;
-    node_pos.y += size.y / 2;
+    node_pos.x += (float)size.x / 2;
+    node_pos.y += (float)size.y / 2;
     //Calculate the size of the node based on camera zoom
     float node_size = s;
 
@@ -359,10 +365,10 @@ void Window_EntityHierarchy::draw_node(Node* n)
     if(selected_node == n)
     {
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 255, 255, 255, 255);
-        draw_circle(Window::current->get_sdl_renderer(), node_pos.x, node_pos.y, node_size+4);
+        draw_circle(Window::current->get_sdl_renderer(), (int)node_pos.x, (int)node_pos.y, (int)node_size+4);
     }
     //Draw name
-    std::string name = "";
+    std::string name;
     if(n->group != nullptr)
     {
         name = n->group->name;
@@ -376,26 +382,26 @@ void Window_EntityHierarchy::draw_node(Node* n)
         name = scuffy_demangle(typeid(*n->system).name());
     }
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
-    TTFFont* font = ResourceManager::load<TTFFont>("engine_res/zed_font.ttf");
+    auto* font = ResourceManager::load<TTFFont>("engine_res/zed_font.ttf");
     SDL_Surface* surface = TTF_RenderText_Solid(font->get_ttf_font(), name.c_str(), {255, 255, 255, 255});
     SDL_Texture* texture = SDL_CreateTextureFromSurface(Window::current->get_sdl_renderer(), surface);
     Vec2i tex_size;
-    SDL_QueryTexture(texture, NULL, NULL, &tex_size.x, &tex_size.y);
-    SDL_RenderTexture(Window::current->get_sdl_renderer(), texture, nullptr, new SDL_FRect{node_pos.x-tex_size.x/8, node_pos.y+node_size, (float)tex_size.x/4, (float)tex_size.y/4});
+    SDL_QueryTexture(texture, nullptr, nullptr, &tex_size.x, &tex_size.y);
+    SDL_RenderTexture(Window::current->get_sdl_renderer(), texture, nullptr, new SDL_FRect{node_pos.x-(float)tex_size.x/8, node_pos.y+node_size, (float)tex_size.x/4, (float)tex_size.y/4});
     SDL_DestroySurface(surface);
     SDL_DestroyTexture(texture);
 
 
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 127, 127, 127, 80);
     SDL_SetRenderDrawBlendMode(Window::current->get_sdl_renderer(), SDL_BLENDMODE_BLEND);
-    for (int i = 0; i < n->linked.size(); ++i) {
-        Vec2 linked_pos = n->linked[i]->pos;
+    for (auto & i : n->linked) {
+        Vec2 linked_pos = i->pos;
         linked_pos.x -= cam_pos.x;
         linked_pos.y -= cam_pos.y;
         linked_pos.x /= zoom;
         linked_pos.y /= zoom;
-        linked_pos.x += size.x / 2;
-        linked_pos.y += size.y / 2;
+        linked_pos.x += (float)size.x / 2;
+        linked_pos.y += (float)size.y / 2;
         SDL_RenderLine(Window::current->get_sdl_renderer(), node_pos.x, node_pos.y, linked_pos.x, linked_pos.y);
     }
 }
@@ -420,12 +426,12 @@ void Window_EntityHierarchy::simulate_node(Node *node)
     float repulsion = 0.001f;
     float attraction = 0.001f;
     float distance = 128;
-    for (int i = 0; i < nodes.size(); ++i)
+    for (auto & i : nodes)
     {
-        if(nodes[i]!=node)
+        if(i!=node)
         {
             //Attempt to maintain a distance by 32 pixels
-            Vec2 dir = nodes[i]->pos - node->pos;
+            Vec2 dir = i->pos - node->pos;
             float dist = dir.length();
             if (dist < distance) {
                 dir = dir.normalized();
@@ -448,12 +454,12 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     std::vector<EntityGroup*> groups = *group->get_child_groups();
     std::vector<System*> systems = *group->get_systems();
     bool group_exists = false;
-    Node* group_node = nullptr;
-    for (int i = 0; i < nodes.size(); ++i) {
-        if(nodes[i]->group.get() == group)
+    Node* group_node;
+    for (auto & node : nodes) {
+        if(node->group.get() == group)
         {
             group_exists = true;
-            group_node = nodes[i];
+            group_node = node;
             break;
         }
     }
@@ -467,8 +473,8 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     if(parent != nullptr)
     {
         bool linked = false;
-        for (int i = 0; i < parent->linked.size(); ++i) {
-            if(parent->linked[i] == group_node)
+        for (auto & i : parent->linked) {
+            if(i == group_node)
             {
                 linked = true;
                 break;
@@ -483,29 +489,29 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     {
         group_node->open = false;
     }
-    for (int i = 0; i < entities.size(); ++i) {
+    for (auto & entitie : entities) {
         //Check nodes to see if it already exists
         bool exists = false;
         Node* node = nullptr;
-        for (int j = 0; j < nodes.size(); ++j) {
-            if(nodes[j]->entity.get() == entities[i])
+        for (auto & j : nodes) {
+            if(j->entity.get() == entitie)
             {
                 exists = true;
-                node = nodes[j];
+                node = j;
                 break;
             }
         }
 
         if(!exists)
         {
-            node = new Node(entities[i]);
+            node = new Node(entitie);
             nodes.push_back(node);
             print_info("Entity node created");
         }
         //Check if it's already linked
         bool linked = false;
-        for (int j = 0; j < group_node->linked.size(); ++j) {
-            if(group_node->linked[j] == node)
+        for (auto & j : group_node->linked) {
+            if(j == node)
             {
                 linked = true;
                 break;
@@ -516,28 +522,28 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
             group_node->linked.push_back(node);
         }
     }
-    for (int i = 0; i < systems.size(); ++i) {
+    for (auto & system : systems) {
         //Check nodes to see if it already exists
         bool exists = false;
         Node* node = nullptr;
-        for (int j = 0; j < nodes.size(); ++j) {
-            if(nodes[j]->system.get() == systems[i])
+        for (auto & j : nodes) {
+            if(j->system.get() == system)
             {
                 exists = true;
-                node = nodes[j];
+                node = j;
                 break;
             }
         }
         if(!exists)
         {
-            node = new Node(systems[i]);
+            node = new Node(system);
             nodes.push_back(node);
             print_info("System node created");
         }
         //Check if it's already linked
         bool linked = false;
-        for (int j = 0; j < group_node->linked.size(); ++j) {
-            if(group_node->linked[j] == node)
+        for (auto & j : group_node->linked) {
+            if(j == node)
             {
                 linked = true;
                 break;
@@ -547,15 +553,15 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
             group_node->linked.push_back(node);
         }
     }
-    for (int i = 0; i < groups.size(); ++i) {
-        build_graph(groups[i], group_node);
+    for (auto & g : groups) {
+        build_graph(g, group_node);
     }
 }
 
 
 Node::Node(Entity *entity)
 {
-    this->pos = Vec2(Window_EntityHierarchy::nodes.size(),0);
+    this->pos = Vec2((float)Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
     this->size = 8;
     this->color = Color((int)EditorTheme::scene_hierarchy_entity.x,(int)EditorTheme::scene_hierarchy_entity.y,(int)EditorTheme::scene_hierarchy_entity.z,255);
@@ -567,7 +573,7 @@ Node::Node(Entity *entity)
 }
 Node::Node(Pomegranate::System *system)
 {
-    this->pos = Vec2(Window_EntityHierarchy::nodes.size(),0);
+    this->pos = Vec2((float)Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
     this->size = 8;
     this->color = Color((int)EditorTheme::scene_hierarchy_system.x,(int)EditorTheme::scene_hierarchy_system.y,(int)EditorTheme::scene_hierarchy_system.z,255);
@@ -579,7 +585,7 @@ Node::Node(Pomegranate::System *system)
 }
 Node::Node(Pomegranate::EntityGroup *group)
 {
-    this->pos = Vec2(Window_EntityHierarchy::nodes.size(),0);
+    this->pos = Vec2((float)Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
     this->size = 8;
     this->color = Color((int)EditorTheme::scene_hierarchy_group.x,(int)EditorTheme::scene_hierarchy_group.y,(int)EditorTheme::scene_hierarchy_group.z,255);

@@ -54,7 +54,7 @@ void Window_SceneView::render() {
         SDL_DestroyTexture(render_texture);
         render_texture = SDL_CreateTexture(Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, ImGui::GetWindowWidth(), ImGui::GetWindowHeight());
     }
-    if(currently_opened_scene != nullptr)
+    if(Editor::current_scene != nullptr)
     {
         SDL_SetRenderTarget(Window::current->get_sdl_renderer(), render_texture);
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_background.x,EditorTheme::scene_view_background.y,EditorTheme::scene_view_background.z, 255);
@@ -84,7 +84,7 @@ void Window_SceneView::render() {
 
 
         //Render scene
-        currently_opened_scene->draw(nullptr);
+        Editor::current_scene->draw(nullptr);
 
         Vec2 mouse_world_pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(screen_w/2,screen_h/2))/zoom+this->position;
         //Draw movement arrows around selected entity
@@ -171,6 +171,10 @@ void Window_SceneView::render() {
         }
         if(!ImGui::IsWindowFocused() || !InputManager::get_mouse_button(1))
         {
+            if(dragging_entity || dragging_entity_horizontal || dragging_entity_vertical)
+            {
+                Editor::action();
+            }
             dragging_entity = false;
             dragging_entity_horizontal = false;
             dragging_entity_vertical = false;
@@ -190,9 +194,9 @@ void Window_SceneView::render() {
     {
         this->zoom_target += (InputManager::mouse_scroll.y * 0.1)*zoom_target;
     }
-    if(zoom_target < 0.1)
+    if(zoom_target < 0.01)
     {
-        zoom_target = 0.1;
+        zoom_target = 0.01;
     }
     ImGui::SetCursorPos(ImVec2(0,0));
     ImGui::Image(render_texture, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));

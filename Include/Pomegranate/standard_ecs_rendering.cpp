@@ -8,8 +8,16 @@ namespace Pomegranate
         print_info("Loading sprite");
         this->texture = ResourceManager::load<Texture>("res/none.png");
         this->color = Color(255, 255, 255, 255);
+        this->pivot = Vec2(0.5, 0.5);
+        this->offset = Vec2(0, 0);
+        this->flip_horizontal = false;
+        this->flip_vertical = false;
         register_component(Sprite);
         //TODO: Add texture support to lua
+        push_data<Vec2>("pivot", &this->pivot);
+        push_data<Vec2>("offset", &this->offset);
+        push_data<bool>("flip_horizontal", &this->flip_horizontal);
+        push_data<bool>("flip_vertical", &this->flip_vertical);
         push_data<Color>("color", &this->color);
         push_data<Texture*>("texture", &this->texture);
     }
@@ -104,13 +112,23 @@ namespace Pomegranate
         SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
         r.w = (float)w*t->scale.x*Camera::current->get_component<Camera>()->zoom;
         r.h = (float)h*t->scale.y*Camera::current->get_component<Camera>()->zoom;
-        r.x = ((t->pos.x-Camera::current->get_component<Transform>()->pos.x)*Camera::current->get_component<Camera>()->zoom-r.w/2)+screen_w/2;
-        r.y = ((t->pos.y-Camera::current->get_component<Transform>()->pos.y)*Camera::current->get_component<Camera>()->zoom-r.w/2)+screen_h/2;
+        r.x = ((t->pos.x+s->offset.x-Camera::current->get_component<Transform>()->pos.x)*Camera::current->get_component<Camera>()->zoom)+screen_w/2-r.w*s->pivot.x;
+        r.y = ((t->pos.y+s->offset.y-Camera::current->get_component<Transform>()->pos.y)*Camera::current->get_component<Camera>()->zoom)+screen_h/2-r.h*s->pivot.y;
         auto* center = new SDL_FPoint();
-        center->x = r.w/2;
-        center->y = r.h/2;
+        center->x = r.w*s->pivot.x;
+        center->y = r.h*s->pivot.y;
         SDL_SetTextureColorMod(s->texture->get_sdl_texture(), s->color.r, s->color.g, s->color.b);
-        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture->get_sdl_texture(), nullptr, &r, t->rot*180.0/3.14159, center, SDL_FLIP_NONE);
+        SDL_RendererFlip flip = SDL_FLIP_NONE;
+        if(s->flip_horizontal)
+        {
+            flip = (SDL_RendererFlip)(flip|SDL_FLIP_HORIZONTAL);
+        }
+        if(s->flip_vertical)
+        {
+            flip = (SDL_RendererFlip)(flip|SDL_FLIP_VERTICAL);
+        }
+
+        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture->get_sdl_texture(), nullptr, &r, t->rot*180.0/3.14159, center, flip);
     }
 
     void Render::animated_sprite(Entity*e) {
@@ -124,8 +142,8 @@ namespace Pomegranate
         SDL_FRect src = {r.w/(float)s->horizontal_frames*(float)s->frame+(float)s->x_offset, r.h/(float)s->vertical_frames*(float)s->frame+(float)s->y_offset, r.w/(float)s->horizontal_frames, r.h/(float)s->vertical_frames};
         r.w = (float)w*t->scale.x;
         r.h = (float)h*t->scale.y;
-        r.x = t->pos.x-r.w/2-Camera::current->get_component<Transform>()->pos.x;
-        r.y = t->pos.y-r.h/2-Camera::current->get_component<Transform>()->pos.y;
+        r.x = t->pos.x-Camera::current->get_component<Transform>()->pos.x-r.w/2;
+        r.y = t->pos.y-Camera::current->get_component<Transform>()->pos.y-r.h/2;
         auto* center = new SDL_FPoint();
         center->x = r.w/2;
         center->y = r.h/2;

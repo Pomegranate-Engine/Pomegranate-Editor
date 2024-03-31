@@ -3,14 +3,26 @@
 #include "imgui.h"
 #include "Pomegranate/pomegranate.h"
 
+using namespace Pomegranate;
+
+enum DockSlot
+{
+    DOCK_SLOT_LEFT,
+    DOCK_SLOT_RIGHT,
+    DOCK_SLOT_BOTTOM,
+    DOCK_SLOT_CENTER,
+    DOCK_SLOT_FLOATING
+};
+
 class EditorWindow
 {
 public:
+    DockSlot dock_slot = DOCK_SLOT_FLOATING;
+    bool mouse_released = false;
     bool open = true;
     int flags = 0;
     Pomegranate::Vec2i position;
     Pomegranate::Vec2i size;
-    bool docked = false;
     std::string name;
     void begin();
     virtual void render()=0;

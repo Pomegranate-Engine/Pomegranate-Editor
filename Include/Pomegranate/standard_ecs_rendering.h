@@ -22,6 +22,10 @@ namespace Pomegranate
     class Sprite : public Component
     {
     public:
+        Vec2 pivot;
+        Vec2 offset;
+        bool flip_horizontal;
+        bool flip_vertical;
         Texture* texture;
         Color color;
         Sprite();

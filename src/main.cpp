@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     register_system(RigidBody);
     register_system(KinematicBody);
 
-    currently_opened_scene = new EntityGroup("root");
+    Editor::current_scene = new EntityGroup("root");
 
     //Create windows
     WindowsManager windows_manager;

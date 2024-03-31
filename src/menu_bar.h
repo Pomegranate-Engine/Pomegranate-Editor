@@ -9,6 +9,10 @@
 #include <string>
 #include <sstream>
 #include "scene.h"
+#include "json.hpp"
+#include "editor.h"
+
+using json = nlohmann::json;
 using namespace Pomegranate;
 void draw_menu_bar();
 

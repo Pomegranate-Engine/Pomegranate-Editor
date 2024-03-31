@@ -28,7 +28,7 @@ void theming(Vec3 color_for_text, Vec3 color_for_head, Vec3 color_for_body, Vec3
     style.Colors[ImGuiCol_Text] = ImVec4( color_for_text.x, color_for_text.y, color_for_text.z, 1.00f );
     style.Colors[ImGuiCol_TextDisabled] = ImVec4( color_for_text.x, color_for_text.y, color_for_text.z, 0.58f );
     style.Colors[ImGuiCol_WindowBg] = ImVec4( color_for_body.x, color_for_body.y, color_for_body.z, 1.0f );
-    style.Colors[ImGuiCol_Border] = ImVec4( color_for_body.x, color_for_body.y, color_for_body.z, 0.00f );
+    style.Colors[ImGuiCol_Border] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.00f );
     style.Colors[ImGuiCol_BorderShadow] = ImVec4( color_for_body.x, color_for_body.y, color_for_body.z, 0.00f );
     style.Colors[ImGuiCol_FrameBg] = ImVec4( color_for_inputs.x, color_for_inputs.y, color_for_inputs.z, 1.00f );
     style.Colors[ImGuiCol_FrameBgHovered] = ImVec4( color_for_hover.x, color_for_hover.y, color_for_hover.z, 1.0f );

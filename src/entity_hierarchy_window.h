@@ -35,8 +35,6 @@ public:
 class Window_EntityHierarchy : public EditorWindow
 {
 public:
-    Texture* entity_texture;
-    Texture* group_texture;
     SDL_Texture* graph_texture;
     Vec2 cam_pos;
     float zoom;
