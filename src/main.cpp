@@ -27,12 +27,19 @@ class PlayerComponent : public Component
 {
 public:
     float speed;
+    float deceleration;
+    Vec2 velocity;
     void init(Pomegranate::Entity * e) override
     {
         speed = 1.0;
+        deceleration = 0.1;
+        velocity = Vec2();
         e->require_component<Transform>();
         e->require_component<Sprite>();
         register_component(PlayerComponent);
+        push_data<float>("speed", &speed);
+        push_data<float>("deceleration", &deceleration);
+        push_data<Vec2>("velocity", &velocity);
     }
 };
 class PlayerController : public System
@@ -42,21 +49,61 @@ class PlayerController : public System
         if(e->has_component<PlayerComponent>())
         {
             auto* player = e->get_component<PlayerComponent>();
+            auto* transform = e->get_component<Transform>();
             if (InputManager::get_key(SDL_SCANCODE_W)) {
-                e->get_component<Transform>()->pos.y -= 1*player->speed;
+                player->velocity.y -= 1*player->speed;
             }
             if (InputManager::get_key(SDL_SCANCODE_S)) {
-                e->get_component<Transform>()->pos.y += 1*player->speed;
+                player->velocity.y += 1*player->speed;
             }
             if (InputManager::get_key(SDL_SCANCODE_A)) {
-                e->get_component<Transform>()->pos.x -= 1*player->speed;
+                player->velocity.x -= 1*player->speed;
             }
             if (InputManager::get_key(SDL_SCANCODE_D)) {
-                e->get_component<Transform>()->pos.x += 1*player->speed;
+                player->velocity.x += 1*player->speed;
+            }
+            player->velocity -= player->velocity * player->deceleration*delta_time;
+            transform->pos += player->velocity;
+        }
+    }
+};
+class CameraFollow : public Component
+{
+public:
+    float speed;
+    Entity* target;
+    void init(Entity* e) override
+    {
+        speed = 1.0;
+        target = nullptr;
+        e->require_component<Transform>();
+        e->require_component<Camera>();
+        register_component(CameraFollow);
+        push_data<float>("speed", &speed);
+        push_data<Entity*>("target", &target);
+    }
+};
+class CameraController : public System
+{
+public:
+    void tick(Entity* e) override
+    {
+        if(e->has_component<CameraFollow>())
+        {
+            auto* camera_follow = e->get_component<CameraFollow>();
+            auto* transform = e->get_component<Transform>();
+            if(camera_follow->target)
+            {
+                if(camera_follow->target->has_component<Transform>())
+                {
+                    auto* target_transform = camera_follow->target->get_component<Transform>();
+                    transform->pos = transform->pos + (target_transform->pos - transform->pos) * camera_follow->speed * delta_time;
+                }
             }
         }
     }
 };
+
 int main(int argc, char* argv[])
 {
     //region init

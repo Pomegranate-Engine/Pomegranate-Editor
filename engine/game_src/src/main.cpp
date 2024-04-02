@@ -13,6 +13,51 @@ using namespace Pomegranate;
 
 //[/COMPONENTS_SYSTEMS_INCLUDE]
 
+class PlayerComponent : public Component
+{
+public:
+    float speed;
+    float deceleration;
+    Vec2 velocity;
+    void init(Pomegranate::Entity * e) override
+    {
+        speed = 1.0;
+        deceleration = 0.1;
+        velocity = Vec2();
+        e->require_component<Transform>();
+        e->require_component<Sprite>();
+        register_component(PlayerComponent);
+        push_data<float>("speed", &speed);
+        push_data<float>("deceleration", &deceleration);
+        push_data<Vec2>("velocity", &velocity);
+    }
+};
+class PlayerController : public System
+{
+    void tick(Pomegranate::Entity *e) override
+    {
+        if(e->has_component<PlayerComponent>())
+        {
+            auto* player = e->get_component<PlayerComponent>();
+            auto* transform = e->get_component<Transform>();
+            if (InputManager::get_key(SDL_SCANCODE_W)) {
+                player->velocity.y -= 1*player->speed;
+            }
+            if (InputManager::get_key(SDL_SCANCODE_S)) {
+                player->velocity.y += 1*player->speed;
+            }
+            if (InputManager::get_key(SDL_SCANCODE_A)) {
+                player->velocity.x -= 1*player->speed;
+            }
+            if (InputManager::get_key(SDL_SCANCODE_D)) {
+                player->velocity.x += 1*player->speed;
+            }
+            player->velocity -= player->velocity * player->deceleration*delta_time;
+            transform->pos += player->velocity;
+        }
+    }
+};
+
 //Main window
 const char* game_name = "[/GAME_NAME]";
 const char* scene_path = "[/SCENE_PATH]";
@@ -60,6 +105,8 @@ int main(int argc, char* argv[])
     register_system(KinematicBody);
 
     //[/COMPONENTS_SYSTEMS_REGISTER]
+    register_component(PlayerComponent);
+    register_system(PlayerController);
 
     Editor::current_scene = open_scene(scene_path);
 
