@@ -85,20 +85,7 @@ void Window_EntityHierarchy::render()
     }
     build_graph(Editor::current_scene);
     Vec2i tex_size;
-    SDL_QueryTexture(graph_texture, nullptr, nullptr, &tex_size.x, &tex_size.y);
 
-    if(tex_size.x != (int)ImGui::GetWindowWidth() || tex_size.y != (int)ImGui::GetWindowHeight())
-    {
-        size.x = (int)ImGui::GetWindowWidth();
-        size.y = (int)ImGui::GetWindowHeight();
-        SDL_DestroyTexture(graph_texture);
-        graph_texture = SDL_CreateTexture(Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, (int)ImGui::GetWindowWidth(), (int)ImGui::GetWindowHeight());
-    }
-
-    /*SDL_SetRenderTarget(Window::current->get_sdl_renderer(), graph_texture);
-    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), (uint8_t)EditorTheme::editor_body.x,(uint8_t)EditorTheme::editor_body.y,(uint8_t)EditorTheme::editor_body.z, 255);
-    SDL_RenderClear(Window::current->get_sdl_renderer());
-    */
     //Check if window is focused
     if(ImGui::IsWindowFocused()) {
         //Check if mouse is hovering over a node
@@ -334,7 +321,6 @@ Window_EntityHierarchy::Window_EntityHierarchy()
     this->cam_pos = Vec2(0, 0);
     this->zoom = 1.0;
     this->size = Vec2i(512, Window::current->get_height());
-    graph_texture = SDL_CreateTexture(Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, size.x, size.y);
     selected_node = nullptr;
     dragging_node = nullptr;
 }
@@ -358,9 +344,6 @@ void Window_EntityHierarchy::draw_node(Node* n)
     //Calculate the size of the node based on camera zoom
     float node_size = s;
 
-    //Draw the node
-    //SDL_SetTextureColorMod(n->texture->get_sdl_texture(), color.r, color.g, color.b);
-    //SDL_RenderTexture(Window::current->get_sdl_renderer(), n->texture->get_sdl_texture(), nullptr, new SDL_FRect{node_pos.x-node_size, node_pos.y-node_size, node_size*2, node_size*2});
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
     ImGui::Image((void*)n->texture->get_sdl_texture(), ImVec2(node_size*2, node_size*2), ImVec2(0, 0), ImVec2(1, 1), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f));
 
@@ -383,22 +366,10 @@ void Window_EntityHierarchy::draw_node(Node* n)
     {
         name = scuffy_demangle(typeid(*n->system).name());
     }
-    /*SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
-    auto* font = ResourceManager::load<TTFFont>("engine/zed_font.ttf");
-    SDL_Surface* surface = TTF_RenderText_Solid(font->get_ttf_font(), name.c_str(), {255, 255, 255, 255});
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(Window::current->get_sdl_renderer(), surface);
-    Vec2i tex_size;
-    SDL_QueryTexture(texture, nullptr, nullptr, &tex_size.x, &tex_size.y);
-    //SDL_RenderTexture(Window::current->get_sdl_renderer(), texture, nullptr, new SDL_FRect{node_pos.x-(float)tex_size.x/8, node_pos.y+node_size, (float)tex_size.x/4, (float)tex_size.y/4});
-    SDL_DestroySurface(surface);
-    SDL_DestroyTexture(texture);*/
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-(float)name.size()*4, node_pos.y+node_size));
     ImGui::Text(name.c_str());
 
-
-    /*SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 127, 127, 127, 80);
-    SDL_SetRenderDrawBlendMode(Window::current->get_sdl_renderer(), SDL_BLENDMODE_BLEND);*/
     for (auto & i : n->linked) {
         Vec2 linked_pos = i->pos;
         linked_pos.x -= cam_pos.x;
@@ -407,7 +378,6 @@ void Window_EntityHierarchy::draw_node(Node* n)
         linked_pos.y /= zoom;
         linked_pos.x += (float)size.x / 2;
         linked_pos.y += (float)size.y / 2;
-        //SDL_RenderLine(Window::current->get_sdl_renderer(), node_pos.x, node_pos.y, linked_pos.x, linked_pos.y);
         ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + 24), ImVec2(linked_pos.x, linked_pos.y + 24), IM_COL32(127, 127, 127, 80), 2);
     }
 }

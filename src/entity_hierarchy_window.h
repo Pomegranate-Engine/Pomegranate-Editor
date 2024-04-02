@@ -35,7 +35,6 @@ public:
 class Window_EntityHierarchy : public EditorWindow
 {
 public:
-    SDL_Texture* graph_texture;
     Vec2 cam_pos;
     float zoom;
     static std::vector<Node*> nodes;
