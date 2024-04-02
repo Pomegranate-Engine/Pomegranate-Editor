@@ -89,29 +89,34 @@ void Window_EntityHierarchy::render()
     //Check if window is focused
     if(ImGui::IsWindowFocused()) {
         //Check if mouse is hovering over a node
+
         bool hovering_node = false;
-        for (auto & node : nodes) {
-            //Calculate screen pos
-            Vec2 node_pos = node->pos;
-            node_pos.x -= cam_pos.x;
-            node_pos.y -= cam_pos.y;
-            node_pos.x /= zoom;
-            node_pos.y /= zoom;
-            node_pos.x += (float)size.x / 2;
-            node_pos.y += (float)size.y / 2;
-            //Check if mouse is hovering over node
-            Vec2 mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
-            if (mouse.distance_to(node_pos) < node->size) {
-                hovering_node = true;
-                if (InputManager::get_mouse_button(SDL_BUTTON_LEFT) && dragging_node == nullptr) {
-                    selected_node = node;
-                    Node::selected = node;
-                    dragging_node = node;
+        if(!InputManager::get_key(SDL_SCANCODE_LSHIFT))
+        {
+            for (auto &node: nodes) {
+                //Calculate screen pos
+                Vec2 node_pos = node->pos;
+                node_pos.x -= cam_pos.x;
+                node_pos.y -= cam_pos.y;
+                node_pos.x /= zoom;
+                node_pos.y /= zoom;
+                node_pos.x += (float) size.x / 2;
+                node_pos.y += (float) size.y / 2;
+                //Check if mouse is hovering over node
+                Vec2 mouse =
+                        InputManager::get_mouse_position() - Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+                if (mouse.distance_to(node_pos) < node->size) {
+                    hovering_node = true;
+                    if (InputManager::get_mouse_button(SDL_BUTTON_LEFT) && dragging_node == nullptr) {
+                        selected_node = node;
+                        Node::selected = node;
+                        dragging_node = node;
+                    }
                 }
             }
         }
         if (!hovering_node && dragging_node == nullptr) {
-            if (InputManager::get_mouse_button(SDL_BUTTON_LEFT)) {
+            if (InputManager::get_mouse_button(2)) {
                 cam_pos.x -= InputManager::get_mouse_delta().x * zoom;
                 cam_pos.y -= InputManager::get_mouse_delta().y * zoom;
             }
@@ -346,6 +351,19 @@ void Window_EntityHierarchy::draw_node(Node* n)
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
     ImGui::Image((void*)n->texture->get_sdl_texture(), ImVec2(node_size*2, node_size*2), ImVec2(0, 0), ImVec2(1, 1), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f));
+    //Make it DragDrop for the inspector
+    ImGui::SetItemAllowOverlap();
+    ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
+    if(InputManager::get_key(SDL_SCANCODE_LSHIFT))
+    {
+        ImGui::InvisibleButton((std::string("##") + (n->entity != nullptr ? n->entity->name : n->group != nullptr ? n->group->name : n->system != nullptr ? scuffy_demangle(typeid(*n->system).name()) : "")).c_str(), ImVec2(node_size * 2, node_size * 2));
+        if (ImGui::BeginDragDropSource()) {
+            ImGui::SetDragDropPayload("Node", &n, sizeof(Node *));
+            ImGui::Image((void *) n->texture->get_sdl_texture(), ImVec2(node_size * 2, node_size * 2), ImVec2(0, 0),
+                         ImVec2(1, 1), ImVec4(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, 1.0f));
+            ImGui::EndDragDropSource();
+        }
+    }
 
     if(selected_node == n)
     {
