@@ -81,7 +81,7 @@ json save_scene_as_json(EntityGroup* scene)
         for (auto& [type, component] : components)
         {
             j["entities"][std::to_string(entity->id)]["components"][type->name()] = json::object();
-            std::unordered_map<std::string, std::pair<const type_info*, void*>> data = component->component_data;
+            std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data = component->component_data;
             //Write component data
             for (auto& [name, data] : data)
             {
