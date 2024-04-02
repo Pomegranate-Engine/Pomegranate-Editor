@@ -1,6 +1,8 @@
 #include "scene.h"
 
+#ifdef __WINDOWS__
 #include <windows.h>
+#endif
 #include <Pomegranate/audio.h>
 #include <Pomegranate/ttf_font.h>
 
