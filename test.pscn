@@ -2,6 +2,40 @@
     "entities": {
         "0": {
             "components": {
+                "class Pomegranate::Camera": {
+                    "zoom": {
+                        "type": "float",
+                        "value": 1.0
+                    }
+                },
+                "class Pomegranate::Transform": {
+                    "pos": {
+                        "type": "vec2",
+                        "x": 0.0,
+                        "y": 0.0
+                    },
+                    "rot": {
+                        "type": "float",
+                        "value": 0.0
+                    },
+                    "scale": {
+                        "type": "vec2",
+                        "x": 1.0,
+                        "y": 1.0
+                    },
+                    "z_index": {
+                        "type": "int",
+                        "value": 0
+                    }
+                }
+            },
+            "name": "Camera",
+            "parents": [
+                0
+            ]
+        },
+        "1": {
+            "components": {
                 "class Pomegranate::Sprite": {
                     "color": {
                         "a": 255,
@@ -54,7 +88,7 @@
                     }
                 }
             },
-            "name": "New Entity",
+            "name": "Sprite",
             "parents": [
                 0
             ]

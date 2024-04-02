@@ -11,6 +11,9 @@
 #include "scene.h"
 #include "json.hpp"
 #include "editor.h"
+#include "compile_and_run.h"
+#include "imfilebrowser.h"
+#include <algorithm>
 
 using json = nlohmann::json;
 using namespace Pomegranate;

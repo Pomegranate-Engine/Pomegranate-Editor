@@ -77,6 +77,8 @@ set(IMGUI_SOURCES
         src/theme.h
         src/editor.cpp
         src/editor.h
+        src/compile_and_run.cpp
+        src/compile_and_run.h
 )
 
 # Add executable

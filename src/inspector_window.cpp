@@ -35,28 +35,28 @@ void InspectorWindow::render()
                             std::string property_name = std::string(j->first);
                             if (j->second.second != nullptr) {
                                 if (j->second.first->hash_code() == typeid(std::string).hash_code()) {
-                                    std::string *value = (std::string *) j->second.second;
+                                    auto *value = (std::string *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(float).hash_code()) {
-                                    float *value = (float *) j->second.second;
+                                    auto *value = (float *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(int).hash_code()) {
-                                    int *value = (int *) j->second.second;
+                                    auto *value = (int *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(bool).hash_code()) {
-                                    bool *value = (bool *) j->second.second;
+                                    auto *value = (bool *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(Vec2).hash_code()) {
-                                    Vec2 *value = (Vec2 *) j->second.second;
+                                    auto *value = (Vec2 *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(Vec3).hash_code()) {
-                                    Vec3 *value = (Vec3 *) j->second.second;
+                                    auto *value = (Vec3 *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(Color).hash_code()) {
-                                    Color *value = (Color *) j->second.second;
+                                    auto *value = (Color *) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 } else if (j->second.first->hash_code() == typeid(Texture *).hash_code()) {
-                                    Texture **value = (Texture **) j->second.second;
+                                    auto **value = (Texture **) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 }
                                 if(ImGui::IsItemDeactivatedAfterEdit())

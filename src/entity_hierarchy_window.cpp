@@ -382,7 +382,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
         name = scuffy_demangle(typeid(*n->system).name());
     }
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
-    auto* font = ResourceManager::load<TTFFont>("engine_res/zed_font.ttf");
+    auto* font = ResourceManager::load<TTFFont>("engine/zed_font.ttf");
     SDL_Surface* surface = TTF_RenderText_Solid(font->get_ttf_font(), name.c_str(), {255, 255, 255, 255});
     SDL_Texture* texture = SDL_CreateTextureFromSurface(Window::current->get_sdl_renderer(), surface);
     Vec2i tex_size;
@@ -565,7 +565,7 @@ Node::Node(Entity *entity)
     this->velocity = Vec2(0, 0);
     this->size = 8;
     this->color = Color((int)EditorTheme::scene_hierarchy_entity.x,(int)EditorTheme::scene_hierarchy_entity.y,(int)EditorTheme::scene_hierarchy_entity.z,255);
-    this->texture = ResourceManager::load<Texture>("engine_res/entity.png");
+    this->texture = ResourceManager::load<Texture>("engine/entity.png");
     this->entity = std::unique_ptr<Entity>(entity);
     this->system = nullptr;
     this->group = nullptr;
@@ -577,7 +577,7 @@ Node::Node(Pomegranate::System *system)
     this->velocity = Vec2(0, 0);
     this->size = 8;
     this->color = Color((int)EditorTheme::scene_hierarchy_system.x,(int)EditorTheme::scene_hierarchy_system.y,(int)EditorTheme::scene_hierarchy_system.z,255);
-    this->texture = ResourceManager::load<Texture>("engine_res/system.png");
+    this->texture = ResourceManager::load<Texture>("engine/system.png");
     this->entity = nullptr;
     this->system = std::unique_ptr<System>(system);
     this->group = nullptr;
@@ -589,7 +589,7 @@ Node::Node(Pomegranate::EntityGroup *group)
     this->velocity = Vec2(0, 0);
     this->size = 8;
     this->color = Color((int)EditorTheme::scene_hierarchy_group.x,(int)EditorTheme::scene_hierarchy_group.y,(int)EditorTheme::scene_hierarchy_group.z,255);
-    this->texture = ResourceManager::load<Texture>("engine_res/group.png");
+    this->texture = ResourceManager::load<Texture>("engine/group.png");
     this->entity = nullptr;
     this->system = nullptr;
     this->group = std::unique_ptr<EntityGroup>(group);

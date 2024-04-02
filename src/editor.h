@@ -12,6 +12,7 @@ class Editor
 {
 public:
     static std::vector<json> history;
+    static std::string current_scene_path;
     static EntityGroup* current_scene;
     static int current_scene_index;
     static int max_history;

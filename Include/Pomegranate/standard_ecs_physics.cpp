@@ -68,17 +68,6 @@ namespace Pomegranate
                 p->cur_pos = t->pos;
                 p->cur_rot = t->rot;
 
-                //Constraint
-                Vec2 constraint_position = Vec2(0,0);
-                float constraint_radius = 512;
-                Vec2 to_obj = p->cur_pos - constraint_position;
-
-                float distance = to_obj.length();
-                if(distance > constraint_radius-c->radius*(abs(t->scale.x+t->scale.y)*0.5f))
-                {
-                    Vec2 normal = to_obj.normalized();
-                    p->cur_pos = constraint_position + normal * (constraint_radius-c->radius*(abs(t->scale.x+t->scale.y)*0.5f));
-                }
 
                 //Collisions
                 solve_collisions(entity);

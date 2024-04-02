@@ -2,6 +2,7 @@
 
 std::vector<json> Editor::history = {};
 EntityGroup* Editor::current_scene = nullptr;
+std::string Editor::current_scene_path = "";
 int Editor::current_scene_index = 0;
 int Editor::max_history = 256;
 
@@ -14,8 +15,8 @@ void Editor::action()
     }
     // Action
     history.push_back(save_scene_as_json(current_scene));
-    //Dump history to a file in engine_res/ folder history.txt
-    std::ofstream file("engine_res/history.txt");
+    //Dump history to a file in engine/ folder history.txt
+    std::ofstream file("engine/history.txt");
     for(auto& j : history)
     {
         file << j.dump(4) << std::endl;
