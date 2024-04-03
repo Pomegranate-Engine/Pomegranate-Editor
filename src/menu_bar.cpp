@@ -54,7 +54,23 @@ void save()
         save_scene(Editor::current_scene_path.c_str(), Editor::current_scene);
     }
 }
-
+void run_scene()
+{
+    if (!Editor::current_scene_path.empty())
+    {
+        //Save
+        save_scene(Editor::current_scene_path.c_str(), Editor::current_scene);
+        compile_project("Game", Editor::current_scene_path);
+        run_project();
+    }
+}
+void new_scene()
+{
+    // New scene
+    unload_all();
+    Editor::current_scene = new EntityGroup("root");
+    Editor::current_scene_path = "";
+}
 void draw_menu_bar()
 {
     if(InputManager::get_key(SDL_SCANCODE_LCTRL) && (InputManager::get_key(SDL_SCANCODE_S) && !save_key_down))
@@ -81,9 +97,7 @@ void draw_menu_bar()
         if (ImGui::MenuItem("New"))
         {
             // New scene
-            unload_all();
-            Editor::current_scene = new EntityGroup("root");
-            Editor::current_scene_path = "";
+            new_scene();
         }
         if (ImGui::MenuItem("Open"))
         {
@@ -113,13 +127,8 @@ void draw_menu_bar()
     }
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Play").x - ImGui::GetStyle().WindowPadding.x - ImGui::GetStyle().WindowPadding.y);
     if (ImGui::MenuItem("Play","F5")) {
-        if (!Editor::current_scene_path.empty())
-        {
-            //Save
-            save_scene(Editor::current_scene_path.c_str(), Editor::current_scene);
-            compile_project("Game", Editor::current_scene_path);
-            run_project();
-        }
+        // Run scene
+        run_scene();
     }
     //Play from starting scene
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Play Start").x - ImGui::GetStyle().WindowPadding.x - ImGui::GetStyle().WindowPadding.y - ImGui::CalcTextSize("Play").x - ImGui::GetStyle().WindowPadding.x - ImGui::GetStyle().WindowPadding.y);

@@ -14,6 +14,7 @@
 #include "compile_and_run.h"
 #include "imfilebrowser.h"
 #include <algorithm>
+#include <future>
 
 using json = nlohmann::json;
 using namespace Pomegranate;
