@@ -5,7 +5,6 @@
 #endif
 #include <Pomegranate/audio.h>
 #include <Pomegranate/ttf_font.h>
-
 std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
 {
     std::vector<EntityGroup*> groups;
@@ -165,7 +164,10 @@ json save_scene_as_json(EntityGroup* scene)
                 {
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name] = json::object();
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "entity";
-                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = (*(Entity**)data.second)->id;
+                    if(*(Entity**)data.second != nullptr)
+                        j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = (*(Entity**)data.second)->id;
+                    else
+                        j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = -1;
                 }
             }
         }
@@ -196,6 +198,7 @@ void save_scene(const char* path, EntityGroup* scene)
 
 void unload_all()
 {
+
     //Delete entities
     for (auto& entity : Entity::entities)
     {
@@ -308,7 +311,8 @@ EntityGroup* open_scene_from_json(json data)
                 }
                 else if(data["type"] == "entity")
                 {
-                    *(Entity**)c->component_data[name].second = Entity::entities[data["value"].get<uint32_t>() + id_append_entity];
+                    if(data["value"].get<uint32_t>() != -1)
+                        *(Entity**)c->component_data[name].second = Entity::entities[data["value"].get<uint32_t>() + id_append_entity];
                 }
             }
         }

@@ -66,9 +66,8 @@ namespace Pomegranate
         current = entity;
     }
 
-    void Camera::init(Pomegranate::Entity *e) {
+    void Camera::init(Pomegranate::Entity *) {
         push_data<float>("zoom", &this->zoom);
-        make_current(e);
     }
 
     DebugCircle::DebugCircle()
@@ -82,22 +81,24 @@ namespace Pomegranate
 
     void Render::draw(Entity* entity)
     {
-        if(entity->has_component<Sprite>())
+        if(Camera::current!= nullptr)
         {
-            Render::sprite(entity);
+            if (entity->has_component<Sprite>()) {
+                Render::sprite(entity);
+            }
+            /*if(entity->has_component<DebugCircle>())
+            {
+                Render::debug_circle(entity);
+            }
+            if(entity->has_component<AnimatedSprite>())
+            {
+                Render::animated_sprite(entity);
+            }
+            if(entity->has_component<Tilemap>())
+            {
+                Render::tilemap(entity);
+            }*/
         }
-        /*if(entity->has_component<DebugCircle>())
-        {
-            Render::debug_circle(entity);
-        }
-        if(entity->has_component<AnimatedSprite>())
-        {
-            Render::animated_sprite(entity);
-        }
-        if(entity->has_component<Tilemap>())
-        {
-            Render::tilemap(entity);
-        }*/
     }
 
     void Render::sprite(Entity*e) {

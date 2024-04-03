@@ -87,7 +87,7 @@ void Window_EntityHierarchy::render()
     Vec2i tex_size;
 
     //Check if window is focused
-    if(ImGui::IsWindowFocused()) {
+    if(ImRect(ImGui::GetWindowPos(),ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(),ImGui::GetWindowPos().y + ImGui::GetWindowHeight())).Contains(ImVec2(InputManager::get_mouse_position().x,InputManager::get_mouse_position().y))){
         //Check if mouse is hovering over a node
 
         bool hovering_node = false;
@@ -116,7 +116,7 @@ void Window_EntityHierarchy::render()
             }
         }
         if (!hovering_node && dragging_node == nullptr) {
-            if (InputManager::get_mouse_button(2)) {
+            if (InputManager::get_mouse_button(1) && !InputManager::get_key(SDL_SCANCODE_LSHIFT)) {
                 cam_pos.x -= InputManager::get_mouse_delta().x * zoom;
                 cam_pos.y -= InputManager::get_mouse_delta().y * zoom;
             }
@@ -329,7 +329,34 @@ Window_EntityHierarchy::Window_EntityHierarchy()
     selected_node = nullptr;
     dragging_node = nullptr;
 }
+static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs)
+{
+    return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y);
+}
+void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, ImVec4 color, float angle)
+{
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
+    float cos_a = cosf(angle);
+    float sin_a = sinf(angle);
+    ImVec2 pos[4] =
+            {
+                    center + ImRotate(ImVec2(-size.x * 0.5f, -size.y * 0.5f), cos_a, sin_a),
+                    center + ImRotate(ImVec2(+size.x * 0.5f, -size.y * 0.5f), cos_a, sin_a),
+                    center + ImRotate(ImVec2(+size.x * 0.5f, +size.y * 0.5f), cos_a, sin_a),
+                    center + ImRotate(ImVec2(-size.x * 0.5f, +size.y * 0.5f), cos_a, sin_a)
+            };
+    ImVec2 uvs[4] =
+            {
+                    ImVec2(0.0f, 0.0f),
+                    ImVec2(1.0f, 0.0f),
+                    ImVec2(1.0f, 1.0f),
+                    ImVec2(0.0f, 1.0f)
+            };
+
+    ImU32 col = IM_COL32((int)(color.x * 255), (int)(color.y * 255), (int)(color.z * 255), (int)(color.w * 255));
+    draw_list->AddImageQuad(tex_id, pos[0], pos[1], pos[2], pos[3], uvs[0], uvs[1], uvs[2], uvs[3], col);
+}
 void Window_EntityHierarchy::draw_node(Node* n)
 {
     Vec2 pos = n->pos;
@@ -350,7 +377,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     float node_size = s;
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
-    ImGui::Image((void*)n->texture->get_sdl_texture(), ImVec2(node_size*2, node_size*2), ImVec2(0, 0), ImVec2(1, 1), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f));
+    ImageRotated((void*)n->texture->get_sdl_texture(),ImVec2(node_pos.x, node_pos.y+node_size*3) ,ImVec2(node_size*2, node_size*2), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f),n->velocity.x*0.025f);
     //Make it DragDrop for the inspector
     ImGui::SetItemAllowOverlap();
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));

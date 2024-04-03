@@ -70,8 +70,8 @@ class PlayerController : public System
 class CameraFollow : public Component
 {
 public:
-    float speed;
-    Entity* target;
+    float speed = 1.0;
+    Entity* target = nullptr;
     void init(Entity* e) override
     {
         speed = 1.0;

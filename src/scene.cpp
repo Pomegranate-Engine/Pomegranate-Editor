@@ -167,7 +167,10 @@ json save_scene_as_json(EntityGroup* scene)
                 {
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name] = json::object();
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "entity";
-                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = (*(Entity**)data.second)->id;
+                    if(*(Entity**)data.second != nullptr)
+                        j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = (*(Entity**)data.second)->id;
+                    else
+                        j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = -1;
                 }
             }
         }
@@ -321,7 +324,8 @@ EntityGroup* open_scene_from_json(json data)
                 }
                 else if(data["type"] == "entity")
                 {
-                    *(Entity**)c->component_data[name].second = Entity::entities[data["value"].get<uint32_t>() + id_append_entity];
+                    if(data["value"].get<uint32_t>() != -1)
+                        *(Entity**)c->component_data[name].second = Entity::entities[data["value"].get<uint32_t>() + id_append_entity];
                 }
             }
         }
