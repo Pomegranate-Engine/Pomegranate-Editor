@@ -6,6 +6,7 @@
 #include <fstream>
 #include <filesystem>
 #include <regex>
+#include "editor.h"
 
 void compile_project(const std::string& project_name,const std::string& base_scene);
 void run_project();

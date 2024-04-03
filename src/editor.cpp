@@ -5,6 +5,11 @@ EntityGroup* Editor::current_scene = nullptr;
 std::string Editor::current_scene_path = "";
 int Editor::current_scene_index = 0;
 int Editor::max_history = 256;
+#ifdef _WIN32
+std::string Editor::cmake_generator = "Visual Studio 16 2019";
+#else
+std::string Editor::cmake_generator = "Unix Makefiles";
+#endif
 
 void Editor::action()
 {

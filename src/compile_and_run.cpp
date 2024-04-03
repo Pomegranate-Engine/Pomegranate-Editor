@@ -49,20 +49,32 @@ void compile_project(const std::string& project_name,const std::string& base_sce
     modified_main_file.close();
 
     //Setup project with cmake, use vs compiler on windows
-    std::string command = "cmake -S build -B build -G \"Visual Studio 16 2019\"";
+    std::string command = "cmake -S build -B build -G \"" + Editor::cmake_generator +"\"";
     system(command.c_str());
     //Compile the project
     command = "cmake --build build --config Debug";
     system(command.c_str());
 
     //Copy engine/ and res/
-    std::filesystem::copy("res/", "build/bin/Debug/res", std::filesystem::copy_options::recursive);
-    std::filesystem::copy("engine/", "build/bin/Debug/engine", std::filesystem::copy_options::recursive);
+    if(std::filesystem::exists("build/bin/Debug/"))
+    {
+        std::filesystem::copy("res/", "build/bin/Debug/res", std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing);
+        std::filesystem::copy("engine/", "build/bin/Debug/engine", std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing);
+    }
+    else
+    {
+        std::filesystem::copy("res/", "build/bin/res", std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing);
+        std::filesystem::copy("engine/", "build/bin/engine", std::filesystem::copy_options::recursive | std::filesystem::copy_options::update_existing);
+    }
 }
 
 void run_project()
 {
+    std::string command;
     //Run the project in build/bin/Debug, make sure its running from it's own directory
-    std::string command = "cd build/bin/Debug && ls && start Pomegranate_Engine.exe";
+    if(std::filesystem::exists("build/bin/Debug"))
+        command = "cd build/bin/Debug && ls && start Pomegranate_Engine.exe";
+    else
+        command = "cd build/bin && ls && ./Pomegranate_Engine";
     system(command.c_str());
 }
