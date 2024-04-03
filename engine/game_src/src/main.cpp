@@ -57,6 +57,42 @@ class PlayerController : public System
         }
     }
 };
+class CameraFollow : public Component
+{
+public:
+    float speed;
+    Entity* target;
+    void init(Entity* e) override
+    {
+        speed = 1.0;
+        target = nullptr;
+        e->require_component<Transform>();
+        e->require_component<Camera>();
+        register_component(CameraFollow);
+        push_data<float>("speed", &speed);
+        push_data<Entity*>("target", &target);
+    }
+};
+class CameraController : public System
+{
+public:
+    void tick(Entity* e) override
+    {
+        if(e->has_component<CameraFollow>())
+        {
+            auto* camera_follow = e->get_component<CameraFollow>();
+            auto* transform = e->get_component<Transform>();
+            if(camera_follow->target)
+            {
+                if(camera_follow->target->has_component<Transform>())
+                {
+                    auto* target_transform = camera_follow->target->get_component<Transform>();
+                    transform->pos = transform->pos + (target_transform->pos - transform->pos) * camera_follow->speed * delta_time;
+                }
+            }
+        }
+    }
+};
 
 //Main window
 const char* game_name = "[/GAME_NAME]";
@@ -99,6 +135,7 @@ int main(int argc, char* argv[])
     register_component(ScaleLink);
     register_component(RotationLink);
 
+
     //Register systems
     register_system(Render);
     register_system(RigidBody);
@@ -107,6 +144,8 @@ int main(int argc, char* argv[])
     //[/COMPONENTS_SYSTEMS_REGISTER]
     register_component(PlayerComponent);
     register_system(PlayerController);
+    register_system(CameraController);
+    register_component(CameraFollow);
 
     Editor::current_scene = open_scene(scene_path);
 

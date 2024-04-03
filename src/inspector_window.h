@@ -15,6 +15,9 @@ public:
     static void property_field(const char* name, Vec3* value);
     static void property_field(const char* name, Color* value);
     static void property_field(const char* name, Texture** value);
+    static void property_field(const char* name, TTFFont** value);
+    static void property_field(const char* name, Entity** value);
+
     InspectorWindow();
     void render() override;
     void update() override;

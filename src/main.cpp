@@ -143,12 +143,14 @@ int main(int argc, char* argv[])
     register_component(ScaleLink);
     register_component(RotationLink);
     register_component(PlayerComponent);
+    register_component(CameraFollow);
 
     //Register systems
     register_system(PlayerController);
     register_system(Render);
     register_system(RigidBody);
     register_system(KinematicBody);
+    register_system(CameraController);
 
     Editor::current_scene = new EntityGroup("root");
 

@@ -163,6 +163,12 @@ json save_scene_as_json(EntityGroup* scene)
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "audio";
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["path"] = (*(Audio**)data.second)->path;
                 }
+                else if(data.first == &typeid(Entity*))
+                {
+                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name] = json::object();
+                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "entity";
+                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = (*(Entity**)data.second)->id;
+                }
             }
         }
     }
@@ -255,6 +261,10 @@ EntityGroup* open_scene_from_json(json data)
         {
             EntityGroup::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
         }
+    }
+    //Load components
+    for (auto& [id, entity] : data["entities"].items()) {
+        Entity *e = Entity::entities[std::stoi(id) + id_append_entity];
         for (auto& [type, component] : entity["components"].items())
         {
             if(!e->has_component(type.c_str()))
@@ -308,6 +318,10 @@ EntityGroup* open_scene_from_json(json data)
                 else if (data["type"] == "audio")
                 {
                     *(Audio**)c->component_data[name].second = ResourceManager::load<Audio>(data["path"].get<std::string>());
+                }
+                else if(data["type"] == "entity")
+                {
+                    *(Entity**)c->component_data[name].second = Entity::entities[data["value"].get<uint32_t>() + id_append_entity];
                 }
             }
         }

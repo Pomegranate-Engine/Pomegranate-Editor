@@ -358,7 +358,12 @@ void Window_EntityHierarchy::draw_node(Node* n)
     {
         ImGui::InvisibleButton((std::string("##") + (n->entity != nullptr ? n->entity->name : n->group != nullptr ? n->group->name : n->system != nullptr ? scuffy_demangle(typeid(*n->system).name()) : "")).c_str(), ImVec2(node_size * 2, node_size * 2));
         if (ImGui::BeginDragDropSource()) {
-            ImGui::SetDragDropPayload("Node", &n, sizeof(Node *));
+            if(n->entity != nullptr)
+                ImGui::SetDragDropPayload("Entity", &n->entity, sizeof(Entity *));
+            if(n->group != nullptr)
+                ImGui::SetDragDropPayload("Group", &n->group, sizeof(EntityGroup *));
+            if(n->system != nullptr)
+                ImGui::SetDragDropPayload("System", &n->system, sizeof(System *));
             ImGui::Image((void *) n->texture->get_sdl_texture(), ImVec2(node_size * 2, node_size * 2), ImVec2(0, 0),
                          ImVec2(1, 1), ImVec4(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, 1.0f));
             ImGui::EndDragDropSource();

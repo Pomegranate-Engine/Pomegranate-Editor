@@ -59,6 +59,16 @@ void InspectorWindow::render()
                                     auto **value = (Texture **) j->second.second;
                                     property_field(property_name.c_str(), value);
                                 }
+                                else if(j->second.first->hash_code() == typeid(TTFFont*).hash_code())
+                                {
+                                    auto **value = (TTFFont**)j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                }
+                                else if(j->second.first->hash_code() == typeid(Entity*).hash_code())
+                                {
+                                    auto **value = (Entity**)j->second.second;
+                                    property_field(property_name.c_str(), value);
+                                }
                                 if(ImGui::IsItemDeactivatedAfterEdit())
                                 {
                                     Editor::action();
@@ -176,6 +186,63 @@ void InspectorWindow::property_field(const char *name, Texture **value)
             Texture* texture = *(Texture**)payload->Data;
             *value = texture;
             print_info("Texture Dropped");
+        }
+        ImGui::EndDragDropTarget();
+    }
+}
+
+void InspectorWindow::property_field(const char *name, TTFFont **value)
+{
+    //This will be a drag and drop field
+    ImGui::Text("%s", name);
+    //Create button to open file dialog and be drop target
+    ImGui::SameLine();
+    if(ImGui::Button((*value)->path.c_str()))
+    {
+        //Open file dialog
+        //Set the texture to the selected texture
+    }
+    //Drop target
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource"))
+        {
+            TTFFont* ttf = *(TTFFont**)payload->Data;
+            *value = ttf;
+            print_info("Texture Dropped");
+        }
+        ImGui::EndDragDropTarget();
+    }
+}
+
+void InspectorWindow::property_field(const char *name, Entity **value)
+{
+    //This will be a drag and drop field
+    ImGui::Text("%s", name);
+    //Create button to open file dialog and be drop target
+    ImGui::SameLine();
+    if(*value != nullptr) {
+        if (ImGui::Button((*value)->name.c_str())) {
+            //Open file dialog
+            //Set the texture to the selected texture
+        }
+    }
+    else
+    {
+        if(ImGui::Button("None"))
+        {
+            //Open file dialog
+            //Set the texture to the selected texture
+        }
+    }
+    //Drop target
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
+        {
+            Entity* entity = *(Entity**)payload->Data;
+            *value = entity;
+            print_info("Entity Dropped");
         }
         ImGui::EndDragDropTarget();
     }

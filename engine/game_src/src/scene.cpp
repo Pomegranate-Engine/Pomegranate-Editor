@@ -1,47 +1,49 @@
 #include "scene.h"
 
+#ifdef __WINDOWS__
 #include <windows.h>
+#endif
 #include <Pomegranate/audio.h>
 #include <Pomegranate/ttf_font.h>
 
 std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
 {
-	std::vector<EntityGroup*> groups;
-	groups.push_back(group);
-	for (auto& child : *group->get_child_groups())
-	{
-		auto child_groups = get_all_groups(child);
-		groups.insert(groups.end(), child_groups.begin(), child_groups.end());
-	}
-	return groups;
+    std::vector<EntityGroup*> groups;
+    groups.push_back(group);
+    for (auto& child : *group->get_child_groups())
+    {
+        auto child_groups = get_all_groups(child);
+        groups.insert(groups.end(), child_groups.begin(), child_groups.end());
+    }
+    return groups;
 }
 std::vector<Entity*> get_all_entities(EntityGroup* group)
 {
-	std::vector<Entity*> entities;
-	for (auto& entity : *group->get_entities())
-	{
-		entities.push_back(entity);
-	}
-	for (auto& child : *group->get_child_groups())
-	{
-		auto child_entities = get_all_entities(child);
-		entities.insert(entities.end(), child_entities.begin(), child_entities.end());
-	}
-	return entities;
+    std::vector<Entity*> entities;
+    for (auto& entity : *group->get_entities())
+    {
+        entities.push_back(entity);
+    }
+    for (auto& child : *group->get_child_groups())
+    {
+        auto child_entities = get_all_entities(child);
+        entities.insert(entities.end(), child_entities.begin(), child_entities.end());
+    }
+    return entities;
 }
 std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
 {
-	std::vector<std::pair<System*,uint32_t>> systems;
-	for (auto& system : *group->get_systems())
-	{
-		systems.push_back(std::make_pair(system,group->id));
-	}
-	for (auto& child : *group->get_child_groups())
-	{
-		auto child_systems = get_all_systems(child);
-		systems.insert(systems.end(), child_systems.begin(), child_systems.end());
-	}
-	return systems;
+    std::vector<std::pair<System*,uint32_t>> systems;
+    for (auto& system : *group->get_systems())
+    {
+        systems.push_back(std::make_pair(system,group->id));
+    }
+    for (auto& child : *group->get_child_groups())
+    {
+        auto child_systems = get_all_systems(child);
+        systems.insert(systems.end(), child_systems.begin(), child_systems.end());
+    }
+    return systems;
 }
 json save_scene_as_json(EntityGroup* scene)
 {
@@ -77,7 +79,7 @@ json save_scene_as_json(EntityGroup* scene)
         for (auto& [type, component] : components)
         {
             j["entities"][std::to_string(entity->id)]["components"][type->name()] = json::object();
-            std::unordered_map<std::string, std::pair<const type_info*, void*>> data = component->component_data;
+            std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data = component->component_data;
             //Write component data
             for (auto& [name, data] : data)
             {
@@ -159,6 +161,12 @@ json save_scene_as_json(EntityGroup* scene)
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "audio";
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["path"] = (*(Audio**)data.second)->path;
                 }
+                else if(data.first == &typeid(Entity*))
+                {
+                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name] = json::object();
+                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "entity";
+                    j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["value"] = (*(Entity**)data.second)->id;
+                }
             }
         }
     }
@@ -177,34 +185,34 @@ json save_scene_as_json(EntityGroup* scene)
 }
 void save_scene(const char* path, EntityGroup* scene)
 {
-	std::ofstream file(path);
-	if (file.is_open())
-	{
+    std::ofstream file(path);
+    if (file.is_open())
+    {
         json j = save_scene_as_json(scene);
-		file << j.dump(4);
-	}
-	file.close();
+        file << j.dump(4);
+    }
+    file.close();
 }
 
 void unload_all()
 {
-	//Delete entities
-	for (auto& entity : Entity::entities)
-	{
-		delete entity.second;
-	}
-	//Delete groups
-	for (auto& group : EntityGroup::groups)
-	{
-		delete group.second;
-	}
-	//TODO: For some reason can't delete entities or groups, causes crash
+    //Delete entities
+    for (auto& entity : Entity::entities)
+    {
+        delete entity.second;
+    }
+    //Delete groups
+    for (auto& group : EntityGroup::groups)
+    {
+        delete group.second;
+    }
+    //TODO: For some reason can't delete entities or groups, causes crash
 
-	Entity::entities.clear();
-	EntityGroup::groups_id.clear();
-	EntityGroup::groups.clear();
-	EntityGroup::group_count = 0;
-	Entity::entity_count = 0;
+    Entity::entities.clear();
+    EntityGroup::groups_id.clear();
+    EntityGroup::groups.clear();
+    EntityGroup::group_count = 0;
+    Entity::entity_count = 0;
 }
 
 EntityGroup* open_scene_from_json(json data)
@@ -236,11 +244,14 @@ EntityGroup* open_scene_from_json(json data)
     {
         Entity* e = new Entity();
         e->name = entity["name"].get<std::string>();
-        print_info("Created entity: " + e->name);
         for (auto& parent : entity["parents"])
         {
             EntityGroup::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
         }
+    }
+    //Load components
+    for (auto& [id, entity] : data["entities"].items()) {
+        Entity *e = Entity::entities[std::stoi(id) + id_append_entity];
         for (auto& [type, component] : entity["components"].items())
         {
             if(!e->has_component(type.c_str()))
@@ -295,6 +306,10 @@ EntityGroup* open_scene_from_json(json data)
                 {
                     *(Audio**)c->component_data[name].second = ResourceManager::load<Audio>(data["path"].get<std::string>());
                 }
+                else if(data["type"] == "entity")
+                {
+                    *(Entity**)c->component_data[name].second = Entity::entities[data["value"].get<uint32_t>() + id_append_entity];
+                }
             }
         }
     }
@@ -302,7 +317,6 @@ EntityGroup* open_scene_from_json(json data)
     for (auto& [type, system] : data["systems"].items())
     {
         System* s = System::system_types[type.c_str()]();
-        print_info("Created system: " + type);
         for (auto& linked : system["linked"])
         {
             EntityGroup::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
@@ -316,11 +330,11 @@ EntityGroup* open_scene_from_json(json data)
 
 EntityGroup *open_scene(const char *path)
 {
-	std::ifstream f(path);
-	json data = json::parse(f);
-	if (f.is_open())
-	{
+    std::ifstream f(path);
+    json data = json::parse(f);
+    if (f.is_open())
+    {
         return open_scene_from_json(data);
-	}
-	return nullptr;
+    }
+    return nullptr;
 }
