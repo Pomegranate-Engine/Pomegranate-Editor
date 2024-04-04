@@ -1,0 +1,30 @@
+{
+  "editor": {
+    "text": "ffffff",
+    "title_bar": "282c34",
+    "elements": "1e1f22",
+    "inputs": "495162",
+    "hover": "495162",
+    "popups": "89ca78",
+    "body": "ffffff",
+    "rounding": 8
+  },
+  "scene_view": {
+    "x": "ef596f",
+    "y": "89ca78",
+    "background": "1e1f22"
+  },
+  "scene_hierarchy": {
+    "entity": "61afef",
+    "group": "e5c07b",
+    "system": "ef596f"
+  },
+  "color_palette": {
+    "red": "ef596f",
+    "yellow": "e5c07b",
+    "green": "89ca78",
+    "blue": "61afef",
+    "purple": "d55fde",
+    "white": "bbbbbb"
+  }
+}

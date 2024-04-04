@@ -15,6 +15,7 @@
 #include "imfilebrowser.h"
 #include <algorithm>
 #include <future>
+#include "notifications.h"
 
 using json = nlohmann::json;
 using namespace Pomegranate;

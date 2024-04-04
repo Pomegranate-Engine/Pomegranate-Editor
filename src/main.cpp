@@ -19,6 +19,7 @@ using namespace Pomegranate;
 #include "resources_window.h"
 #include "menu_bar.h"
 #include "theme.h"
+#include "notifications.h"
 
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
@@ -166,6 +167,8 @@ int main(int argc, char* argv[])
     bool is_running = true;
     SDL_Event event;
 
+    Notify::notify(Notification(nullptr,"This is a notification", "Lorem ipsum!",5));
+
     while (is_running)
     {
         Uint64 start = SDL_GetPerformanceCounter(); //For delta time
@@ -207,10 +210,15 @@ int main(int argc, char* argv[])
 
         draw_menu_bar();
         windows_manager.render(); //Render windows
+        Notify::render(delta_time);
 
         //Draw imgui
         ImGui::Render();
+
+        // Main rendering function
+
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
+
 
         SDL_RenderPresent(Window::current->get_sdl_renderer()); //Present
 

@@ -71,6 +71,7 @@ void new_scene()
     Editor::current_scene = new EntityGroup("root");
     Editor::current_scene_path = "";
 }
+int i;
 void draw_menu_bar()
 {
     if(InputManager::get_key(SDL_SCANCODE_LCTRL) && (InputManager::get_key(SDL_SCANCODE_S) && !save_key_down))
@@ -135,6 +136,8 @@ void draw_menu_bar()
     if (ImGui::MenuItem("Play Start","F6"))
     {
         // Run scene from start
+        Notify::notify({nullptr,"Not implemented","This feature is not implemented" + std::to_string(i)});
+        i++;
     }
     ImGui::EndMainMenuBar();
     savingDialog.Display();
