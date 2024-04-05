@@ -81,6 +81,8 @@ set(IMGUI_SOURCES
         src/compile_and_run.h
         src/notifications.cpp
         src/notifications.h
+        src/hotkey_manager.cpp
+        src/hotkey_manager.h
 )
 
 # Add executable

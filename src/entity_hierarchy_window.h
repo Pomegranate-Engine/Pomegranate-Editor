@@ -6,6 +6,7 @@
 #include "Pomegranate/ecs.h"
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
+#include "hotkey_manager.h"
 
 #include"utils.h"
 #include <cstdlib>
@@ -46,6 +47,12 @@ public:
     void simulate_node(Node* node);
     void render() override;
     void update() override;
+    static void focus();
+    static void create_entity();
+    static void create_group();
+    static void create_system();
+    static void delete_node();
+    static void duplicate();
 };
 
 #include "entity_hierarchy_window.inl"

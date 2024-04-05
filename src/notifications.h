@@ -16,13 +16,14 @@ struct Notification
 {
 public:
     static uint32_t NotificationCount;
+    Vec3 color;
     uint32_t id;
     Texture* icon;
     std::string title;
     std::string content;
     float lifetime;
     float time_alive;
-    Notification(Texture* icon, const std::string& title, const std::string& content, float lifetime=5);
+    Notification(Texture* icon, Vec3 color, const std::string& title, const std::string& content, float lifetime=5);
 };
 
 class Notify

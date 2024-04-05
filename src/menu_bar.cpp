@@ -1,13 +1,11 @@
 #include "menu_bar.h"
-bool save_key_down = false;
-bool undo_key_down = false;
-bool redo_key_down = false;
 ImGui::FileBrowser openingDialog;
 ImGui::FileBrowser savingDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
 void undo()
 {
     if(Editor::current_scene_index == 0)
     {
+        Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),EditorTheme::color_palette_yellow,"Error","No more undo steps"});
         return;
     }
     // Undo
@@ -18,11 +16,13 @@ void undo()
     {
         Editor::current_scene_index = 0;
     }
+    Notify::notify({ResourceManager::load<Texture>("engine/check.png"),EditorTheme::color_palette_green,"Undo","Undone"});
 }
 void redo()
 {
     if(Editor::current_scene_index == Editor::history.size()-1)
     {
+        Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),EditorTheme::color_palette_yellow,"Error","No more redo steps"});
         return;
     }
     // Redo
@@ -32,6 +32,7 @@ void redo()
     if (Editor::current_scene_index > Editor::history.size() - 1) {
         Editor::current_scene_index = (int)Editor::history.size() - 1;
     }
+    Notify::notify({ResourceManager::load<Texture>("engine/check.png"),EditorTheme::color_palette_green,"Redo","Redone"});
 }
 void open()
 {
@@ -52,6 +53,7 @@ void save()
     else
     {
         save_scene(Editor::current_scene_path.c_str(), Editor::current_scene);
+        Notify::notify({ResourceManager::load<Texture>("engine/check.png"), EditorTheme::color_palette_green,"Saved","Saved scene to: "+Editor::current_scene_path});
     }
 }
 void run_scene()
@@ -59,9 +61,18 @@ void run_scene()
     if (!Editor::current_scene_path.empty())
     {
         //Save
+        Notify::notify({ResourceManager::load<Texture>("engine/check.png"),EditorTheme::color_palette_green,"Saving","Saving scene"});
         save_scene(Editor::current_scene_path.c_str(), Editor::current_scene);
+        //Compile
+        Notify::notify({ResourceManager::load<Texture>("engine/check.png"), EditorTheme::color_palette_green,"Compiling","Compiling project"});
         compile_project("Game", Editor::current_scene_path);
+        //Run
+        Notify::notify({ResourceManager::load<Texture>("engine/check.png"), EditorTheme::color_palette_green,"Running","Starting"});
         run_project();
+    }
+    else
+    {
+        Notify::notify({ResourceManager::load<Texture>("engine/error.png"),EditorTheme::color_palette_red,"Error","Please save the scene or open an existing scene"});
     }
 }
 void new_scene()
@@ -71,26 +82,14 @@ void new_scene()
     Editor::current_scene = new EntityGroup("root");
     Editor::current_scene_path = "";
 }
-int i;
 void draw_menu_bar()
 {
-    if(InputManager::get_key(SDL_SCANCODE_LCTRL) && (InputManager::get_key(SDL_SCANCODE_S) && !save_key_down))
-    {
-        save();
-    }
-    save_key_down = InputManager::get_key(SDL_SCANCODE_S);
-
-    if(InputManager::get_key(SDL_SCANCODE_LCTRL) && (InputManager::get_key(SDL_SCANCODE_Z) && !undo_key_down))
-    {
-        undo();
-    }
-    undo_key_down = InputManager::get_key(SDL_SCANCODE_Z);
-
-    if(InputManager::get_key(SDL_SCANCODE_LCTRL) && (InputManager::get_key(SDL_SCANCODE_Y) && !redo_key_down))
-    {
-        redo();
-    }
-    redo_key_down = InputManager::get_key(SDL_SCANCODE_Y);
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_F5},"Run Scene",run_scene});
+    //HotkeyManager::add_hotkey({{SDL_SCANCODE_F6},"Run",run}})
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_S},"Save",save});
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_O},"Open",open});
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_Z},"Undo",undo});
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_Y},"Redo",redo});
 
     ImGui::BeginMainMenuBar();
     if (ImGui::BeginMenu("Scene"))
@@ -136,8 +135,7 @@ void draw_menu_bar()
     if (ImGui::MenuItem("Play Start","F6"))
     {
         // Run scene from start
-        Notify::notify({nullptr,"Not implemented","This feature is not implemented" + std::to_string(i)});
-        i++;
+        Notify::notify({ResourceManager::load<Texture>("engine/error.png"),EditorTheme::color_palette_red,"Not implemented","This feature is not implemented"});
     }
     ImGui::EndMainMenuBar();
     savingDialog.Display();
@@ -145,9 +143,9 @@ void draw_menu_bar()
     {
         std::string path = "res/"+savingDialog.GetSelected().filename().string();
         save_scene(path.c_str(), Editor::current_scene);
-        print_info("Saved scene to: %s", path.c_str());
         Editor::current_scene_path = path;
         savingDialog.ClearSelected();
+        Notify::notify({ResourceManager::load<Texture>("engine/check.png"),EditorTheme::color_palette_green,"Saved","Saved scene to: " + Editor::current_scene_path});
     }
     openingDialog.Display();
     if (openingDialog.HasSelected())

@@ -4,7 +4,7 @@ std::vector<Node*> Window_EntityHierarchy::nodes = std::vector<Node*>();
 Node* Node::selected = nullptr;
 Node* Window_EntityHierarchy::selected_node = nullptr;
 Node* Window_EntityHierarchy::dragging_node = nullptr;
-
+bool create_system_popup = false;
 void draw_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
     const int32_t diameter = (radius * 2);
@@ -75,6 +75,25 @@ void draw_filled_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY
 
 void Window_EntityHierarchy::render()
 {
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_H}, "Focus hierarchy", focus});
+    if(ImGui::IsWindowFocused())
+    {
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_E}, "Create Entity", create_entity});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_G}, "Create Group", create_group});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_S}, "Create System", create_system});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_BACKSPACE}, "Delete Node", delete_node});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_DELETE}, "Delete Node", delete_node});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_D, SDL_SCANCODE_LSHIFT}, "Duplicate", duplicate});
+    }
+    else
+    {
+        HotkeyManager::disable_hotkey("Create Entity");
+        HotkeyManager::disable_hotkey("Create Group");
+        HotkeyManager::disable_hotkey("Create System");
+        HotkeyManager::disable_hotkey("Delete Node");
+        HotkeyManager::disable_hotkey("Duplicate");
+    }
+
     //Clean the graph
     for (int i = 0; i < nodes.size(); ++i) {
         if(nodes[i]->entity == nullptr && nodes[i]->group == nullptr && nodes[i]->system == nullptr)
@@ -162,7 +181,6 @@ void Window_EntityHierarchy::render()
 
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     ImGui::SetCursorPos(ImVec2(0, 0));
-
     //open Context menu
     if(ImGui::BeginPopupContextWindow())
     {
@@ -172,144 +190,151 @@ void Window_EntityHierarchy::render()
             {
                 if(ImGui::MenuItem("Create Entity"))
                 {
-                    //Add the entity as child to selected node
-                    if(selected_node != nullptr)
-                    {
-                        if(selected_node->group != nullptr)
-                        {
-                            //Create a new entity
-                            auto *entity = new Entity();
-                            entity->name = "New Entity";
-                            selected_node->group->add_entity(entity);
-                            Editor::action();
-                        }
-                    }
+                    create_entity();
                 }
                 if(ImGui::MenuItem("Create Group")) {
-                    //Add the group as child to selected node
-                    if(selected_node != nullptr)
-                    {
-                        if(selected_node->group != nullptr)
-                        {
-                            //Create a new group
-                            auto *group = new EntityGroup("New Group");
-                            selected_node->group->add_group(group);
-                            Editor::action();
-                        }
-                    }
+                    create_group();
                 }
-                if(ImGui::BeginMenu("Create System")) {
-                    for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
-                        if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
-                            //Add the system as child to selected node
-                            if(selected_node != nullptr)
-                            {
-                                if(selected_node->group != nullptr)
-                                {
-                                    selected_node->group->add_system(i->second());
-                                    Editor::action();
-                                }
-                            }
-                        }
-                    }
-                    ImGui::EndMenu();
+                if(ImGui::MenuItem("Create System")) {
+                    create_system();
                 }
             }
             if(selected_node->entity != nullptr)
             {
                 if(ImGui::MenuItem("Duplicate"))
                 {
-                    //Duplicate the entity
-                    if(selected_node != nullptr)
-                    {
-                        if(selected_node->entity != nullptr)
-                        {
-                            std::vector<EntityGroup*> groups = std::vector<EntityGroup*>();
-                            for (auto & node : nodes) {
-                                if(node->group != nullptr)
-                                {
-                                    if(std::find(node->group->get_entities()->begin(),
-                                                 node->group->get_entities()->end(),selected_node->entity.get()) != node->group->get_entities()->end())
-                                    {
-                                        groups.push_back(node->group.get());
-                                    }
-                                }
-                            }
-                            Entity* entity = selected_node->entity->duplicate();
-                            //Link it
-                            for (auto & group : groups) {
-                                group->add_entity(entity);
-                            }
-                            Editor::action();
-                        }
-                    }
-
+                    duplicate();
                 }
             }
             if(ImGui::MenuItem("Delete Node"))
             {
-                if(selected_node != nullptr)
-                {
-                    //Delete the entity/group/system from the scene remove the node and all linked nodes
-                    if(selected_node->entity != nullptr)
-                    {
-                        selected_node->entity->force_destroy();
-                        Editor::action();
-                    }
-                    if(selected_node->group != nullptr)
-                    {
-                        //Get the nodes parent EntityGroup* and remove the group from it
-                        EntityGroup* parent = selected_node->group->get_parent();
-                        if(parent != nullptr)
-                        {
-                            EntityGroup* group = selected_node->group.get();
-                            parent->remove_group(group);
-                            Editor::action();
-                        }
-                    }
-                    if(selected_node->system != nullptr)
-                    {
-                        //Get the node parent EntityGroup* and remove the system from it
-                        //Sort through nodes to find the parent group
-                        EntityGroup* parent;
-                        for (auto & node : nodes) {
-                            if(node->group != nullptr)
-                            {
-                                if(node->group->has_system(selected_node->system.get()))
-                                {
-                                    parent = node->group.get();
-                                    //Remove the system from the parent group
-                                    parent->remove_system(selected_node->system.get());
-                                    break;
-                                }
-                            }
-                        }
-                        Editor::action();
-                    }
-
-                    for (auto & node : nodes) {
-                        for (int j = 0; j < node->linked.size(); ++j) {
-                            if(node->linked[j] == selected_node)
-                            {
-                                node->linked.erase(node->linked.begin() + j);
-                                j--;
-                            }
-                        }
-                    }
-                    for (int i = 0; i < nodes.size(); ++i) {
-                        if(nodes[i] == selected_node)
-                        {
-                            nodes.erase(nodes.begin() + i);
-                            i--;
-                        }
-                    }
-                    selected_node = nullptr;
-                    Node::selected = nullptr;
-                }
+                delete_node();
             }
         }
         ImGui::EndPopup();
     }
+    if(create_system_popup)
+        ImGui::OpenPopup("create system");
+    if(ImGui::BeginPopup("create system"))
+    {
+        for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
+            if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
+                //Add the system as child to selected node
+                if(selected_node != nullptr)
+                {
+                    if(selected_node->group != nullptr)
+                    {
+                        selected_node->group->add_system(i->second());
+                        Editor::action();
+                        create_system_popup = false;
+                    }
+                    else
+                    {
+                        //Find parents
+                        std::vector<EntityGroup*> parents;
+                        for (auto & node : nodes) {
+                            if (node->group != nullptr) {
+                                if (std::find(node->group->get_entities()->begin(), node->group->get_entities()->end(),
+                                              selected_node->entity.get()) != node->group->get_entities()->end()) {
+                                    parents.push_back(node->group.get());
+                                }
+                            }
+                        }
+                        //Create a new system and link it to the parents
+                        System* system = i->second();
+                        for (auto & parent : parents) {
+                            parent->add_system(system);
+                        }
+                        Editor::action();
+                        create_system_popup = false;
+                    }
+                }
+            }
+        }
+        if(!ImGui::IsItemHovered())
+        {
+            if(ImGui::IsMouseClicked(0))
+            {
+                create_system_popup = false;
+            }
+        }
+        ImGui::EndPopup();
+    }
+}
+
+void Window_EntityHierarchy::create_entity()
+{
+    //Add the entity as child to selected node
+    if(selected_node != nullptr)
+    {
+        if(selected_node->group != nullptr)
+        {
+            //Create a new entity
+            auto *entity = new Entity();
+            entity->name = "New Entity";
+            selected_node->group->add_entity(entity);
+            Editor::action();
+        }
+        else
+        {
+            //Find parents
+            std::vector<EntityGroup*> parents;
+            for (auto & node : nodes) {
+                if (node->group != nullptr) {
+                    if (std::find(node->group->get_entities()->begin(), node->group->get_entities()->end(),
+                                  selected_node->entity.get()) != node->group->get_entities()->end()) {
+                        parents.push_back(node->group.get());
+                    }
+                }
+            }
+            //Create a new entity and link it to the parents
+            auto *entity = new Entity();
+            entity->name = "New Entity";
+            for (auto & parent : parents) {
+                parent->add_entity(entity);
+            }
+            Editor::action();
+        }
+    }
+}
+
+void Window_EntityHierarchy::create_group()
+{
+    //Add the group as child to selected node
+    if(selected_node != nullptr)
+    {
+        if(selected_node->group != nullptr)
+        {
+            //Create a new group
+            auto *group = new EntityGroup("New Group");
+            selected_node->group->add_group(group);
+            Editor::action();
+        }
+        else
+        {
+            //Find parents
+            std::vector<EntityGroup*> parents;
+            for (auto & node : nodes) {
+                if (node->group != nullptr) {
+                    if (std::find(node->group->get_entities()->begin(), node->group->get_entities()->end(),
+                                  selected_node->entity.get()) != node->group->get_entities()->end()) {
+                        parents.push_back(node->group.get());
+                    }
+                }
+            }
+            //Create a new group and link it to the parents
+            auto *group = new EntityGroup("New Group");
+            for (auto & parent : parents) {
+                parent->add_group(group);
+            }
+            Editor::action();
+        }
+    }
+}
+
+void Window_EntityHierarchy::create_system()
+{
+    create_system_popup = true;
 }
 
 void Window_EntityHierarchy::update()
@@ -376,6 +401,12 @@ void Window_EntityHierarchy::draw_node(Node* n)
     //Calculate the size of the node based on camera zoom
     float node_size = s;
 
+    if(selected_node == n)
+    {
+        //Draw selection circle imgui drawlist
+        ImGui::GetCurrentWindow()->DrawList->AddCircle(ImVec2(node_pos.x, node_pos.y + node_size*3), node_size + 4, IM_COL32(255, 255, 255, 255), 32, 2);
+    }
+
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
     ImageRotated((void*)n->texture->get_sdl_texture(),ImVec2(node_pos.x, node_pos.y+node_size*3) ,ImVec2(node_size*2, node_size*2), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f),n->velocity.x*0.05f);
     //Make it DragDrop for the inspector
@@ -395,12 +426,6 @@ void Window_EntityHierarchy::draw_node(Node* n)
                          ImVec2(1, 1), ImVec4(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, 1.0f));
             ImGui::EndDragDropSource();
         }
-    }
-
-    if(selected_node == n)
-    {
-        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 255, 255, 255, 255);
-        draw_circle(Window::current->get_sdl_renderer(), (int)node_pos.x, (int)node_pos.y, (int)node_size+4);
     }
     //Draw name
     std::string name;
@@ -493,6 +518,8 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     {
         group_node = new Node(group);
         print_info("Group node created");
+        selected_node = group_node;
+        Node::selected = group_node;
         nodes.push_back(group_node);
     }
     //Link the parent
@@ -532,6 +559,8 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
         {
             node = new Node(entitie);
             nodes.push_back(node);
+            selected_node = node;
+            Node::selected = node;
             print_info("Entity node created");
         }
         //Check if it's already linked
@@ -564,6 +593,8 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
         {
             node = new Node(system);
             nodes.push_back(node);
+            selected_node = node;
+            Node::selected = node;
             print_info("System node created");
         }
         //Check if it's already linked
@@ -581,6 +612,126 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     }
     for (auto & g : groups) {
         build_graph(g, group_node);
+    }
+}
+
+void Window_EntityHierarchy::delete_node()
+{
+    if(selected_node != nullptr)
+    {
+        //Delete the entity/group/system from the scene remove the node and all linked nodes
+        if(selected_node->entity != nullptr)
+        {
+            selected_node->entity->force_destroy();
+            Editor::action();
+        }
+        if(selected_node->group != nullptr)
+        {
+            //Get the nodes parent EntityGroup* and remove the group from it
+            EntityGroup* parent = selected_node->group->get_parent();
+            if(parent != nullptr)
+            {
+                EntityGroup* group = selected_node->group.get();
+                parent->remove_group(group);
+                Editor::action();
+            }
+        }
+        if(selected_node->system != nullptr)
+        {
+            //Get the node parent EntityGroup* and remove the system from it
+            //Sort through nodes to find the parent group
+            EntityGroup* parent;
+            for (auto & node : nodes) {
+                if(node->group != nullptr)
+                {
+                    if(node->group->has_system(selected_node->system.get()))
+                    {
+                        parent = node->group.get();
+                        //Remove the system from the parent group
+                        parent->remove_system(selected_node->system.get());
+                        break;
+                    }
+                }
+            }
+            Editor::action();
+        }
+
+        //Find parent and set new selected node
+        Node* new_selected = nullptr;
+        for (auto & node : nodes) {
+            for (auto & linked : node->linked) {
+                if(linked == selected_node)
+                {
+                    new_selected = node;
+                    break;
+                }
+            }
+        }
+
+        for (auto & node : nodes) {
+            for (int j = 0; j < node->linked.size(); ++j) {
+                if(node->linked[j] == selected_node)
+                {
+                    node->linked.erase(node->linked.begin() + j);
+                    j--;
+                }
+            }
+        }
+
+        for (int i = 0; i < nodes.size(); ++i) {
+            if(nodes[i] == selected_node)
+            {
+                nodes.erase(nodes.begin() + i);
+                i--;
+            }
+        }
+        selected_node = new_selected;
+        Node::selected = new_selected;
+    }
+}
+
+void Window_EntityHierarchy::duplicate()
+{
+    //Duplicate the entity
+    if(selected_node != nullptr)
+    {
+        if(selected_node->entity != nullptr)
+        {
+            std::vector<EntityGroup*> groups = std::vector<EntityGroup*>();
+            for (auto & node : nodes) {
+                if(node->group != nullptr)
+                {
+                    if(std::find(node->group->get_entities()->begin(),
+                                 node->group->get_entities()->end(),selected_node->entity.get()) != node->group->get_entities()->end())
+                    {
+                        groups.push_back(node->group.get());
+                    }
+                }
+            }
+            Entity* entity = selected_node->entity->duplicate();
+            //Link it
+            for (auto & group : groups) {
+                group->add_entity(entity);
+            }
+            Editor::action();
+        }
+    }
+}
+
+void Window_EntityHierarchy::focus()
+{
+    ImGui::SetWindowFocus("Graph Hierarchy");
+    //Find the root and make it the selected node
+    for (auto & node : nodes) {
+        if(node->group != nullptr)
+        {
+            if(node->group->get_parent() == nullptr)
+            {
+                selected_node = node;
+                Node::selected = node;
+                break;
+            }
+        }
     }
 }
 
