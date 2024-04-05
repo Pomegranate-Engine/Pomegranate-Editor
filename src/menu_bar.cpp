@@ -1,6 +1,17 @@
 #include "menu_bar.h"
 ImGui::FileBrowser openingDialog;
 ImGui::FileBrowser savingDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
+std::function<void()> save_current_callback;
+bool save_scene_modal = false;
+void undo();
+void redo();
+void save();
+void open();
+void run_scene();
+void new_scene();
+void force_new_scene();
+void force_open();
+
 void undo()
 {
     if(Editor::current_scene_index == 0)
@@ -34,12 +45,25 @@ void redo()
     }
     Notify::notify({ResourceManager::load<Texture>("engine/check.png"),EditorTheme::color_palette_green,"Redo","Redone"});
 }
-void open()
+void force_open()
 {
     openingDialog.SetTypeFilters({".pscn"});
     openingDialog.SetTitle("Open Scene");
     openingDialog.SetPwd("res/");
     openingDialog.Open();
+}
+void open()
+{
+    if(!Editor::current_scene_path.empty())
+    {
+        save();
+        force_open();
+    }
+    else
+    {
+        save_scene_modal = true;
+        save_current_callback = force_open;
+    }
 }
 void save()
 {
@@ -75,12 +99,24 @@ void run_scene()
         Notify::notify({ResourceManager::load<Texture>("engine/error.png"),EditorTheme::color_palette_red,"Error","Please save the scene or open an existing scene"});
     }
 }
-void new_scene()
+void force_new_scene()
 {
-    // New scene
     unload_all();
     Editor::current_scene = new EntityGroup("root");
     Editor::current_scene_path = "";
+}
+void new_scene()
+{
+    // New scene
+    if(!Editor::current_scene_path.empty())
+    {
+        save();
+    }
+    else
+    {
+        save_scene_modal = true;
+        save_current_callback = force_new_scene;
+    }
 }
 void draw_menu_bar()
 {
@@ -90,6 +126,7 @@ void draw_menu_bar()
     HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_O},"Open",open});
     HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_Z},"Undo",undo});
     HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_Y},"Redo",redo});
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL,SDL_SCANCODE_N},"New",new_scene});
 
     ImGui::BeginMainMenuBar();
     if (ImGui::BeginMenu("Scene"))
@@ -99,7 +136,7 @@ void draw_menu_bar()
             // New scene
             new_scene();
         }
-        if (ImGui::MenuItem("Open"))
+        if (ImGui::MenuItem("Open","Ctrl+O"))
         {
             // Open scene
             open();
@@ -155,5 +192,29 @@ void draw_menu_bar()
         Editor::current_scene = open_scene(path.c_str());
         Editor::current_scene_path = path;
         openingDialog.ClearSelected();
+    }
+
+    if(save_scene_modal)
+    {
+        ImGui::OpenPopup("Save Current");
+    }
+
+    if(ImGui::BeginPopupModal("Save Current",&save_scene_modal))
+    {
+        ImGui::Text("Save current scene?");
+        if(ImGui::Button("Yes"))
+        {
+            save();
+            ImGui::CloseCurrentPopup();
+            save_scene_modal = false;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("No"))
+        {
+            save_current_callback();
+            ImGui::CloseCurrentPopup();
+            save_scene_modal = false;
+        }
+        ImGui::EndPopup();
     }
 }
