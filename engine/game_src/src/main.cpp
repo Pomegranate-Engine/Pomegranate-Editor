@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigWindowsMoveFromTitleBarOnly = true;
-
+    //Set default font to engine/zed_font.ttf
     // Setup Platform/Renderer backends
     ImGui_ImplSDL3_InitForSDLRenderer(main_window.get_sdl_window(),main_window.get_sdl_renderer());
     ImGui_ImplSDLRenderer3_Init(main_window.get_sdl_renderer());

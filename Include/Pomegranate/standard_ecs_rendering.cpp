@@ -66,8 +66,9 @@ namespace Pomegranate
         current = entity;
     }
 
-    void Camera::init(Pomegranate::Entity *) {
+    void Camera::init(Pomegranate::Entity *e) {
         push_data<float>("zoom", &this->zoom);
+        make_current(e);
     }
 
     DebugCircle::DebugCircle()
@@ -81,22 +82,23 @@ namespace Pomegranate
 
     void Render::draw(Entity* entity)
     {
-        if(entity->has_component<Sprite>())
-        {
-            Render::sprite(entity);
+        if(Camera::current != nullptr) {
+            if (entity->has_component<Sprite>()) {
+                Render::sprite(entity);
+            }
+            /*if(entity->has_component<DebugCircle>())
+            {
+                Render::debug_circle(entity);
+            }
+            if(entity->has_component<AnimatedSprite>())
+            {
+                Render::animated_sprite(entity);
+            }
+            if(entity->has_component<Tilemap>())
+            {
+                Render::tilemap(entity);
+            }*/
         }
-        /*if(entity->has_component<DebugCircle>())
-        {
-            Render::debug_circle(entity);
-        }
-        if(entity->has_component<AnimatedSprite>())
-        {
-            Render::animated_sprite(entity);
-        }
-        if(entity->has_component<Tilemap>())
-        {
-            Render::tilemap(entity);
-        }*/
     }
 
     void Render::sprite(Entity*e) {
@@ -109,7 +111,12 @@ namespace Pomegranate
         SDL_QueryTexture(s->texture->get_sdl_texture(), nullptr, nullptr, &w, &h);
         int screen_w = 0;
         int screen_h = 0;
+        float render_scale_x = 1.0;
+        float render_scale_y = 1.0;
+        SDL_GetRenderScale(Window::current->get_sdl_renderer(), &render_scale_x, &render_scale_y);
         SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
+        screen_w /= render_scale_x;
+        screen_h /= render_scale_y;
         r.w = (float)w*t->scale.x*Camera::current->get_component<Camera>()->zoom;
         r.h = (float)h*t->scale.y*Camera::current->get_component<Camera>()->zoom;
         r.x = ((t->pos.x+s->offset.x-Camera::current->get_component<Transform>()->pos.x)*Camera::current->get_component<Camera>()->zoom)+screen_w/2-r.w*s->pivot.x;

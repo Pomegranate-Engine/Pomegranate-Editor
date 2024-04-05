@@ -66,8 +66,9 @@ namespace Pomegranate
         current = entity;
     }
 
-    void Camera::init(Pomegranate::Entity *) {
+    void Camera::init(Pomegranate::Entity *e) {
         push_data<float>("zoom", &this->zoom);
+        make_current(e);
     }
 
     DebugCircle::DebugCircle()
@@ -81,8 +82,7 @@ namespace Pomegranate
 
     void Render::draw(Entity* entity)
     {
-        if(Camera::current!= nullptr)
-        {
+        if(Camera::current!= nullptr) {
             if (entity->has_component<Sprite>()) {
                 Render::sprite(entity);
             }
@@ -106,11 +106,14 @@ namespace Pomegranate
         auto s = e->get_component<Sprite>();
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), s->color.r,s->color.g,s->color.b, s->color.a);
         SDL_FRect r;
-        int w = 0;
-        int h = 0;
-        SDL_QueryTexture(s->texture->get_sdl_texture(), nullptr, nullptr, &w, &h);
         int screen_w = 0;
         int screen_h = 0;
+        float render_scale_x = 1.0;
+        float render_scale_y = 1.0;
+        SDL_GetRenderScale(Window::current->get_sdl_renderer(), &render_scale_x, &render_scale_y);
+        SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
+        screen_w /= render_scale_x;
+        screen_h /= render_scale_y;
         SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
         r.w = (float)w*t->scale.x*Camera::current->get_component<Camera>()->zoom;
         r.h = (float)h*t->scale.y*Camera::current->get_component<Camera>()->zoom;

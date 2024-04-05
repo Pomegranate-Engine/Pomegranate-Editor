@@ -9,6 +9,7 @@ void InspectorWindow::render()
 {
     if(Node::selected!= nullptr)
     {
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_I}, "Focus Inspector", focus});
         if (Node::selected->entity != nullptr)
         {
             Entity *entity = Node::selected->entity.get();
@@ -115,6 +116,11 @@ void InspectorWindow::render()
                 Editor::action();
             }
         }
+    }
+    else
+    {
+        //Disable hotkeys
+        HotkeyManager::disable_hotkey("Focus Inspector");
     }
 }
 
@@ -246,4 +252,9 @@ void InspectorWindow::property_field(const char *name, Entity **value)
         }
         ImGui::EndDragDropTarget();
     }
+}
+
+void InspectorWindow::focus()
+{
+    ImGui::SetWindowFocus("Inspector");
 }

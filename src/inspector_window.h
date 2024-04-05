@@ -21,6 +21,8 @@ public:
     InspectorWindow();
     void render() override;
     void update() override;
+
+    static void focus();
 };
 
 

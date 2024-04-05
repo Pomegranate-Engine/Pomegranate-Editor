@@ -7,6 +7,7 @@
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
 #include "hotkey_manager.h"
+#include "notifications.h"
 
 #include"utils.h"
 #include <cstdlib>
@@ -53,6 +54,11 @@ public:
     static void create_system();
     static void delete_node();
     static void duplicate();
+    static void move(Vec2 dir);
+    static void move_right();
+    static void move_left();
+    static void move_up();
+    static void move_down();
 };
 
 #include "entity_hierarchy_window.inl"

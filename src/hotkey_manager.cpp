@@ -76,6 +76,7 @@ void HotkeyManager::tick()
                 print_info("Hotkey pressed: " + hotkey.first);
 
                 for (auto &action: hotkey.second.actions) {
+                    print_info("Action: " + action.first);
                     action.second();
                 }
             }

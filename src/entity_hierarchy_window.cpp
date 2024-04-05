@@ -75,7 +75,7 @@ void draw_filled_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY
 
 void Window_EntityHierarchy::render()
 {
-    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_H}, "Focus hierarchy", focus});
+    HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_H}, "Focus Hierarchy", focus});
     if(ImGui::IsWindowFocused())
     {
         HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_E}, "Create Entity", create_entity});
@@ -84,6 +84,10 @@ void Window_EntityHierarchy::render()
         HotkeyManager::add_hotkey({{SDL_SCANCODE_BACKSPACE}, "Delete Node", delete_node});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_DELETE}, "Delete Node", delete_node});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_D, SDL_SCANCODE_LSHIFT}, "Duplicate", duplicate});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LEFT}, "Move Left", move_left});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_RIGHT}, "Move Right", move_right});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_UP}, "Move Up", move_up});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_DOWN}, "Move Down", move_down});
     }
     else
     {
@@ -92,6 +96,10 @@ void Window_EntityHierarchy::render()
         HotkeyManager::disable_hotkey("Create System");
         HotkeyManager::disable_hotkey("Delete Node");
         HotkeyManager::disable_hotkey("Duplicate");
+        HotkeyManager::disable_hotkey("Move Left");
+        HotkeyManager::disable_hotkey("Move Right");
+        HotkeyManager::disable_hotkey("Move Up");
+        HotkeyManager::disable_hotkey("Move Down");
     }
 
     //Clean the graph
@@ -344,7 +352,7 @@ void Window_EntityHierarchy::update()
 
 Window_EntityHierarchy::Window_EntityHierarchy()
 {
-    this->flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+    this->flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoNav;
     this->name = "Graph Hierarchy";
     this->open = true;
     this->position = Vec2i(0, 0);
@@ -733,6 +741,58 @@ void Window_EntityHierarchy::focus()
             }
         }
     }
+}
+
+void Window_EntityHierarchy::move(Vec2 dir)
+{
+    if (selected_node != nullptr)
+    {
+        // Calculate the distance from selected_node to each node in the specified direction
+        std::vector<Node*> nodes_in_direction;
+        for (Node* node : nodes) {
+            Vec2 diff = {node->pos.x - selected_node->pos.x, node->pos.y - selected_node->pos.y};
+            float dot_product = diff.x * dir.x + diff.y * dir.y;
+            if (dot_product > 0) { // Check if the node is in the specified direction
+                nodes_in_direction.push_back(node);
+            }
+        }
+
+        // Find the node with the minimum distance
+        Node* closest_node = nullptr;
+        float min_distance = std::numeric_limits<float>::max();
+        for (Node* node : nodes_in_direction) {
+            Vec2 diff = {node->pos.x - selected_node->pos.x, node->pos.y - selected_node->pos.y};
+            float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+            if (distance < min_distance) {
+                min_distance = distance;
+                closest_node = node;
+            }
+        }
+
+        // Move to the closest node (you need to implement this part)
+        if (closest_node != nullptr) {
+            // Implement moving to the closest node
+            selected_node = closest_node;
+            Node::selected = closest_node;
+        }
+    }
+}
+
+void Window_EntityHierarchy::move_right()
+{
+    move(Vec2(1,0));
+}
+void Window_EntityHierarchy::move_left()
+{
+    move(Vec2(-1,0));
+}
+void Window_EntityHierarchy::move_up()
+{
+    move(Vec2(0,-1));
+}
+void Window_EntityHierarchy::move_down()
+{
+    move(Vec2(0,1));
 }
 
 
