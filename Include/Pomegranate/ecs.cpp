@@ -7,8 +7,6 @@ namespace Pomegranate
     std::unordered_map<uint32_t ,Entity*> Entity::entities = std::unordered_map<uint32_t,Entity*>();
     std::unordered_map<std::string, std::function<Component*()>> Component::component_types = std::unordered_map<std::string, std::function<Component*()>>();
     std::unordered_map<std::string, std::function<System*()>> System::system_types = std::unordered_map<std::string, std::function<System*()>>();
-    std::unordered_map<std::string, int> LuaComponent::lua_component_types = std::unordered_map<std::string, int>();
-    LuaComponent* LuaComponent::current = nullptr;
     uint32_t Entity::entity_count = 0;
     uint32_t EntityGroup::group_count = 0;
     std::unordered_map<std::string, EntityGroup*> EntityGroup::groups = std::unordered_map<std::string, EntityGroup*>();
@@ -44,6 +42,11 @@ namespace Pomegranate
     Component* Entity::add_component(const char *name)
     {
         //Check if it starts with "class"
+        if(has_component(name))
+        {
+            print_error("Component " + std::string(name) + " already exists in entity " + std::to_string(this->id) + "!");
+            return nullptr;
+        }
         std::string n = std::string(name);
         auto component = Component::component_types[n]();
         component->init(this);
@@ -75,13 +78,15 @@ namespace Pomegranate
     }
 
 
-    void Entity::remove_component(Component* component) {
+    void Entity::remove_component(Component* component)
+    {
         for (auto c : components)
         {
             if (c.second == component)
             {
+                delete c.second;
                 components.erase(c.first);
-                delete component;
+                print_info("Component Removed");
                 return;
             }
         }

@@ -82,22 +82,26 @@ namespace Pomegranate
 
     void Render::draw(Entity* entity)
     {
-        if(Camera::current != nullptr) {
-            if (entity->has_component<Sprite>()) {
-                Render::sprite(entity);
-            }
-            /*if(entity->has_component<DebugCircle>())
+        if(Camera::current != nullptr)
+        {
+            if(entity->has_component<Transform>())
             {
-                Render::debug_circle(entity);
+                if (entity->has_component<Sprite>()) {
+                    Render::sprite(entity);
+                }
+                /*if(entity->has_component<DebugCircle>())
+                {
+                    Render::debug_circle(entity);
+                }
+                if(entity->has_component<AnimatedSprite>())
+                {
+                    Render::animated_sprite(entity);
+                }
+                if(entity->has_component<Tilemap>())
+                {
+                    Render::tilemap(entity);
+                }*/
             }
-            if(entity->has_component<AnimatedSprite>())
-            {
-                Render::animated_sprite(entity);
-            }
-            if(entity->has_component<Tilemap>())
-            {
-                Render::tilemap(entity);
-            }*/
         }
     }
 

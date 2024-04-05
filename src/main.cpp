@@ -25,6 +25,8 @@ using namespace Pomegranate;
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
 
+#define EDITOR_MODE
+
 class PlayerComponent : public Component
 {
 public:
@@ -106,6 +108,45 @@ public:
     }
 };
 
+class EditorDebug : public System
+{
+public:
+    void draw(Pomegranate::Entity *e) override
+    {
+#ifdef EDITOR_MODE
+        if(e->has_component<Sprite>() && e->has_component<Transform>())
+        {
+            //Draw bounding box
+            auto* sprite = e->get_component<Sprite>();
+            auto* transform = e->get_component<Transform>();
+            SDL_FRect rect = {transform->pos.x, transform->pos.y, (float)sprite->texture->get_size().x*transform->scale.x,(float)sprite->texture->get_size().y*transform->scale.y};
+            //Adjust for camera zoom position and stuff
+            rect.x -= Camera::current->get_component<Transform>()->pos.x;
+            rect.y -= Camera::current->get_component<Transform>()->pos.y;
+            rect.x *= Camera::current->get_component<Camera>()->zoom;
+            rect.y *= Camera::current->get_component<Camera>()->zoom;
+            rect.w *= Camera::current->get_component<Camera>()->zoom;
+            rect.h *= Camera::current->get_component<Camera>()->zoom;
+            rect.x -= rect.w/2;
+            rect.y -= rect.h/2;
+            //Offset to sdl_renderer center
+            int screen_w = 0;
+            int screen_h = 0;
+            float render_scale_x = 1.0;
+            float render_scale_y = 1.0;
+            SDL_GetRenderScale(Window::current->get_sdl_renderer(), &render_scale_x, &render_scale_y);
+            SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
+            screen_w /= render_scale_x;
+            screen_h /= render_scale_y;
+            rect.x += screen_w/2;
+            rect.y += screen_h/2;
+            SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 255, 0, 0, 255);
+            SDL_RenderRect(Window::current->get_sdl_renderer(), &rect);
+        }
+#endif
+    }
+};
+
 int main(int argc, char* argv[])
 {
     //region init
@@ -153,6 +194,7 @@ int main(int argc, char* argv[])
     register_system(RigidBody);
     register_system(KinematicBody);
     register_system(CameraController);
+    register_system(EditorDebug);
 
     Editor::current_scene = new EntityGroup("root");
 

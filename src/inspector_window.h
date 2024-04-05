@@ -3,10 +3,13 @@
 #include "entity_hierarchy_window.h"
 #include "Imgui/misc/cpp/imgui_stdlib.h"
 #include "Imgui/imgui_internal.h"
+#include <unordered_set>
 
 class InspectorWindow : public EditorWindow
 {
 public:
+    static int element_index;
+    Component* right_clicked_component = nullptr;
     static void property_field(const char* name, std::string* value);
     static void property_field(const char* name, float* value);
     static void property_field(const char* name, int* value);
@@ -17,6 +20,7 @@ public:
     static void property_field(const char* name, Texture** value);
     static void property_field(const char* name, TTFFont** value);
     static void property_field(const char* name, Entity** value);
+    static std::string get_element(std::string name);
 
     InspectorWindow();
     void render() override;

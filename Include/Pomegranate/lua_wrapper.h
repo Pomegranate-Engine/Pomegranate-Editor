@@ -35,8 +35,6 @@ namespace Pomegranate
     Color lua_get_color(lua_State* l, int idx);
 
     //Lua gets
-    int lua_get_component(lua_State* l);
-    int lua_has_component(lua_State* l);
     int lua_get_key(lua_State* l);
     int lua_get_axis(lua_State* l);
     int lua_get_mouse(lua_State* l);
@@ -53,8 +51,6 @@ namespace Pomegranate
     int lia_print_log(lua_State* l);
     int lia_print_ready(lua_State* l);
     int lia_print_assert(lua_State* l);
-    int lua_register_component(lua_State* l);
-    int lua_require_component(lua_State* l);
 
     //Wrapper
     void add_wrapper_functions(lua_State* l);

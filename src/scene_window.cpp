@@ -61,7 +61,7 @@ void Window_SceneView::render() {
         SDL_RenderClear(Window::current->get_sdl_renderer());
         //Create camera entity
         Entity* camera = new Entity();
-        camera->add_component<Camera,Transform>();
+        camera->add_components<Camera,Transform>();
         Camera::make_current(camera);
 
         //Lerp zoom to zoom target

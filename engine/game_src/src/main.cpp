@@ -94,6 +94,17 @@ public:
     }
 };
 
+class EditorDebug : public System
+{
+public:
+    void draw(Pomegranate::Entity *) override
+    {
+#ifdef EDITOR_MODE
+
+#endif
+    }
+};
+
 //Main window
 const char* game_name = "[/GAME_NAME]";
 const char* scene_path = "[/SCENE_PATH]";
@@ -140,6 +151,7 @@ int main(int argc, char* argv[])
     register_system(Render);
     register_system(RigidBody);
     register_system(KinematicBody);
+    register_system(EditorDebug);
 
     //[/COMPONENTS_SYSTEMS_REGISTER]
     register_component(PlayerComponent);

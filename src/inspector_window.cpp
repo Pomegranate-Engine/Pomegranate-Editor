@@ -1,5 +1,7 @@
 #include "inspector_window.h"
 
+int InspectorWindow::element_index = 0;
+
 InspectorWindow::InspectorWindow()
 {
     this->name = "Inspector";
@@ -15,7 +17,8 @@ void InspectorWindow::render()
             Entity *entity = Node::selected->entity.get();
             property_field("Name", &entity->name);
             std::unordered_multimap<const std::type_info*,Component*> components = entity->get_components();
-            Component* right_clicked_component = nullptr;
+            element_index = 0;
+            std::unordered_set<const std::type_info*> keys;
             for(auto i = components.begin(); i != components.end(); i++)
             {
                 Component* component = i->second;
@@ -23,18 +26,20 @@ void InspectorWindow::render()
                 {
                     std::string name = std::string(i->first->name());
 
-                    bool component_open = ImGui::CollapsingHeader(scuffy_demangle(name.c_str()).c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+                    bool component_open = ImGui::CollapsingHeader((scuffy_demangle(name.c_str())+ "##" + std::to_string(element_index)).c_str(), ImGuiTreeNodeFlags_DefaultOpen);
                     //Add a break
                     if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Right))
                     {
                         ImGui::OpenPopup("ComponentSettingsPopup");
                         right_clicked_component = component;
                     }
+                    keys.insert(i->first);
                     if(component_open) {
                         //Display the properties
                         for (auto j = component->component_data.begin(); j != component->component_data.end(); j++) {
                             std::string property_name = std::string(j->first);
                             if (j->second.second != nullptr) {
+                                element_index++;
                                 if (j->second.first->hash_code() == typeid(std::string).hash_code()) {
                                     auto *value = (std::string *) j->second.second;
                                     property_field(property_name.c_str(), value);
@@ -79,15 +84,18 @@ void InspectorWindow::render()
                     }
 
                 }
+                element_index++;
             }
-            if(ImGui::BeginPopup("ComponentSettingsPopup"))
+            if(right_clicked_component!= nullptr)
             {
-                if(ImGui::MenuItem("Remove Component"))
-                {
-                    //Remove the component
-                    entity->remove_component(right_clicked_component);
+                if (ImGui::BeginPopup("ComponentSettingsPopup")) {
+                    if (ImGui::MenuItem("Remove Component")) {
+                        //Remove the component
+                        print_info("Removing Component");
+                        entity->remove_component(right_clicked_component);
+                    }
+                    ImGui::EndPopup();
                 }
-                ImGui::EndPopup();
             }
             //Button to add components
             //It takes up the full width of the window
@@ -100,7 +108,10 @@ void InspectorWindow::render()
             {
                 for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
                     if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
-                        entity->add_component(i->first.c_str());
+                        if(entity->add_component(i->first.c_str()) == nullptr)
+                        {
+                            Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),EditorTheme::color_palette_red,"Component already exists!","Component " + scuffy_demangle(i->first.c_str()) + " already exists on this entity. Not added!"});
+                        }
                         Editor::action();
                     }
                 }
@@ -129,36 +140,41 @@ void InspectorWindow::update()
 
 }
 
+std::string InspectorWindow::get_element(std::string name)
+{
+    return name + "##"+ std::to_string(element_index);
+}
+
 void InspectorWindow::property_field(const char *name, std::string* value)
 {
-    ImGui::InputText(name, value);
+    ImGui::InputText(get_element(name).c_str(), value);
 }
 
 void InspectorWindow::property_field(const char *name, float* value)
 {
-    ImGui::InputFloat(name, value);
+    ImGui::InputFloat(get_element(name).c_str(), value);
 }
 
 void InspectorWindow::property_field(const char *name, int* value)
 {
-    ImGui::InputInt(name, value);
+    ImGui::InputInt(get_element(name).c_str(), value);
 }
 
 void InspectorWindow::property_field(const char *name, bool* value)
 {
-    ImGui::Checkbox(name, value);
+    ImGui::Checkbox(get_element(name).c_str(), value);
 }
 void InspectorWindow::property_field(const char *name, Vec2* value)
 {
     float v[2] = {value->x, value->y};
-    ImGui::InputFloat2(name, v);
+    ImGui::InputFloat2(get_element(name).c_str(), v);
     value->x = v[0];
     value->y = v[1];
 }
 void InspectorWindow::property_field(const char *name, Vec3* value)
 {
     float v[3] = {value->x, value->y, value->z};
-    ImGui::InputFloat3(name, v);
+    ImGui::InputFloat3(get_element(name).c_str(), v);
     value->x = v[0];
     value->y = v[1];
     value->z = v[2];
@@ -166,7 +182,7 @@ void InspectorWindow::property_field(const char *name, Vec3* value)
 void InspectorWindow::property_field(const char *name, Color* value)
 {
     float color[4] = {(float)value->r/255.0f, (float)value->g/255.0f, (float)value->b/255.0f, (float)value->a/255.0f};
-    ImGui::ColorEdit4(name, color);
+    ImGui::ColorEdit4(get_element(name).c_str(), color);
     value->r = (uint8_t)(color[0]*255);
     value->g = (uint8_t)(color[1]*255);
     value->b = (uint8_t)(color[2]*255);
