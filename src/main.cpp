@@ -1,7 +1,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <Pomegranate/pomegranate.h>
-#include<Pomegranate/lua_wrapper.h>
+#include"lua.h"
 #include<Pomegranate/standard_ecs_physics.h>
 #include<Pomegranate/standard_ecs.h>
 #include<Pomegranate/standard_ecs_rendering.h>
@@ -50,24 +50,27 @@ class PlayerController : public System
 {
     void tick(Pomegranate::Entity *e) override
     {
-        if(e->has_component<PlayerComponent>())
+        if(e->has_component<LuaComponent>())
         {
-            auto* player = e->get_component<PlayerComponent>();
+            auto* player = e->get_component<LuaComponent>()->get_component("PlayerComponent");
             auto* transform = e->get_component<Transform>();
+            Vec2 v = player->get<Vec2>("velocity");
             if (InputManager::get_key(SDL_SCANCODE_W)) {
-                player->velocity.y -= 1*player->speed;
+                v.y -= 1*player->get<double>("speed");
             }
             if (InputManager::get_key(SDL_SCANCODE_S)) {
-                player->velocity.y += 1*player->speed;
+                v.y += 1*player->get<double>("speed");
             }
             if (InputManager::get_key(SDL_SCANCODE_A)) {
-                player->velocity.x -= 1*player->speed;
+                v.x -= 1*player->get<double>("speed");
             }
             if (InputManager::get_key(SDL_SCANCODE_D)) {
-                player->velocity.x += 1*player->speed;
+                v.x += 1*player->get<double>("speed");
             }
-            player->velocity -= player->velocity * player->deceleration*delta_time;
-            transform->pos += player->velocity;
+            float deceleration = player->get<double>("deceleration");
+            v -= v * deceleration*delta_time;
+            transform->pos += v;
+            player->set("velocity",v);
         }
     }
 };
@@ -187,6 +190,7 @@ int main(int argc, char* argv[])
     register_component(RotationLink);
     register_component(PlayerComponent);
     register_component(CameraFollow);
+    register_component(LuaComponent);
 
     //Register systems
     register_system(PlayerController);

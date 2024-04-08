@@ -54,7 +54,6 @@ set(POMEGRANATE_SOURCES
         ${POMEGRANATE_DIR}/debug.cpp
         ${POMEGRANATE_DIR}/resource_manager.cpp
         ${POMEGRANATE_DIR}/pomegranate_type_names.h
-        ${POMEGRANATE_DIR}/lua_wrapper.cpp
         ${POMEGRANATE_DIR}/draw.cpp
 )
 
@@ -83,6 +82,8 @@ set(IMGUI_SOURCES
         src/notifications.h
         src/hotkey_manager.cpp
         src/hotkey_manager.h
+        src/lua.cpp
+        src/lua.h
 )
 
 # Add executable

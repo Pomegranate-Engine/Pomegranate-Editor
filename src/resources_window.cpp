@@ -66,5 +66,9 @@ void ResourcesWindow::load_resources()
         {
             ResourceManager::load<Audio>(file);
         }
+        else if(file.find(".lua") != std::string::npos)
+        {
+            ResourceManager::load<LuaComponentScript>(file);
+        }
     }
 }

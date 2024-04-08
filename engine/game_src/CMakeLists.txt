@@ -23,6 +23,7 @@ set(SOURCE_FILES src/main.cpp
         src/scene.h
         src/editor.cpp
         src/editor.h
+        src/lua.cpp
 )
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)
@@ -49,7 +50,6 @@ set(POMEGRANATE_SOURCES
         ${POMEGRANATE_DIR}/debug.cpp
         ${POMEGRANATE_DIR}/resource_manager.cpp
         ${POMEGRANATE_DIR}/pomegranate_type_names.h
-        ${POMEGRANATE_DIR}/lua_wrapper.cpp
         ${POMEGRANATE_DIR}/draw.cpp
 )
 

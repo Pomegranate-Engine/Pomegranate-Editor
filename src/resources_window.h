@@ -5,6 +5,7 @@
 #include "Pomegranate/ttf_font.h"
 #include "Pomegranate/texture.h"
 #include "Pomegranate/audio.h"
+#include "lua.h"
 
 //Include file/directory stuff
 #include <filesystem>

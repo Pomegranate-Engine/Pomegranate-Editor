@@ -114,7 +114,7 @@ void Window_EntityHierarchy::render()
     Vec2i tex_size;
 
     //Check if window is focused
-    if(ImRect(ImGui::GetWindowPos(),ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(),ImGui::GetWindowPos().y + ImGui::GetWindowHeight())).Contains(ImVec2(InputManager::get_mouse_position().x,InputManager::get_mouse_position().y))){
+    if(ImGui::IsWindowFocused()){
         //Check if mouse is hovering over a node
 
         bool hovering_node = false;
@@ -225,6 +225,10 @@ void Window_EntityHierarchy::render()
         ImGui::OpenPopup("create system");
     if(ImGui::BeginPopup("create system"))
     {
+        if(InputManager::get_key(SDL_SCANCODE_ESCAPE))
+        {
+            create_system_popup = false;
+        }
         for (auto i = System::system_types.begin(); i != System::system_types.end(); i++) {
             if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
                 //Add the system as child to selected node

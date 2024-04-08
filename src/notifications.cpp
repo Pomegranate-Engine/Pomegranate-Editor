@@ -28,9 +28,16 @@ void Notify::render(float dt)
         {
             alpha = 0;
         }
-        int w;
-        int h;
-        SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(),&w,&h);
+        float w;
+        float h;
+        SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(),&(int&)w,&(int&)h);
+
+        int window_w;
+        int window_h;
+        SDL_GetWindowSize(Window::current->get_sdl_window(),&window_w,&window_h);
+        //Get render scale
+        float scale_x = (float)w/(float)window_w;
+        float scale_y = (float)h/(float)window_h;
 
         ImGui::PushStyleColor(ImGuiCol_WindowBg,ImVec4(notifications[i].color.x/255.0f,notifications[i].color.y/255.0f,notifications[i].color.z/255.0f, alpha));
         if(ImGui::Begin((notifications[i].title + "##" + std::to_string(notifications[i].id)).c_str(), nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_AlwaysFront))
@@ -46,19 +53,19 @@ void Notify::render(float dt)
             ImGui::Text("%s", notifications[i].content.c_str());
             if(notifications[i].time_alive == 0) {
                 ImGui::SetWindowPos(
-                        ImVec2(w / 2 - ImGui::GetWindowSize().x - 8, h / 2 - ((notifications.size() - i) * 72) - 8),
+                        ImVec2(w / scale_x - ImGui::GetWindowSize().x - 8.0f, h / scale_y - ((notifications.size() - i) * 72.0f) - 8.0f),
                         ImGuiCond_Always);
                 Vec2 a = Vec2(0,ImGui::GetWindowPos().y);
-                Vec2 b = Vec2(0, h / 2 - ((notifications.size() - i) * 72) - 8);
+                Vec2 b = Vec2(0, h / scale_y - ((notifications.size() - i) * 72.0f) - 8.0f);
 
                 ImGui::SetWindowPos(
-                        ImVec2(lerp(w / 2 - 8,w / 2 - ImGui::GetWindowSize().x - 8,0.0),a.lerp(b,10*dt).y),
+                        ImVec2(lerp(w / scale_x - 8,w / scale_x - ImGui::GetWindowSize().x - 8,0.0),a.lerp(b,10.0f*dt).y),
                         ImGuiCond_Always);
             }
             else
             {
                 Vec2 a = Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y);
-                Vec2 b = Vec2(0, h / 2 - ((notifications.size() - i) * 72) - 8);
+                Vec2 b = Vec2(0, h / scale_y - ((notifications.size() - i) * 72) - 8.0f);
 
                 float t = notifications[i].time_alive;
                 if(notifications[i].time_alive < notifications[i].lifetime-1)
@@ -67,14 +74,14 @@ void Notify::render(float dt)
                         t = 1;
                     }
                     ImGui::SetWindowPos(
-                            ImVec2(lerp(a.x, w / 2 - ImGui::GetWindowSize().x - 8, t), a.lerp(b, 10 * dt).y),
+                            ImVec2(lerp(a.x, w / scale_x - ImGui::GetWindowSize().x - 8, t), a.lerp(b, 10 * dt).y),
                             ImGuiCond_Always);
                 }
                 else
                 {
                     t = (t-(notifications[i].lifetime-1));
                     ImGui::SetWindowPos(
-                            ImVec2(lerp(a.x,w / 2 - 8, t), a.lerp(b, 10 * dt).y),
+                            ImVec2(lerp(a.x,w / scale_x - 8, t), a.lerp(b, 10 * dt).y),
                             ImGuiCond_Always);
                 }
             }

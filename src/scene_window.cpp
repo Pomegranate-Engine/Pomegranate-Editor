@@ -186,7 +186,7 @@ void Window_SceneView::render() {
     }
 
     //Move camera
-    if(ImRect(ImGui::GetWindowPos(),ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(),ImGui::GetWindowPos().y + ImGui::GetWindowHeight())).Contains(ImVec2(InputManager::get_mouse_position().x,InputManager::get_mouse_position().y))) {
+    if(ImGui::IsWindowFocused()) {
         if (InputManager::get_mouse_button(1) && !dragging_entity &&
             !dragging_entity_horizontal && !dragging_entity_vertical) {
             this->position -= InputManager::mouse_delta / zoom;

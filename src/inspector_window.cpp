@@ -75,6 +75,36 @@ void InspectorWindow::render()
                                     auto **value = (Entity**)j->second.second;
                                     property_field(property_name.c_str(), value);
                                 }
+                                else if(j->second.first->hash_code() == typeid(std::vector<LuaComponentScript*>).hash_code())
+                                {
+                                    auto *value = (std::vector<LuaComponentScript*>*)j->second.second;
+                                    if(ImGui::CollapsingHeader(property_name.c_str()))
+                                    {
+                                        for(int i = 0; i < value->size(); i++)
+                                        {
+                                            //Add imgui tab
+                                            ImGui::Text("    ");
+                                            ImGui::SameLine();
+                                            LuaComponentScript** script = &value->at(i);
+                                            property_field((property_name + " [" + std::to_string(i) + "]").c_str(), script);
+                                            if(ImGui::IsItemDeactivatedAfterEdit())
+                                            {
+                                                Editor::action();
+                                            }
+                                            ImGui::SameLine();
+                                            if(ImGui::Button("X"))
+                                            {
+                                                value->erase(value->begin() + i);
+                                                Editor::action();
+                                            }
+                                        }
+                                        if(ImGui::Button("Add"))
+                                        {
+                                            value->push_back(nullptr);
+                                            Editor::action();
+                                        }
+                                    }
+                                }
                                 if(ImGui::IsItemDeactivatedAfterEdit())
                                 {
                                     Editor::action();
@@ -195,7 +225,7 @@ void InspectorWindow::property_field(const char *name, Texture **value)
     ImGui::Text("%s", name);
     //Create button to open file dialog and be drop target
     ImGui::SameLine();
-    if(ImGui::Button((*value)->path.c_str()))
+    if(ImGui::Button(*value==nullptr?"None":(*value)->path.c_str()))
     {
         //Open file dialog
         //Set the texture to the selected texture
@@ -219,7 +249,7 @@ void InspectorWindow::property_field(const char *name, TTFFont **value)
     ImGui::Text("%s", name);
     //Create button to open file dialog and be drop target
     ImGui::SameLine();
-    if(ImGui::Button((*value)->path.c_str()))
+    if(ImGui::Button(*value==nullptr?"None":(*value)->path.c_str()))
     {
         //Open file dialog
         //Set the texture to the selected texture
@@ -265,6 +295,101 @@ void InspectorWindow::property_field(const char *name, Entity **value)
             Entity* entity = *(Entity**)payload->Data;
             *value = entity;
             print_info("Entity Dropped");
+        }
+        ImGui::EndDragDropTarget();
+    }
+}
+
+void InspectorWindow::property_field(const char *name, LuaComponentScript **value)
+{
+    //This will be a drag and drop field
+    ImGui::Text("%s", name);
+    //Create button to open file dialog and be drop target
+    ImGui::SameLine();
+    bool open = ImGui::CollapsingHeader(*value==nullptr?"None":(*value)->name.c_str());
+    if(open)
+    {
+        //Display component properties
+        LuaComponentScript* lua = *value;
+        if(lua!=nullptr)
+        {
+            for (auto [key,value] : lua->component_data)
+            {
+                if(value.has_value())
+                {
+                    if(&value.type() == &typeid(double))
+                    {
+                        float v = (float)std::any_cast<double>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = (double)v;
+                    }
+                    else if(&value.type() == &typeid(int))
+                    {
+                        int v = std::any_cast<int>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(bool))
+                    {
+                        bool v = std::any_cast<bool>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(std::string))
+                    {
+                        std::string v = std::any_cast<std::string>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(Vec2))
+                    {
+                        Vec2 v = std::any_cast<Vec2>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(Vec3))
+                    {
+                        Vec3 v = std::any_cast<Vec3>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(Color))
+                    {
+                        Color v = std::any_cast<Color>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(Texture*))
+                    {
+                        Texture* v = std::any_cast<Texture*>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(TTFFont*))
+                    {
+                        TTFFont* v = std::any_cast<TTFFont*>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                    else if(&value.type() == &typeid(Entity*))
+                    {
+                        Entity* v = std::any_cast<Entity*>(value);
+                        property_field(key.c_str(), &v);
+                        lua->component_data[key] = v;
+                    }
+                }
+            }
+        }
+    }
+    //Drop target
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource"))
+        {
+            LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
+            lua->run_script();
+            *value = lua;
+            print_info("Texture Dropped");
         }
         ImGui::EndDragDropTarget();
     }

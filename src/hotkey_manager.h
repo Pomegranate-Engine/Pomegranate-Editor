@@ -2,6 +2,8 @@
 #define POMEGRANATE_ENGINE_HOTKEY_MANAGER_H
 #include "Pomegranate/pomegranate.h"
 #include <vector>
+#include<unordered_map>
+#include<functional>
 using namespace Pomegranate;
 class Hotkey
 {

@@ -22,52 +22,26 @@ namespace Pomegranate
         *(T*)this->component_data[name].second = value;
     }
 
-    template <typename T> inline T* Entity::get_component(const char* lua_type)
+    template <typename T> inline T* Entity::get_component()
     {
-        if(typeid(T) == typeid(LuaComponent))
+        if(this->has_component<T>())
         {
-            auto r = this->components.equal_range(&typeid(T));
-            for(auto i = r.first; i != r.second; i++)
-            {
-                if(((LuaComponent*)(i->second))->real_type == LuaComponent::lua_component_types[lua_type])
-                {
-                    return (T*)i->second;
-                }
-            }
+            T* component = (T*)this->components.equal_range(&typeid(T)).first->second;
+            return component;
+        }
+        else
+        {
             return nullptr;
         }
-        else
-        {
-            if(this->has_component<T>())
-            {
-                T* component = (T*)this->components.equal_range(&typeid(T)).first->second;
-                return component;
-            }
-            else
-            {
-                return nullptr;
-            }
-        }
     }
-    template <typename T> inline bool Entity::has_component(const char* lua_type)
+    template <typename T> inline bool Entity::has_single_component()
     {
-        if(typeid(T) == typeid(LuaComponent))
-        {
-            auto r = this->components.equal_range(&typeid(T));
-            for(auto i = r.first; i != r.second; i++)
-            {
-                if(((LuaComponent*)(i->second))->real_type == LuaComponent::lua_component_types[lua_type])
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-        else
-        {
-            const std::type_info* type = &typeid(T);
-            return this->components.find(type) != this->components.end();
-        }
+        const std::type_info* type = &typeid(T);
+        return this->components.find(type) != this->components.end();
+    }
+    template <typename... T> inline bool Entity::has_component()
+    {
+        return (has_single_component<T>() && ...);
     }
 
     template<typename T> inline T *Entity::require_component()
@@ -83,42 +57,22 @@ namespace Pomegranate
         }
     }
 
-    template<typename T> inline void Entity::add_single_component(const char* lua_type)
+    template<typename T> inline T* Entity::add_component()
     {
-        if(typeid(T) == typeid(LuaComponent))
+        if(this->has_single_component<T>())
         {
-            if(!has_component<T>())
-            {
-                auto* component = new LuaComponent();
-                component->real_type = LuaComponent::lua_component_types[lua_type];
-                component->load_script(lua_type);
-                component->init(this);
-                std::pair<const std::type_info *, Component *> pair(&typeid(T), component);
-                this->components.insert(pair);
-            }
-            else
-            {
-                print_warn("Entity already has component of type " + std::string(typeid(T).name()) + "! Component not added.");
-            }
+            print_warn("Entity already has component " + std::string(typeid(T).name()) + "!");
+            return nullptr;
         }
-        else
-        {
-            if(!has_component<T>())
-            {
-                T* component = new T();
-                component->init(this);
-                std::pair<const std::type_info *, Component *> pair(&typeid(T), component);
-                this->components.insert(pair);
-            }
-            else
-            {
-                print_warn("Entity already has component of type " + std::string(typeid(T).name()) + "! Component not added.");
-            }
-        }
+        T* component = new T();
+        component->init(this);
+        std::pair<const std::type_info *, Component *> pair(&typeid(T), component);
+        this->components.insert(pair);
+        return component;
     }
-    template<typename... T> inline void Entity::add_component(const char *lua_type)
+    template<typename... T> inline void Entity::add_components()
     {
-        (add_single_component<T>(lua_type), ...);
+        (add_component<T>(), ...);
     }
 
     template<typename T> inline void Component::register_component_with_name(std::string name)

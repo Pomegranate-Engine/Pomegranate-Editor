@@ -18,13 +18,6 @@
 #include "audio.h"
 #include "ttf_font.h"
 
-extern "C"
-{
-#include <Lua/lua.h>
-#include <Lua/lauxlib.h>
-#include <Lua/lualib.h>
-}
-
 namespace Pomegranate
 {
     class Entity;
@@ -48,21 +41,6 @@ namespace Pomegranate
 
     };
 #define register_component(T) Component::register_component_with_name<T>(typeid(T).name())
-
-    //For lua wrapper
-    class LuaComponent : public Component
-    {
-    public:
-        uint32_t real_type;
-        static std::unordered_map<std::string, int> lua_component_types;
-        static LuaComponent* current;
-        lua_State* state;
-        bool loaded = false;
-        LuaComponent();
-        ~LuaComponent() override;
-        void load_script(const char* path);
-        void init(Entity* entity) override;
-    };
 
 
     class System
@@ -101,17 +79,18 @@ namespace Pomegranate
         uint32_t id;
         std::string name;
         std::unordered_multimap<const std::type_info*,Component*> get_components();
-        template <typename T> void add_single_component(const char* lua_type = nullptr);
-        template <typename... T> void add_component(const char* lua_type = nullptr);
+        template <typename T> T* add_component();
+        template <typename... T> void add_components();
         Component* add_component(const char* name);
         void remove_component(Component*);
         void add_to_group(EntityGroup*);
         void remove_from_group(EntityGroup*);
         std::vector<EntityGroup*> get_parent_groups();
-        template <typename T> T* get_component(const char* lua_type = nullptr);
+        template <typename T> T* get_component();
         Component* get_component(const char*);
         template <typename T> T* require_component();
-        template <typename T> bool has_component(const char* lua_type = nullptr);
+        template <typename T> bool has_single_component();
+        template <typename... T> bool has_component();
         bool has_component(const char*);
         Entity* duplicate();
         Entity();

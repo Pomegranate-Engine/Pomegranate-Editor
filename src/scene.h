@@ -5,6 +5,7 @@
 #include<fstream>
 #include"json.hpp"
 #include"editor.h"
+#include "lua.h"
 
 using namespace Pomegranate;
 using json = nlohmann::json;

@@ -4,6 +4,7 @@
 #include "Imgui/misc/cpp/imgui_stdlib.h"
 #include "Imgui/imgui_internal.h"
 #include <unordered_set>
+#include "lua.h"
 
 class InspectorWindow : public EditorWindow
 {
@@ -20,6 +21,7 @@ public:
     static void property_field(const char* name, Texture** value);
     static void property_field(const char* name, TTFFont** value);
     static void property_field(const char* name, Entity** value);
+    static void property_field(const char* name, LuaComponentScript** value);
     static std::string get_element(std::string name);
 
     InspectorWindow();
