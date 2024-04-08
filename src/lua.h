@@ -27,7 +27,12 @@ public:
     void init(Entity *e) override;
     LuaComponentScript* get_component(std::string name);
 };
+
 int luaopen_pomegranate(lua_State* L);
+
+int component_index(lua_State* L);
+int component_newindex(lua_State* L);
+
 int vec2_new(lua_State* L);
 int vec2_add(lua_State* L);
 int vec2_sub(lua_State* L);
@@ -71,6 +76,19 @@ int color_tostring(lua_State* L);
 int color_gc(lua_State* L);
 int color_index(lua_State* L);
 int color_set_index(lua_State* L);
+
+int group_find(lua_State* L);
+int group_index(lua_State* L);
+int group_add(lua_State* L);
+
+int entity_new(lua_State* L);
+int entity_add_component(lua_State* L);
+int entity_get_component(lua_State* L);
+int entity_has_component(lua_State* L);
+int entity_remove_component(lua_State* L);
+int entity_index(lua_State* L);
+
+void lua_pushcomponent(lua_State* L, Component* component);
 
 std::unordered_map<std::string, std::any> lua_checkcomponent(lua_State* L);
 

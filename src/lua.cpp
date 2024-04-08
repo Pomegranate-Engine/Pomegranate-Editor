@@ -541,13 +541,258 @@ std::unordered_map<std::string, std::any> lua_checkcomponent(lua_State *L) {
     return data;
 }
 
-int component_from(lua_State *L) {
-    lua_checkcomponent(L);
+void lua_pushcomponent(lua_State* L, Component* component)
+{
+    //Push user data
+    print_info("Pushing component");
+    Component **c = (Component **)lua_newuserdata(L, sizeof(Component*));
+    *c = component;
+    luaL_getmetatable(L, "Component");
+    lua_setmetatable(L, -2);
+}
+
+int component_index(lua_State *L)
+{
+    print_info("Indexing!");
+    Component* component = *(Component**)luaL_checkudata(L, 1, "Component");
+    const char* key = luaL_checkstring(L, 2);
+    if(component->component_data.find(key) != component->component_data.end())
+    {
+        print_info("Found it!");
+        std::pair<const type_info *, void *> value = component->component_data[key];
+        if(value.first == &typeid(std::string))
+        {
+            lua_pushstring(L, (*((std::string*)value.second)).c_str());
+        }
+        else if(value.first == &typeid(float))
+        {
+            lua_pushnumber(L, *((float*)value.second));
+        }
+        else if(value.first == &typeid(Vec2))
+        {
+            Vec2* vec = (Vec2*)value.second;
+            lua_pushnumber(L, vec->x);
+            lua_pushnumber(L, vec->y);
+            Vec2 **v = (Vec2 **)lua_newuserdata(L, sizeof(Vec2));
+            *v = vec;
+            luaL_getmetatable(L, "Vec2");
+            lua_setmetatable(L, -2);
+        }
+        else if(value.first == &typeid(Vec3))
+        {
+            Vec3* vec = (Vec3*)value.second;
+            lua_pushnumber(L, vec->x);
+            lua_pushnumber(L, vec->y);
+            lua_pushnumber(L, vec->z);
+            Vec3 **v = (Vec3 **)lua_newuserdata(L, sizeof(Vec3));
+            *v = vec;
+            luaL_getmetatable(L, "Vec3");
+            lua_setmetatable(L, -2);
+        }
+        else if(value.first == &typeid(Color))
+        {
+            Color* color = (Color*)value.second;
+            lua_pushnumber(L, color->r);
+            lua_pushnumber(L, color->g);
+            lua_pushnumber(L, color->b);
+            lua_pushnumber(L, color->a);
+            Color **c = (Color **)lua_newuserdata(L, sizeof(Color));
+            *c = color;
+            luaL_getmetatable(L, "Color");
+            lua_setmetatable(L, -2);
+        }
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+int component_newindex(lua_State *L) {
+    Component* component = *(Component**)luaL_checkudata(L, 1, "Component");
+    const char* key = luaL_checkstring(L, 2);
+    if(component->component_data[key].first == &typeid(std::string))
+    {
+        *(std::string*)component->component_data[key].second = luaL_checkstring(L, 3);
+    }
+    else if(component->component_data[key].first == &typeid(float))
+    {
+        *(float*)component->component_data[key].second = luaL_checknumber(L, 3);
+    }
+    else if(component->component_data[key].first == &typeid(Vec2))
+    {
+        Vec2* vec = (Vec2*)component->component_data[key].second;
+        //Check user data
+        if(luaL_testudata(L, 3, "Vec2"))
+        {
+            Vec2* new_vec = (Vec2*)luaL_checkudata(L, 3, "Vec2");
+            *vec = *new_vec;
+        }
+        else
+        {
+            luaL_error(L, "Invalid value for Vec2");
+        }
+    }
     return 0;
 }
 
 const struct luaL_Reg component_functions[] = {
-        {"from", component_from},
+        {"__index", component_index},
+        {"__newindex", component_newindex},
+        {nullptr, nullptr}
+};
+
+//Group
+int group_new(lua_State* L)
+{
+    const char* name = luaL_checkstring(L, 1);
+    EntityGroup* group = new EntityGroup(name);
+    EntityGroup** g = (EntityGroup**)lua_newuserdata(L, sizeof(EntityGroup*));
+    *g = group;
+    luaL_getmetatable(L, "Group");
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
+int group_find(lua_State *L)
+{
+    const char* name = luaL_checkstring(L, 1);
+    EntityGroup* group = EntityGroup::get_group(name);
+    if(group != nullptr)
+    {
+        print_info("Found group");
+        //Push full user data
+        EntityGroup **g = (EntityGroup **)lua_newuserdata(L, sizeof(EntityGroup*));
+        *g = group;
+        luaL_getmetatable(L, "Group");
+        lua_setmetatable(L, -2);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+int group_index(lua_State* L)
+{
+    EntityGroup** group = (EntityGroup**)lua_touserdata(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    if(strcmp(key, "name")==0)
+    {
+        lua_pushstring(L, (*group)->name.c_str());
+    }
+    else if(strcmp(key,"id")==0)
+    {
+        lua_pushnumber(L, (*group)->id);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+int group_add(lua_State* L)
+{
+    //Check type
+    EntityGroup** group = (EntityGroup**)luaL_checkudata(L, 1, "Group");
+    //Entity, Group or System
+    if(luaL_testudata(L, 2, "Entity"))
+    {
+        Entity** entity = (Entity**)luaL_checkudata(L, 2, "Entity");
+        (*group)->add_entity(*entity);
+    }
+    else if(luaL_testudata(L, 2, "Group"))
+    {
+        EntityGroup** child_group = (EntityGroup**)luaL_checkudata(L, 2, "Group");
+        (*group)->add_group(*child_group);
+    }
+    else if(luaL_testudata(L, 2, "System"))
+    {
+        System** system = (System**)luaL_checkudata(L, 2, "System");
+        (*group)->add_system(*system);
+    }
+    return 0;
+}
+
+
+
+const struct luaL_Reg group_functions[] = {
+        {"new", group_new},
+        {"find", group_find},
+        {"add", group_add},
+        {"__index", group_index},
+        {nullptr, nullptr}
+};
+
+//Entity
+
+int entity_new(lua_State* L)
+{
+    const char* name = luaL_checkstring(L, 1);
+    Entity* entity = new Entity();
+    entity->name = name;
+    Entity** e = (Entity**)lua_newuserdata(L, sizeof(Entity*));
+    *e = entity;
+    luaL_getmetatable(L, "Entity");
+    lua_setmetatable(L, -2);
+    return 1;
+}
+int entity_add_component(lua_State* L)
+{
+    Entity** entity = (Entity**)luaL_checkudata(L, 1, "Entity");
+    const char* name = luaL_checkstring(L, 2);
+    print_info("Adding component: " + std::string(name));
+    Component* component = (*entity)->add_component(name);
+    if(component != nullptr)
+    {
+        print_info("Component added: " + std::string(name));
+        lua_pushcomponent(L, component);
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+int entity_get_component(lua_State* L)
+{
+    return 0;
+}
+int entity_has_component(lua_State* L)
+{
+    return 0;
+}
+int entity_remove_component(lua_State* L)
+{
+    return 0;
+}
+int entity_index(lua_State* L)
+{
+    Entity** entity = (Entity**)lua_touserdata(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    if(strcmp(key, "name")==0)
+    {
+        lua_pushstring(L, (*entity)->name.c_str());
+    }
+    else if(strcmp(key, "id")==0)
+    {
+        lua_pushnumber(L, (*entity)->get_id());
+    }
+    else
+    {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+const struct luaL_Reg entity_functions[] = {
+        {"new", entity_new},
+        {"add_component", entity_add_component},
+        {"get_component", entity_get_component},
+        {"__index", entity_index},
         {nullptr, nullptr}
 };
 
@@ -572,6 +817,18 @@ int luaopen_pomegranate(lua_State *L)
     luaL_setfuncs(L, component_functions, 0);
     lua_pushvalue(L, -1);
     lua_setglobal(L, "Component");
+
+    luaL_newmetatable(L, "Group");
+    luaL_setfuncs(L, group_functions, 0);
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_setglobal(L, "Group");
+
+    luaL_newmetatable(L, "Entity");
+    luaL_setfuncs(L, entity_functions, 0);
+    lua_pushvalue(L, -1);
+    lua_setfield(L, -2, "__index");
+    lua_setglobal(L, "Entity");
 
     return 1;
 }
