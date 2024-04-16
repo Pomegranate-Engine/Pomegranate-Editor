@@ -2,6 +2,8 @@
 #define POMEGRANATE_LIBRARY_ENTITY_HIERARCHY_WINDOW_H
 #include "editor_window.h"
 #include "Imgui/imgui.h"
+//stdlib imgui
+#include "Imgui/misc/cpp/imgui_stdlib.h"
 #include "Pomegranate/pomegranate.h"
 #include "Pomegranate/ecs.h"
 #include "Pomegranate/resource_manager.h"
@@ -14,6 +16,7 @@
 #include "scene.h"
 #include<memory>
 #include "theme.h"
+
 using namespace Pomegranate;
 class Node
 {
@@ -37,6 +40,7 @@ public:
 class Window_EntityHierarchy : public EditorWindow
 {
 public:
+    std::string search;
     Vec2 cam_pos;
     float zoom;
     static std::vector<Node*> nodes;

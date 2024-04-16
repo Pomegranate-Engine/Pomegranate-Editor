@@ -199,6 +199,7 @@ int main(int argc, char* argv[])
     register_system(KinematicBody);
     register_system(CameraController);
     register_system(EditorDebug);
+    register_system(LuaSystem);
 
     Editor::current_scene = new EntityGroup("root");
 

@@ -1,3 +1,4 @@
+print_pass("Lua PlayerComponent loaded")
 return {
     name="PlayerComponent",
     velocity=Vec2.new(0,0),

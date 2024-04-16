@@ -6,6 +6,7 @@
 #include "Pomegranate/texture.h"
 #include "Pomegranate/audio.h"
 #include "lua.h"
+#include "theme.h"
 
 //Include file/directory stuff
 #include <filesystem>
@@ -13,10 +14,56 @@
 #include <string>
 #include<vector>
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
 using namespace Pomegranate;
+
+enum class ResourceType
+{
+    RESOURCE_TYPE_TEXTURE,
+    RESOURCE_TYPE_AUDIO,
+    RESOURCE_TYPE_LUA_SCRIPT,
+    RESOURCE_TYPE_FONT,
+    RESOURCE_TYPE_SHADER,
+    RESOURCE_TYPE_MESH,
+    RESOURCE_TYPE_MATERIAL,
+    RESOURCE_TYPE_SCENE,
+    RESOURCE_TYPE_PREFAB,
+    RESOURCE_TYPE_SPRITE_SHEET,
+    RESOURCE_TYPE_ANIMATION,
+    RESOURCE_TYPE_TILEMAP,
+    RESOURCE_TYPE_TILESET,
+    RESOURCE_TYPE_RESOURCE_FILE
+};
+
+struct ResourceTag
+{
+public:
+    std::string name;
+    Color color;
+    uint32_t priority;
+    std::vector<ResourceTag> child_tags;
+    ResourceTag(std::string name, Color color, int priority);
+    void add_child_tag(ResourceTag tag);
+};
+
+class ResourceFile
+{
+public:
+    std::string path;
+    ResourceType type;
+    Color get_color();
+    std::vector<ResourceTag> tags;
+    ResourceFile(std::string path, ResourceType type, std::vector<ResourceTag> tags);
+};
+
 class ResourcesWindow : public EditorWindow
 {
 public:
+    static std::vector<ResourceFile> resource_files;
+    static void add_resource_file(ResourceFile file);
     float time_since_last_reload;
     Resource* selected_resource;
     ResourcesWindow();

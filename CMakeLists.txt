@@ -13,6 +13,7 @@ link_directories("${CMAKE_SOURCE_DIR}/bin/")
 include_directories(
         "Include/"
         "Include/Imgui"
+        "Include/Lua"
 )
 
 # Source files

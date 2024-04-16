@@ -113,6 +113,8 @@ void Window_EntityHierarchy::render()
     build_graph(Editor::current_scene);
     Vec2i tex_size;
 
+    //Search bar
+
     //Check if window is focused
     if(ImGui::IsWindowFocused()){
         //Check if mouse is hovering over a node
@@ -272,6 +274,24 @@ void Window_EntityHierarchy::render()
         }
         ImGui::EndPopup();
     }
+
+    ImGui::SetCursorPos(ImVec2(0, 24));
+    ImGui::PushItemWidth(ImGui::GetWindowWidth());
+    ImGui::InputText("##Search", &search);
+    ImGui::PopItemWidth();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f)); // Gray out the hint text
+
+    if (search.empty())
+    {
+        ImGui::SetCursorPos(ImVec2(0, 24));
+        ImVec2 label_size = ImGui::CalcTextSize("Search nodes...");
+        ImGui::SameLine(0, 0);
+        ImGui::SetCursorPos(ImVec2(5, 24));
+        ImGui::TextUnformatted("Search nodes...");
+    }
+
+    ImGui::PopStyleColor();
 }
 
 void Window_EntityHierarchy::create_entity()
@@ -419,6 +439,34 @@ void Window_EntityHierarchy::draw_node(Node* n)
         ImGui::GetCurrentWindow()->DrawList->AddCircle(ImVec2(node_pos.x, node_pos.y + node_size*3), node_size + 4, IM_COL32(255, 255, 255, 255), 32, 2);
     }
 
+    //Draw name
+    std::string name;
+    if(n->group != nullptr)
+    {
+        name = n->group->name;
+    }
+    if(n->entity != nullptr)
+    {
+        name = n->entity->name;
+    }
+    if(n->system != nullptr)
+    {
+        name = scuffy_demangle(typeid(*n->system).name());
+    }
+
+    std::string name1 = name;
+    std::transform(name1.begin(), name1.end(), name1.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+
+    std::string search1 = search;
+    std::transform(search1.begin(), search1.end(), search1.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+
+    if((name1.find(search)) == std::string::npos)
+    {
+        color = color * 0.5f;
+    }
+
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
     ImageRotated((void*)n->texture->get_sdl_texture(),ImVec2(node_pos.x, node_pos.y+node_size*3) ,ImVec2(node_size*2, node_size*2), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f),n->velocity.x*0.05f);
     //Make it DragDrop for the inspector
@@ -439,20 +487,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
             ImGui::EndDragDropSource();
         }
     }
-    //Draw name
-    std::string name;
-    if(n->group != nullptr)
-    {
-        name = n->group->name;
-    }
-    if(n->entity != nullptr)
-    {
-        name = n->entity->name;
-    }
-    if(n->system != nullptr)
-    {
-        name = scuffy_demangle(typeid(*n->system).name());
-    }
+
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-(float)name.size()*4, node_pos.y+node_size));
     ImGui::Text(name.c_str());
