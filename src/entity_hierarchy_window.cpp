@@ -5,6 +5,8 @@ Node* Node::selected = nullptr;
 Node* Window_EntityHierarchy::selected_node = nullptr;
 Node* Window_EntityHierarchy::dragging_node = nullptr;
 bool create_system_popup = false;
+bool Window_EntityHierarchy::searching = false;
+
 void draw_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
     const int32_t diameter = (radius * 2);
@@ -279,7 +281,14 @@ void Window_EntityHierarchy::render()
     ImGui::PushItemWidth(ImGui::GetWindowWidth());
     ImGui::InputText("##Search", &search);
     ImGui::PopItemWidth();
-
+    if(ImGui::IsItemFocused())
+    {
+        searching = true;
+    }
+    else
+    {
+        searching = false;
+    }
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f)); // Gray out the hint text
 
     if (search.empty())
@@ -664,6 +673,8 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
 
 void Window_EntityHierarchy::delete_node()
 {
+    if(searching)
+        return;
     if(selected_node != nullptr)
     {
         //Delete the entity/group/system from the scene remove the node and all linked nodes

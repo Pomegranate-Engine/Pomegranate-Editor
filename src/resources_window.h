@@ -14,7 +14,11 @@
 #include <string>
 #include<vector>
 
+#include "Imgui/misc/cpp/imgui_stdlib.h"
+
 #include "json.hpp"
+
+#include "scene.h"
 
 using json = nlohmann::json;
 
@@ -52,16 +56,20 @@ public:
 class ResourceFile
 {
 public:
+    Texture* icon;
     std::string path;
     ResourceType type;
     Color get_color();
     std::vector<ResourceTag> tags;
-    ResourceFile(std::string path, ResourceType type, std::vector<ResourceTag> tags);
+    ResourceFile(std::string path, ResourceType type, std::vector<ResourceTag> tags, Texture* icon);
 };
 
 class ResourcesWindow : public EditorWindow
 {
 public:
+    static std::string search;
+    static bool searching;
+    static std::vector<std::string> search_tags;
     static std::vector<ResourceFile> resource_files;
     static void add_resource_file(ResourceFile file);
     float time_since_last_reload;

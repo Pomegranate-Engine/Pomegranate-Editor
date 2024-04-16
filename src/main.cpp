@@ -24,6 +24,7 @@ using namespace Pomegranate;
 
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
+const std::string VERSION = "0.0.1";
 
 #define EDITOR_MODE
 
@@ -218,7 +219,7 @@ int main(int argc, char* argv[])
     while (is_running)
     {
         Uint64 start = SDL_GetPerformanceCounter(); //For delta time
-
+        main_window.set_title(("Pomegranate Editor - " + VERSION + std::string(" - Editing: ") + std::string(Editor::current_scene_path)).c_str()); //Set window title
         //- - - - - # SDL2 Stuff # - - - - -
         InputManager::mouse_delta = Vec2();
         InputManager::mouse_scroll = Vec2();

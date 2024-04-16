@@ -41,6 +41,7 @@ class Window_EntityHierarchy : public EditorWindow
 {
 public:
     std::string search;
+    static bool searching;
     Vec2 cam_pos;
     float zoom;
     static std::vector<Node*> nodes;

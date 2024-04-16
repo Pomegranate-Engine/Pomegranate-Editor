@@ -1,6 +1,9 @@
 #include "resources_window.h"
 
 std::vector<ResourceFile> ResourcesWindow::resource_files;
+std::string ResourcesWindow::search;
+bool ResourcesWindow::searching;
+std::vector<std::string> ResourcesWindow::search_tags;
 
 ResourceTag::ResourceTag(std::string name, Color color, int priority)
 {
@@ -22,11 +25,12 @@ void ResourceTag::add_child_tag(ResourceTag tag)
     child_tags.push_back(tag);
 }
 
-ResourceFile::ResourceFile(std::string path, ResourceType type, std::vector<ResourceTag> tags)
+ResourceFile::ResourceFile(std::string path, ResourceType type, std::vector<ResourceTag> tags, Texture *icon)
 {
     this->path = path;
     this->type = type;
     this->tags = tags;
+    this->icon = icon;
 }
 
 Color ResourceFile::get_color()
@@ -64,11 +68,59 @@ ResourcesWindow::ResourcesWindow()
 
 void ResourcesWindow::render()
 {
-    if (ImGui::Button("Reload Resources"))
+    if (ImGui::Button("Reload"))
     {
         load_resources();
         time_since_last_reload = 0.0f;
     }
+    ImGui::SameLine();
+    ImGui::InputText("##Search", &search);
+    std::transform(search.begin(), search.end(), search.begin(), ::tolower);
+
+    for (int i = 0; i < search_tags.size(); i++)
+    {
+        ImGui::SetNextItemWidth(128);
+        if(ImGui::BeginCombo((std::string("##tags") + std::to_string(i)).c_str(), search_tags[i].c_str()))
+        {
+            std::vector<std::string> tags;
+            for(auto file : resource_files)
+            {
+                for(auto tag : file.tags)
+                {
+                    if(std::find(tags.begin(), tags.end(), tag.name) == tags.end())
+                    {
+                        tags.push_back(tag.name);
+                    }
+                }
+            }
+            for(auto tag : tags)
+            {
+                bool is_selected = (search_tags[i] == tag);
+                if(ImGui::Selectable(tag.c_str(), is_selected))
+                {
+                    search_tags[i] = tag;
+                }
+                if(is_selected)
+                {
+                    ImGui::SetItemDefaultFocus();
+                }
+            }
+            ImGui::EndCombo();
+
+        }
+        if(ImGui::IsItemClicked(1))
+        {
+            search_tags.erase(search_tags.begin() + i);
+            i--;
+        }
+        ImGui::SameLine();
+    }
+    ImGui::SetNextItemWidth(128);
+    if(ImGui::Button("      +      "))
+    {
+        search_tags.push_back("");
+    }
+
     time_since_last_reload += delta_time;
     if (time_since_last_reload > 5.0f)
     {
@@ -77,16 +129,92 @@ void ResourcesWindow::render()
     }
     //Break
     ImGui::Separator();
+
+    //Sort files based on tag name, and then file name/path
+    std::sort(resource_files.begin(), resource_files.end(), [](ResourceFile a, ResourceFile b)
+    {
+        if(a.tags[0].name == b.tags[0].name)
+        {
+            return a.path < b.path;
+        }
+        return a.tags[0].name < b.tags[0].name;
+    });
+
+
     //List all resources
+    int i = 0;
     for(auto file : resource_files)
     {
+
+        std::string lower_case_path = file.path;
+        std::transform(lower_case_path.begin(), lower_case_path.end(), lower_case_path.begin(), ::tolower);
+        //Check if the search string is in the file path
+        if (!search.empty() && lower_case_path.find(search) == std::string::npos)
+        {
+            continue;
+        }
+
+
+        //Filter tags
+        bool has_tag = false;
+        for(auto tag : file.tags)
+        {
+            if(search_tags.size() == 0)
+            {
+                has_tag = true;
+                break;
+            }
+            for(auto search_tag : search_tags)
+            {
+                if(tag.name == search_tag)
+                {
+                    has_tag = true;
+                    break;
+                }
+            }
+        }
+        if(!has_tag)
+        {
+            continue;
+        }
+
         ImGui::PushID(file.path.c_str());
         //Set the color of the text
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4((float)file.get_color().r/255.0f, (float)file.get_color().g/255.0f, (float)file.get_color().b/255.0f, 1.0f));
-        ImGui::Selectable(file.path.c_str());
+        ImGui::PushStyleColor(ImGuiCol_Text,
+                              ImVec4((float) file.get_color().r / 255.0f, (float) file.get_color().g / 255.0f,
+                                     (float) file.get_color().b / 255.0f, 1.0f));
+        ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
+        ImGui::SameLine();
+        ImGui::Selectable(file.path.c_str(),false, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(ImGui::GetWindowWidth()/2-64, 24));
+
         ImGui::PopStyleColor();
 
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0))
+        {
+            print_info("Double clicked");
+            if(file.type == ResourceType::RESOURCE_TYPE_SCENE)
+            {
+                print_info("Opening scene");
+                unload_all();
+                Editor::current_scene = open_scene(file.path.c_str());
+                Editor::current_scene_path = file.path;
+            }
+        }
+
+        //Begin drag and drop source
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+            Texture *texture = ResourceManager::load<Texture>(file.path);
+            ImGui::SetDragDropPayload("resource", &texture, sizeof(Texture **));
+            ImGui::Text(file.path.c_str());
+            ImGui::EndDragDropSource();
+        }
         ImGui::PopID();
+        i++;
+        if(i%2!=0)
+        {
+            ImGui::SameLine();
+            ImGui::SetCursorPos(ImVec2(ImGui::GetWindowWidth()/2, ImGui::GetCursorPosY()));
+        }
     }
 }
 
@@ -103,14 +231,14 @@ bool ends_with(const std::string& str, const std::string& ending) {
     }
 }
 
-void create_meta(std::string path, Vec3 color)
+void create_meta(std::string path, std::string type, Vec3 color)
 {
     //Create meta file
     std::ofstream meta_file(path + ".meta");
     json j = {
             {"type", "texture"},
             {"color", {1.0f, 1.0f, 1.0f, 1.0f}},
-            {"tags", {{{"name", "Texture"}, {"color",{color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f}},{"priority", 0}}}}
+            {"tags", {{{"name", type}, {"color",{color.x/255.0f, color.y/255.0f, color.z/255.0f, 1.0f}},{"priority", 0}}}}
     };
     meta_file << j.dump(4);
     meta_file.close();
@@ -159,14 +287,15 @@ void ResourcesWindow::load_resources()
         {
             if(file.second == "")
             {
-                create_meta(file.first, EditorTheme::color_palette_green);
+                create_meta(file.first,"texture", EditorTheme::color_palette_green);
                 file.second = file.first + ".meta";
             }
 
             add_resource_file({
                 file.first,
                 ResourceType::RESOURCE_TYPE_TEXTURE,
-                read_meta(file.second)
+                read_meta(file.second),
+                ResourceManager::load<Texture>("engine/image.png")
             });
             //Load resource into resource manager
             ResourceManager::load<Texture>(file.first);
@@ -175,14 +304,15 @@ void ResourcesWindow::load_resources()
         {
             if(file.second == "")
             {
-                create_meta(file.first, EditorTheme::color_palette_blue);
+                create_meta(file.first, "script", EditorTheme::color_palette_blue);
                 file.second = file.first + ".meta";
             }
 
             add_resource_file({
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_TEXTURE,
-                                      read_meta(file.second)
+                                      read_meta(file.second),
+                                      ResourceManager::load<Texture>("engine/system.png")
                               });
             //Load resource into resource manager
             ResourceManager::load<Texture>(file.first);
@@ -191,14 +321,15 @@ void ResourcesWindow::load_resources()
         {
             if(file.second == "")
             {
-                create_meta(file.first, EditorTheme::color_palette_yellow);
+                create_meta(file.first, "audio", EditorTheme::color_palette_yellow);
                 file.second = file.first + ".meta";
             }
 
             add_resource_file({
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_AUDIO,
-                                      read_meta(file.second)
+                                      read_meta(file.second),
+                                      ResourceManager::load<Texture>("engine/headphones.png")
                               });
             //Load resource into resource manager
             ResourceManager::load<Audio>(file.first);
@@ -207,14 +338,15 @@ void ResourcesWindow::load_resources()
         {
             if(file.second == "")
             {
-                create_meta(file.first, EditorTheme::color_palette_purple);
+                create_meta(file.first, "font", EditorTheme::color_palette_purple);
                 file.second = file.first + ".meta";
             }
 
             add_resource_file({
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_FONT,
-                                      read_meta(file.second)
+                                      read_meta(file.second),
+                                      ResourceManager::load<Texture>("engine/font.png")
                               });
             //Load resource into resource manager
             ResourceManager::load<TTFFont>(file.first);
@@ -223,15 +355,15 @@ void ResourcesWindow::load_resources()
         {
             if(file.second == "")
             {
-                create_meta(file.first, EditorTheme::color_palette_red);
+                create_meta(file.first, "scene", EditorTheme::color_palette_red);
                 file.second = file.first + ".meta";
             }
 
             add_resource_file({
                                       file.first,
-                                      ResourceType::RESOURCE_TYPE_RESOURCE_FILE,
-                                      read_meta(file.second)
-                              });
+                                      ResourceType::RESOURCE_TYPE_SCENE,
+                                      read_meta(file.second),
+                              ResourceManager::load<Texture>("engine/scene.png")});
             //Load resource into resource manager
         }
     }
