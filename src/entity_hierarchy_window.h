@@ -40,6 +40,8 @@ public:
 class Window_EntityHierarchy : public EditorWindow
 {
 public:
+    static Node* currently_linking;
+    static bool linking;
     std::string search;
     static bool searching;
     Vec2 cam_pos;
@@ -64,6 +66,7 @@ public:
     static void move_left();
     static void move_up();
     static void move_down();
+    static void begin_link();
 };
 
 #include "entity_hierarchy_window.inl"

@@ -6,6 +6,8 @@ Node* Window_EntityHierarchy::selected_node = nullptr;
 Node* Window_EntityHierarchy::dragging_node = nullptr;
 bool create_system_popup = false;
 bool Window_EntityHierarchy::searching = false;
+Node* Window_EntityHierarchy::currently_linking = nullptr;
+bool Window_EntityHierarchy::linking = false;
 
 void draw_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
@@ -90,6 +92,7 @@ void Window_EntityHierarchy::render()
         HotkeyManager::add_hotkey({{SDL_SCANCODE_RIGHT}, "Move Right", move_right});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_UP}, "Move Up", move_up});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_DOWN}, "Move Down", move_down});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_L}, "Begin Link", begin_link});
     }
     else
     {
@@ -102,6 +105,7 @@ void Window_EntityHierarchy::render()
         HotkeyManager::disable_hotkey("Move Right");
         HotkeyManager::disable_hotkey("Move Up");
         HotkeyManager::disable_hotkey("Move Down");
+        HotkeyManager::disable_hotkey("Begin Link");
     }
 
     //Clean the graph
@@ -142,6 +146,28 @@ void Window_EntityHierarchy::render()
                         selected_node = node;
                         Node::selected = node;
                         dragging_node = node;
+                        if(linking)
+                        {
+                            if(currently_linking != nullptr)
+                            {
+                                currently_linking->linked.push_back(node);
+                                node->linked.push_back(currently_linking);
+                                if(node->entity != nullptr)
+                                {
+                                    currently_linking->group->add_entity(node->entity.get());
+                                }
+                                else if(node->group != nullptr)
+                                {
+                                    currently_linking->group->add_group(node->group.get());
+                                }
+                                else if(node->system != nullptr)
+                                {
+                                    currently_linking->group->add_system(node->system.get());
+                                }
+                                linking = false;
+                            }
+                            currently_linking = node;
+                        }
                     }
                 }
             }
@@ -301,6 +327,26 @@ void Window_EntityHierarchy::render()
     }
 
     ImGui::PopStyleColor();
+}
+
+Vec2 find_closest_point_on_line(Vec2 start, Vec2 end, Vec2 point)
+{
+    // Vector from start to end
+    Vec2 lineVec(end.x - start.x, end.y - start.y);
+
+    // Vector from start to point
+    Vec2 pointVec(point.x - start.x, point.y - start.y);
+
+    // Calculate the scalar projection of pointVec onto lineVec
+    float t = (pointVec.x * lineVec.x + pointVec.y * lineVec.y) / (lineVec.x * lineVec.x + lineVec.y * lineVec.y);
+
+    // Clamp t to be within the range [0, 1] to ensure the closest point is on the line segment
+    t = std::max(0.0f, std::min(1.0f, t));
+
+    // Calculate the closest point on the line segment
+    Vec2 closestPoint(start.x + t * lineVec.x, start.y + t * lineVec.y);
+
+    return closestPoint;
 }
 
 void Window_EntityHierarchy::create_entity()
@@ -475,6 +521,24 @@ void Window_EntityHierarchy::draw_node(Node* n)
     {
         color = color * 0.5f;
     }
+    if(linking && currently_linking != n)
+    {
+        float d = Vec2(ImGui::GetMousePos().x,ImGui::GetMousePos().y).distance_to(Vec2(node_pos.x,node_pos.y+node_size*3))/64.0f;
+        if(d>0.5f)
+        {
+            d = 0.5f;
+        }
+        d = 0.5f - d;
+        color = color * ((d)+0.5f);
+    }
+    else
+    {
+        //Draw line to mouse from node
+        if(linking)
+        {
+            ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + node_size*3), ImVec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y), IM_COL32(255, 255, 255, 255), 2);
+        }
+    }
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
     ImageRotated((void*)n->texture->get_sdl_texture(),ImVec2(node_pos.x, node_pos.y+node_size*3) ,ImVec2(node_size*2, node_size*2), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f),n->velocity.x*0.05f);
@@ -509,6 +573,34 @@ void Window_EntityHierarchy::draw_node(Node* n)
         linked_pos.y /= zoom;
         linked_pos.x += (float)size.x / 2;
         linked_pos.y += (float)size.y / 2;
+
+
+        Vec2 mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+
+
+        Vec2 point = find_closest_point_on_line(node_pos+Vec2(0,24),linked_pos+Vec2(0,24),mouse);
+        if(ImGui::IsMouseClicked(1))
+        {
+            if((node_pos+Vec2(0,24)).distance_to(mouse) > 16 && (linked_pos+Vec2(0,24)).distance_to(mouse) > 16)
+            {
+                if (point.distance_to(Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) < 4)
+                {
+                    Notify::notify({ResourceManager::load<Texture>("engine/error.png"), EditorTheme::color_palette_red,
+                                    "Not implemented", "This feature is not implemented"});
+                    //Remove the link
+                    for (auto j = n->linked.begin(); j != n->linked.end(); j++) {
+                        if (*j == i) {
+                            n->linked.erase(j);
+                            n->group->remove_entity((*j)->entity.get());
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        //Draw point on line
+        ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImVec2(point.x, point.y), 4, IM_COL32(255, 255, 255, 255));
         ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + 24), ImVec2(linked_pos.x, linked_pos.y + 24), IM_COL32(127, 127, 127, 80), 2);
     }
 }
@@ -843,6 +935,15 @@ void Window_EntityHierarchy::move_up()
 void Window_EntityHierarchy::move_down()
 {
     move(Vec2(0,1));
+}
+
+void Window_EntityHierarchy::begin_link()
+{
+    if (selected_node != nullptr && selected_node->group != nullptr)
+    {
+        linking = true;
+        currently_linking = selected_node;
+    }
 }
 
 

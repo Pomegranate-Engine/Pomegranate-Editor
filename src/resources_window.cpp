@@ -64,6 +64,7 @@ ResourcesWindow::ResourcesWindow()
 {
     name = "Resources Manager";
     selected_resource = nullptr;
+    load_resources();
 }
 
 void ResourcesWindow::render()
