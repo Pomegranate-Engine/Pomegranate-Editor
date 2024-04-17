@@ -126,7 +126,7 @@ void Window_EntityHierarchy::render()
         //Check if mouse is hovering over a node
 
         bool hovering_node = false;
-        if(!InputManager::get_key(SDL_SCANCODE_LSHIFT))
+        if(!InputManager::get_mouse_button(SDL_BUTTON_MIDDLE))
         {
             for (auto &node: nodes) {
                 //Calculate screen pos
@@ -173,7 +173,7 @@ void Window_EntityHierarchy::render()
             }
         }
         if (!hovering_node && dragging_node == nullptr) {
-            if (InputManager::get_mouse_button(1) && !InputManager::get_key(SDL_SCANCODE_LSHIFT)) {
+            if (InputManager::get_mouse_button(1)) {
                 cam_pos.x -= InputManager::get_mouse_delta().x * zoom;
                 cam_pos.y -= InputManager::get_mouse_delta().y * zoom;
             }
@@ -545,9 +545,13 @@ void Window_EntityHierarchy::draw_node(Node* n)
     //Make it DragDrop for the inspector
     ImGui::SetItemAllowOverlap();
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
-    if(InputManager::get_key(SDL_SCANCODE_LSHIFT))
+    if(InputManager::get_mouse_button(SDL_BUTTON_MIDDLE))
     {
-        ImGui::InvisibleButton((std::string("##") + (n->entity != nullptr ? n->entity->name : n->group != nullptr ? n->group->name : n->system != nullptr ? scuffy_demangle(typeid(*n->system).name()) : "")).c_str(), ImVec2(node_size * 2, node_size * 2));
+        print_info("Middle clicked!");
+        std::string name = std::string("##") + (n->entity != nullptr ? n->entity->name : n->group != nullptr ? n->group->name : n->system != nullptr ? scuffy_demangle(typeid(*n->system).name()) : "");
+        ImGui::InvisibleButton(name.c_str(), ImVec2(node_size * 2, node_size * 2));
+        ImGui::ButtonBehavior(ImRect(ImGui::GetItemRectMin(),ImGui::GetItemRectMax()), ImGui::GetItemID(), NULL, NULL, ImGuiButtonFlags_MouseButtonMiddle);
+
         if (ImGui::BeginDragDropSource()) {
             if(n->entity != nullptr)
                 ImGui::SetDragDropPayload("Entity", &n->entity, sizeof(Entity *));
@@ -575,25 +579,30 @@ void Window_EntityHierarchy::draw_node(Node* n)
         linked_pos.y += (float)size.y / 2;
 
 
-        Vec2 mouse = InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+        Vec2 mouse = Vec2(ImGui::GetMousePos().x,ImGui::GetMousePos().y);
 
 
         Vec2 point = find_closest_point_on_line(node_pos+Vec2(0,24),linked_pos+Vec2(0,24),mouse);
         if(ImGui::IsMouseClicked(1))
         {
-            if((node_pos+Vec2(0,24)).distance_to(mouse) > 16 && (linked_pos+Vec2(0,24)).distance_to(mouse) > 16)
+            if((node_pos+Vec2(0,24)).distance_to(mouse) > 32 && (linked_pos+Vec2(0,24)).distance_to(mouse) > 32)
             {
                 if (point.distance_to(Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) < 4)
                 {
-                    Notify::notify({ResourceManager::load<Texture>("engine/error.png"), EditorTheme::color_palette_red,
-                                    "Not implemented", "This feature is not implemented"});
-                    //Remove the link
-                    for (auto j = n->linked.begin(); j != n->linked.end(); j++) {
-                        if (*j == i) {
-                            n->linked.erase(j);
-                            n->group->remove_entity((*j)->entity.get());
-                            break;
-                        }
+                    //Remove the link and remove enitty from group
+                    i->linked.erase(std::remove(i->linked.begin(), i->linked.end(), n), i->linked.end());
+                    n->linked.erase(std::remove(n->linked.begin(), n->linked.end(), i), n->linked.end());
+                    if(i->entity != nullptr)
+                    {
+                        n->group->remove_entity(i->entity.get());
+                    }
+                    else if(i->group != nullptr)
+                    {
+                        n->group->remove_group(i->group.get());
+                    }
+                    else if(i->system != nullptr)
+                    {
+                        n->group->remove_system(i->system.get());
                     }
                 }
             }
