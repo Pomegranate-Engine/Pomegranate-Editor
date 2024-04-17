@@ -8,6 +8,9 @@ bool create_system_popup = false;
 bool Window_EntityHierarchy::searching = false;
 Node* Window_EntityHierarchy::currently_linking = nullptr;
 bool Window_EntityHierarchy::linking = false;
+bool Window_EntityHierarchy::trying_to_link = false;
+Node* Window_EntityHierarchy::to_try_link = nullptr;
+float Window_EntityHierarchy::linking_distance = 0.0f;
 
 void draw_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY, int32_t radius)
 {
@@ -138,10 +141,15 @@ void Window_EntityHierarchy::render()
                 node_pos.x += (float) size.x / 2;
                 node_pos.y += (float) size.y / 2;
                 //Check if mouse is hovering over node
-                Vec2 mouse =
-                        InputManager::get_mouse_position() - Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
+                Vec2 mouse = InputManager::get_mouse_position() - Vec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y);
                 if (mouse.distance_to(node_pos) < node->size) {
                     hovering_node = true;
+                    if(InputManager::get_mouse_button(SDL_BUTTON_RIGHT))
+                    {
+                        to_try_link = node;
+                        trying_to_link = true;
+                        linking_distance = 0;
+                    }
                     if (InputManager::get_mouse_button(SDL_BUTTON_LEFT) && dragging_node == nullptr) {
                         selected_node = node;
                         Node::selected = node;
@@ -150,19 +158,29 @@ void Window_EntityHierarchy::render()
                         {
                             if(currently_linking != nullptr)
                             {
-                                currently_linking->linked.push_back(node);
-                                node->linked.push_back(currently_linking);
-                                if(node->entity != nullptr)
+                                Node* link_to = node;
+                                if(currently_linking->entity != nullptr)
                                 {
-                                    currently_linking->group->add_entity(node->entity.get());
+                                    link_to = currently_linking;
+                                    currently_linking = node;
                                 }
-                                else if(node->group != nullptr)
+                                else if(currently_linking->system != nullptr)
                                 {
-                                    currently_linking->group->add_group(node->group.get());
+                                    link_to = currently_linking;
+                                    currently_linking = node;
                                 }
-                                else if(node->system != nullptr)
+                                currently_linking->linked.push_back(link_to);
+                                if(link_to->entity != nullptr)
                                 {
-                                    currently_linking->group->add_system(node->system.get());
+                                    currently_linking->group->add_entity(link_to->entity.get());
+                                }
+                                else if(link_to->group != nullptr)
+                                {
+                                    currently_linking->group->add_group(link_to->group.get());
+                                }
+                                else if(link_to->system != nullptr)
+                                {
+                                    currently_linking->group->add_system(link_to->system.get());
                                 }
                                 linking = false;
                             }
@@ -172,6 +190,31 @@ void Window_EntityHierarchy::render()
                 }
             }
         }
+
+        if(InputManager::get_mouse_button(SDL_BUTTON_RIGHT) && to_try_link != nullptr)
+        {
+            Vec2 node_pos = to_try_link->pos;
+            node_pos.x -= cam_pos.x;
+            node_pos.y -= cam_pos.y;
+            node_pos.x /= zoom;
+            node_pos.y /= zoom;
+            node_pos.x += (float) size.x / 2;
+            node_pos.y += (float) size.y / 2;
+            linking_distance = node_pos.distance_to(Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y));
+            if(linking_distance > 32)
+            {
+                linking = true;
+                trying_to_link = false;
+                currently_linking = to_try_link;
+                to_try_link = nullptr;
+            }
+        }
+        else
+        {
+            to_try_link = nullptr;
+            trying_to_link = false;
+        }
+
         if (!hovering_node && dragging_node == nullptr) {
             if (InputManager::get_mouse_button(1)) {
                 cam_pos.x -= InputManager::get_mouse_delta().x * zoom;
@@ -220,7 +263,7 @@ void Window_EntityHierarchy::render()
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     ImGui::SetCursorPos(ImVec2(0, 0));
     //open Context menu
-    if(ImGui::BeginPopupContextWindow())
+    if(linking_distance < 32 && ImGui::BeginPopupContextWindow())
     {
         if(selected_node != nullptr)
         {
@@ -609,7 +652,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
         }
 
         //Draw point on line
-        ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImVec2(point.x, point.y), 4, IM_COL32(255, 255, 255, 255));
+        //ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImVec2(point.x, point.y), 4, IM_COL32(255, 255, 255, 255));
         ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + 24), ImVec2(linked_pos.x, linked_pos.y + 24), IM_COL32(127, 127, 127, 80), 2);
     }
 }
@@ -948,7 +991,7 @@ void Window_EntityHierarchy::move_down()
 
 void Window_EntityHierarchy::begin_link()
 {
-    if (selected_node != nullptr && selected_node->group != nullptr)
+    if(selected_node != nullptr)
     {
         linking = true;
         currently_linking = selected_node;

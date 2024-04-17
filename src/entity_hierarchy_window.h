@@ -42,6 +42,9 @@ class Window_EntityHierarchy : public EditorWindow
 public:
     static Node* currently_linking;
     static bool linking;
+    static bool trying_to_link;
+    static Node* to_try_link;
+    static float linking_distance;
     std::string search;
     static bool searching;
     Vec2 cam_pos;
