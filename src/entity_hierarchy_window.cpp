@@ -5,6 +5,7 @@ Node* Node::selected = nullptr;
 Node* Window_EntityHierarchy::selected_node = nullptr;
 Node* Window_EntityHierarchy::dragging_node = nullptr;
 bool create_system_popup = false;
+bool context_popup = false;
 bool Window_EntityHierarchy::searching = false;
 Node* Window_EntityHierarchy::currently_linking = nullptr;
 bool Window_EntityHierarchy::linking = false;
@@ -191,6 +192,11 @@ void Window_EntityHierarchy::render()
             }
         }
 
+        if(InputManager::get_mouse_button(SDL_BUTTON_LEFT))
+        {
+            linking = false;
+        }
+
         if(InputManager::get_mouse_button(SDL_BUTTON_RIGHT) && to_try_link != nullptr)
         {
             Vec2 node_pos = to_try_link->pos;
@@ -262,10 +268,29 @@ void Window_EntityHierarchy::render()
 
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     ImGui::SetCursorPos(ImVec2(0, 0));
-    //open Context menu
-    if(linking_distance < 32 && ImGui::BeginPopupContextWindow())
+
+
+    if(!trying_to_link)
     {
-        if(selected_node != nullptr)
+        if(InputManager::get_mouse_button(SDL_BUTTON_RIGHT))
+        {
+            context_popup = true;
+        }
+    }
+
+    //open Context menu
+    if(context_popup)
+    {
+        ImGui::OpenPopup("context_menu");
+    }
+    else
+    {
+        ImGui::CloseCurrentPopup();
+    }
+
+    if(ImGui::BeginPopup("context_menu"))
+    {
+        if(linking_distance < 32 && selected_node != nullptr)
         {
             if(selected_node->group != nullptr)
             {
@@ -294,6 +319,7 @@ void Window_EntityHierarchy::render()
         }
         ImGui::EndPopup();
     }
+
     if(create_system_popup)
         ImGui::OpenPopup("create system");
     if(ImGui::BeginPopup("create system"))
