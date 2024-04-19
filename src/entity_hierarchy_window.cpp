@@ -5,7 +5,6 @@ Node* Node::selected = nullptr;
 Node* Window_EntityHierarchy::selected_node = nullptr;
 Node* Window_EntityHierarchy::dragging_node = nullptr;
 bool create_system_popup = false;
-bool context_popup = false;
 bool Window_EntityHierarchy::searching = false;
 Node* Window_EntityHierarchy::currently_linking = nullptr;
 bool Window_EntityHierarchy::linking = false;
@@ -269,26 +268,7 @@ void Window_EntityHierarchy::render()
     SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     ImGui::SetCursorPos(ImVec2(0, 0));
 
-
-    if(!trying_to_link)
-    {
-        if(InputManager::get_mouse_button(SDL_BUTTON_RIGHT))
-        {
-            context_popup = true;
-        }
-    }
-
-    //open Context menu
-    if(context_popup)
-    {
-        ImGui::OpenPopup("context_menu");
-    }
-    else
-    {
-        ImGui::CloseCurrentPopup();
-    }
-
-    if(ImGui::BeginPopup("context_menu"))
+    if(ImGui::BeginPopupContextWindow("context_menu"))
     {
         if(linking_distance < 32 && selected_node != nullptr)
         {
@@ -300,6 +280,9 @@ void Window_EntityHierarchy::render()
                 }
                 if(ImGui::MenuItem("Create Group")) {
                     create_group();
+                }
+                if(ImGui::MenuItem("Create AutoGroup")) {
+                    create_auto_group();
                 }
                 if(ImGui::MenuItem("Create System")) {
                     create_system();
@@ -480,6 +463,40 @@ void Window_EntityHierarchy::create_group()
             }
             //Create a new group and link it to the parents
             auto *group = new EntityGroup("New Group");
+            for (auto & parent : parents) {
+                parent->add_group(group);
+            }
+            Editor::action();
+        }
+    }
+}
+
+void Window_EntityHierarchy::create_auto_group()
+{
+    //Add the group as child to selected node
+    if(selected_node != nullptr)
+    {
+        if(selected_node->group != nullptr)
+        {
+            //Create a new group
+            auto *group = new AutoGroup("New AutoGroup");
+            selected_node->group->add_group(group);
+            Editor::action();
+        }
+        else
+        {
+            //Find parents
+            std::vector<EntityGroup*> parents;
+            for (auto & node : nodes) {
+                if (node->group != nullptr) {
+                    if (std::find(node->group->get_entities()->begin(), node->group->get_entities()->end(),
+                                  selected_node->entity.get()) != node->group->get_entities()->end()) {
+                        parents.push_back(node->group.get());
+                    }
+                }
+            }
+            //Create a new group and link it to the parents
+            auto *group = new AutoGroup("New AutoGroup");
             for (auto & parent : parents) {
                 parent->add_group(group);
             }

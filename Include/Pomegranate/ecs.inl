@@ -84,4 +84,25 @@ namespace Pomegranate
     {
         System::system_types[name] = []() -> System* { return new T(); };
     }
+
+    template<typename... T> AutoGroup* AutoGroup::create(const std::string& name)
+    {
+        AutoGroup* group = new AutoGroup(name);
+        (group->add_component_type<T>(), ...);
+        return group;
+    }
+
+    template <typename T> void AutoGroup::add_component_type()
+    {
+        component_types.push_back(&typeid(T));
+    }
+
+    template <typename T> void AutoGroup::remove_component_type()
+    {
+        auto it = std::find(component_types.begin(), component_types.end(), &typeid(T));
+        if(it != component_types.end())
+        {
+            component_types.erase(it);
+        }
+    }
 }

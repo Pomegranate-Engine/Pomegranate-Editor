@@ -405,54 +405,107 @@ namespace Pomegranate
             auto* c = entity->get_component(component.first->name());
             for (auto& [type,data] : c->component_data)
             {
-                if(data.first == &typeid(int))
-                {
-                    *(int*)data.second = *(int*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(float))
-                {
-                    *(float*)data.second = *(float*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(double))
-                {
-                    *(double*)data.second = *(double*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(bool))
-                {
-                    *(bool*)data.second = *(bool*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(std::string))
-                {
-                    *(std::string*)data.second = *(std::string*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(Vec2))
-                {
-                    *(Vec2*)data.second = *(Vec2*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(Vec3))
-                {
-                    *(Vec3*)data.second = *(Vec3*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(Color))
-                {
-                    *(Color*)data.second = *(Color*)my->component_data[type].second;
-                }
-                if(data.first == &typeid(Texture*))
-                {
-                    *(Texture**)data.second = *(Texture**)my->component_data[type].second;
-                }
-                if(data.first == &typeid(Audio*))
-                {
-                    *(Audio**)data.second = *(Audio**)my->component_data[type].second;
-                }
-                if(data.first == &typeid(TTFFont*))
-                {
-                    *(TTFFont**)data.second = *(TTFFont**)my->component_data[type].second;
-                }
+                std::memcpy(data.second, my->component_data[type].second, sizeof(data.first));
             }
         }
         return entity;
     }
 
     void Component::init(Entity *){}
+
+    AutoGroup::AutoGroup(const std::string& name) : EntityGroup(name)
+    {
+        this->component_types = std::vector<const std::type_info*>();
+    }
+    AutoGroup::~AutoGroup()
+    {
+        for (auto & component : this->component_types)
+        {
+            delete component;
+        }
+        this->component_types.clear();
+    }
+    std::vector<Entity*> AutoGroup::find_entities()
+    {
+        std::vector<Entity*> enties = std::vector<Entity*>();
+        for (auto & entity : Entity::entities)
+        {
+            bool has_all = true;
+            for (auto & component : this->component_types)
+            {
+                if(entity.second->has_component(component->name()))
+                {
+                    enties.push_back(entity.second);
+                }
+                else
+                {
+                    has_all = false;
+                    break;
+                }
+            }
+            if(has_all) {
+                enties.push_back(entity.second);
+            }
+        }
+        return enties;
+    }
+    void AutoGroup::add_component_type(std::string name)
+    {
+        this->component_types.push_back(&typeid(*Component::component_types[name]()));
+    }
+    void AutoGroup::remove_component_type(std::string name)
+    {
+        for (int i = 0; i < this->component_types.size(); ++i)
+        {
+            if(this->component_types[i]->name() == name)
+            {
+                this->component_types.erase(this->component_types.begin() + i);
+                return;
+            }
+        }
+    }
+    void AutoGroup::tick()
+    {
+        std::vector<Entity*> enties = find_entities();
+        //Add entities to this group if they're not already
+        for (auto & entity : enties)
+        {
+            if(!std::count(this->entities.begin(),this->entities.end(),entity))
+            {
+                this->add_entity(entity);
+            }
+        }
+        //Remove entities from this group if they're not in the list
+        for (auto & entity : this->entities)
+        {
+            if(!std::count(enties.begin(),enties.end(),entity))
+            {
+                this->remove_entity(entity);
+            }
+        }
+        //Tick the group
+        EntityGroup::tick();
+    }
+    void AutoGroup::draw(const std::function<bool(Entity*, Entity*)>& sortingFunction)
+    {
+        std::vector<Entity*> enties = find_entities();
+        //Add entities to this group if they're not already
+        for (auto & entity : enties)
+        {
+            if(!std::count(this->entities.begin(),this->entities.end(),entity))
+            {
+                this->add_entity(entity);
+            }
+        }
+        //Remove entities from this group if they're not in the list
+        for (auto & entity : this->entities)
+        {
+            if(!std::count(enties.begin(),enties.end(),entity))
+            {
+                this->remove_entity(entity);
+            }
+        }
+        //Draw the group
+        EntityGroup::draw(sortingFunction);
+    }
 }

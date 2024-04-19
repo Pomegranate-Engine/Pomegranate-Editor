@@ -61,6 +61,7 @@ public:
     static void focus();
     static void create_entity();
     static void create_group();
+    static void create_auto_group();
     static void create_system();
     static void delete_node();
     static void duplicate();

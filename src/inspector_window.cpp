@@ -150,11 +150,42 @@ void InspectorWindow::render()
         }
         else if(Node::selected->group != nullptr)
         {
-            EntityGroup *group = Node::selected->group.get();
-            property_field("Name", &group->name);
-            if(ImGui::IsItemDeactivatedAfterEdit())
+            if(typeid(*Node::selected->group.get()).hash_code() == typeid(EntityGroup).hash_code()) {
+                EntityGroup *group = Node::selected->group.get();
+                property_field("Name", &group->name);
+                if (ImGui::IsItemDeactivatedAfterEdit()) {
+                    Editor::action();
+                }
+            }
+            else if(typeid(*Node::selected->group.get()).hash_code() == typeid(AutoGroup).hash_code())
             {
-                Editor::action();
+                AutoGroup *group = (AutoGroup*)Node::selected->group.get();
+                property_field("Name", &group->name);
+                if (ImGui::IsItemDeactivatedAfterEdit()) {
+                    Editor::action();
+                }
+                //Display the component types
+                if(ImGui::CollapsingHeader("Component Types"))
+                {
+                    for(auto i = group->component_types.begin(); i != group->component_types.end(); i++)
+                    {
+                        ImGui::Text(scuffy_demangle((*i)->name()).c_str());
+                    }
+                    if(ImGui::Button("Add Component"))
+                    {
+                        ImGui::OpenPopup("Add Component");
+                    }
+                }
+                if(ImGui::BeginPopup("Add Component"))
+                {
+                    for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
+                        if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
+                            group->add_component_type(i->first);
+                            Editor::action();
+                        }
+                    }
+                    ImGui::EndPopup();
+                }
             }
         }
     }

@@ -107,36 +107,59 @@ namespace Pomegranate
         void get_ref(Entity*&e);
         static void apply_destruction_queue();
     };
+
     class EntityGroup
     {
     private:
         /* data */
+
+    public:
         std::vector<Entity*> entities;
         std::vector<System*> systems;
         std::vector<EntityGroup*> child_groups;
         EntityGroup* parent = nullptr;
-    public:
         static uint32_t group_count;
         uint32_t id;
         std::string name;
         explicit EntityGroup(const std::string& name);
+
         ~EntityGroup();
         EntityGroup* get_parent();
-        void add_entity(Entity*);
-        void remove_entity(Entity*);
-        void add_system(System*);
-        void remove_system(System*);
-        bool has_system(System*);
-        void add_group(EntityGroup*);
-        void remove_group(EntityGroup*);
-        void tick();
-        void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
+        virtual void add_entity(Entity*);
+        virtual void remove_entity(Entity*);
+        virtual void add_system(System*);
+        virtual void remove_system(System*);
+        virtual bool has_system(System*);
+        virtual void add_group(EntityGroup*);
+        virtual void remove_group(EntityGroup*);
+        virtual void tick();
+        virtual void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
+        virtual std::vector<Entity*>* get_entities();
+        virtual std::vector<System*>* get_systems();
+        virtual std::vector<EntityGroup*>* get_child_groups();
+
         static std::unordered_map<std::string,EntityGroup*> groups;
         static std::unordered_map<uint32_t,EntityGroup*> groups_id;
         static EntityGroup* get_group(const std::string& name);
-        std::vector<Entity*>* get_entities();
-        std::vector<System*>* get_systems();
-        std::vector<EntityGroup*>* get_child_groups();
+    };
+
+    class AutoGroup : public EntityGroup
+    {
+    private:
+        /* data */
+    public:
+        std::vector<const std::type_info*> component_types;
+        std::vector<Entity*> find_entities();
+        AutoGroup(const std::string& name);
+
+        template<typename... T> static AutoGroup* create(const std::string& name);
+        ~AutoGroup();
+        template <typename T> void add_component_type();
+        void add_component_type(std::string);
+        template <typename T> void remove_component_type();
+        void remove_component_type(std::string);
+        void tick() override;
+        void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction) override;
     };
 }
 

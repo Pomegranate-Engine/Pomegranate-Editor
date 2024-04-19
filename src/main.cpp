@@ -204,6 +204,8 @@ int main(int argc, char* argv[])
 
     Editor::current_scene = new EntityGroup("root");
 
+    Editor::current_scene->add_group(AutoGroup::create<Sprite, Transform>("Render"));
+
     //Create windows
     WindowsManager windows_manager;
     auto* entity_hierarchy = new Window_EntityHierarchy();
