@@ -585,6 +585,11 @@ void Window_EntityHierarchy::draw_node(Node* n)
     if(n->group != nullptr)
     {
         name = n->group->name;
+        if(typeid(*n->group) == typeid(AutoGroup))
+        {
+            n->texture = ResourceManager::load<Texture>("engine/auto_group.png");
+            n->color = Color((int)EditorTheme::color_palette_purple.x,(int)EditorTheme::color_palette_purple.y,(int)EditorTheme::color_palette_purple.z,255);
+        }
     }
     if(n->entity != nullptr)
     {
