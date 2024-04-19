@@ -150,6 +150,112 @@ public:
 #endif
     }
 };
+class Transform3D : public Component
+{
+public:
+    Vec3 pos;
+    Vec3 scale;
+    Vec3 rotation;
+    void init(Entity* e) override
+    {
+        pos = Vec3();
+        scale = Vec3(1.0,1.0,1.0);
+        rotation = Vec3();
+        register_component(Transform3D);
+        push_data<Vec3>("pos", &pos);
+        push_data<Vec3>("scale", &scale);
+        push_data<Vec3>("rotation", &rotation);
+    }
+};
+
+class CubeComponent : public Component
+{
+public:
+    float size;
+    void init(Entity* e) override
+    {
+        size = 1.0;
+        e->require_component<Transform3D>();
+        register_component(CubeComponent);
+        push_data<float>("size", &size);
+    }
+};
+
+class Render3D : public System
+{
+public:
+    Mat projection;
+    Mat view;
+    Render3D()
+    {
+        projection = Mat::perspective(1.57, (float)Window::current->get_width()/(float)Window::current->get_height(), 0.01, 1000.0);
+        view = Mat::look_at(Vec3(0,0,0),Vec3(0,0,1),Vec3(0,1,0));
+    }
+    void draw(Entity* e) override
+    {
+        if(e->has_component<Transform3D>() && e->has_component<CubeComponent>())
+        {
+            print_info("Drawing cube");
+            auto* transform = e->get_component<Transform3D>();
+            auto* cube = e->get_component<CubeComponent>();
+            //Calculate cube vertices
+            Vec3 vertices[8] = {
+                    Vec3(-cube->size/2,-cube->size/2,-cube->size/2),
+                    Vec3(cube->size/2,-cube->size/2,-cube->size/2),
+                    Vec3(cube->size/2,cube->size/2,-cube->size/2),
+                    Vec3(-cube->size/2,cube->size/2,-cube->size/2),
+                    Vec3(-cube->size/2,-cube->size/2,cube->size/2),
+                    Vec3(cube->size/2,-cube->size/2,cube->size/2),
+                    Vec3(cube->size/2,cube->size/2,cube->size/2),
+                    Vec3(-cube->size/2,cube->size/2,cube->size/2)
+            };
+            //Adjust based on transform
+            for(int i = 0; i < 8; i++)
+            {
+                vertices[i] = vertices[i] * transform->scale;
+                //Calculate angle (float) and axis for rotation
+                Vec3 axis = Vec3(1,0,0);
+                float angle = transform->rotation.x;
+                vertices[i] = vertices[i].rotate(angle, axis);
+                axis = Vec3(0,1,0);
+                angle = transform->rotation.y;
+                vertices[i] = vertices[i].rotate(angle, axis);
+                axis = Vec3(0,0,1);
+                angle = transform->rotation.z;
+                vertices[i] = vertices[i].rotate(angle, axis);
+                vertices[i] = vertices[i] + transform->pos;
+                Vec4 v = Vec4(vertices[i].x, vertices[i].y, vertices[i].z, 1.0);
+                //Adjust for matricies
+                v = (projection*view)*v;
+                vertices[i] = Vec3(v.x/v.w, v.y/v.w, v.z/v.w);
+                //Adjust for screen
+
+                int renderer_width = 0;
+                int renderer_height = 0;
+                SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &renderer_width, &renderer_height);
+
+                vertices[i].x *= (float)renderer_width/2;
+                vertices[i].y *= (float)renderer_height/2;
+                vertices[i].x += (float)renderer_width/2;
+                vertices[i].y += (float)renderer_height/2;
+            }
+            //Draw lines
+            SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 255, 255, 255, 255);
+            for(int i = 0; i < 8; i++)
+            {
+                //Draw point
+                SDL_RenderPoint(Window::current->get_sdl_renderer(), vertices[i].x, vertices[i].y);
+            }
+            //Draw lines
+            for(int i = 0; i < 4; i++)
+            {
+                SDL_RenderLine(Window::current->get_sdl_renderer(), vertices[i].x, vertices[i].y, vertices[(i+1)%4].x, vertices[(i+1)%4].y);
+                SDL_RenderLine(Window::current->get_sdl_renderer(), vertices[i+4].x, vertices[i+4].y, vertices[((i+1)%4)+4].x, vertices[((i+1)%4)+4].y);
+                SDL_RenderLine(Window::current->get_sdl_renderer(), vertices[i].x, vertices[i].y, vertices[i+4].x, vertices[i+4].y);
+            }
+        }
+    }
+};
 
 int main(int argc, char* argv[])
 {
@@ -192,6 +298,8 @@ int main(int argc, char* argv[])
     register_component(PlayerComponent);
     register_component(CameraFollow);
     register_component(LuaComponent);
+    register_component(CubeComponent);
+    register_component(Transform3D);
 
     //Register systems
     register_system(PlayerController);
@@ -201,6 +309,7 @@ int main(int argc, char* argv[])
     register_system(CameraController);
     register_system(EditorDebug);
     register_system(LuaSystem);
+    register_system(Render3D);
 
     Editor::current_scene = new EntityGroup("root");
 

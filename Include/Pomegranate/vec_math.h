@@ -11,9 +11,7 @@ namespace Pomegranate
     struct Vec3i;
     struct Vec4;
     struct Vec4i;
-    struct Mat2x2;
-    struct Mat3x3;
-    struct Mat4x4;
+    struct Mat;
 
 
     struct Vec2
@@ -35,13 +33,6 @@ namespace Pomegranate
         Vec2 operator*=(const float& other);
         Vec2 operator/=(const Vec2& other);
         Vec2 operator/=(const float& other);
-
-        Vec2 operator*(const Mat2x2& other) const;
-        Vec2 operator*=(const Mat2x2& other);
-        Vec2 operator*(const Mat3x3& other) const;
-        Vec2 operator*=(const Mat3x3& other);
-        Vec2 operator*(const Mat4x4& other) const;
-        Vec2 operator*=(const Mat4x4& other);
 
         bool operator==(const Vec2& other) const;
         bool operator!=(const Vec2& other) const;
@@ -79,13 +70,6 @@ namespace Pomegranate
         bool operator==(const Vec2i& other) const;
         bool operator!=(const Vec2i& other) const;
 
-        Vec2i operator*(const Mat2x2& other) const;
-        Vec2i operator*=(const Mat2x2& other);
-        Vec2i operator*(const Mat3x3& other) const;
-        Vec2i operator*=(const Mat3x3& other);
-        Vec2i operator*(const Mat4x4& other) const;
-        Vec2i operator*=(const Mat4x4& other);
-
         float dot(const Vec2i& other) const;
         float cross(const Vec2i& other) const;
         float length() const;
@@ -121,11 +105,6 @@ namespace Pomegranate
         bool operator==(const Vec3& other) const;
         bool operator!=(const Vec3& other) const;
 
-        Vec3 operator*(const Mat3x3& other) const;
-        Vec3 operator*=(const Mat3x3& other);
-        Vec3 operator*(const Mat4x4& other) const;
-        Vec3 operator*=(const Mat4x4& other);
-
         float dot(const Vec3& other) const;
         Vec3 cross(const Vec3& other) const;
         float length() const;
@@ -158,11 +137,6 @@ namespace Pomegranate
         Vec3i operator*=(const float& other);
         Vec3i operator/=(const Vec3i& other);
         Vec3i operator/=(const float& other);
-
-        Vec3i operator*(const Mat3x3& other) const;
-        Vec3i operator*=(const Mat3x3& other);
-        Vec3i operator*(const Mat4x4& other) const;
-        Vec3i operator*=(const Mat4x4& other);
 
         bool operator==(const Vec3i& other) const;
         bool operator!=(const Vec3i& other) const;
@@ -201,9 +175,6 @@ namespace Pomegranate
         Vec4 operator/=(const float& other);
         bool operator==(const Vec4& other) const;
         bool operator!=(const Vec4& other) const;
-
-        Vec4 operator*(const Mat4x4& other) const;
-        Vec4 operator*=(const Mat4x4& other);
 
         float dot(const Vec4& other) const;
         Vec4 cross(const Vec4& other) const;
@@ -252,79 +223,53 @@ namespace Pomegranate
         float angle_to(const Vec4i& other) const;
     };
     
-    struct Mat2x2
+    struct Mat
     {
-        float m00, m01, m10, m11;
+        std::vector<std::vector<float>> data;
+        int rows;
+        int cols;
 
-        Mat2x2();
-        Mat2x2(float m00, float m01, float m10, float m11);
-        Mat2x2 operator+(const Mat2x2& other) const;
-        Mat2x2 operator-(const Mat2x2& other) const;
-        Mat2x2 operator*(const Mat2x2& other) const;
-        Mat2x2 operator*(const float& other) const;
-        Mat2x2 operator/(const Mat2x2& other) const;
-        Mat2x2 operator/(const float& other) const;
-        Mat2x2 operator+=(const Mat2x2& other);
-        Mat2x2 operator-=(const Mat2x2& other);
-        Mat2x2 operator*=(const Mat2x2& other);
-        Mat2x2 operator*=(const float& other);
-        Mat2x2 operator/=(const Mat2x2& other);
-        Mat2x2 operator/=(const float& other);
-        bool operator==(const Mat2x2& other) const;
-        bool operator!=(const Mat2x2& other) const;
+        Mat();
+        Mat(int rows, int cols);
+        Mat(int rows, int cols, float** data);
+        Mat(const Mat& other);
+        ~Mat();
+
+        Mat operator+(const Mat& other) const;
+        Mat operator-(const Mat& other) const;
+        Mat operator*(const Mat& other) const;
+        Mat operator*(const float& other) const;
+        Mat operator/(const Mat& other) const;
+        Mat operator/(const float& other) const;
+        Mat operator+=(const Mat& other);
+        Mat operator-=(const Mat& other);
+        Mat operator*=(const Mat& other);
+        Mat operator*=(const float& other);
+        Mat operator/=(const Mat& other);
+        Mat operator/=(const float& other);
+        bool operator==(const Mat& other) const;
+        bool operator!=(const Mat& other) const;
+        Vec2 operator*(const Vec2& other) const;
+        Vec3 operator*(const Vec3& other) const;
+        Vec4 operator*(const Vec4& other) const;
+        Vec2i operator*(const Vec2i& other) const;
+        Vec3i operator*(const Vec3i& other) const;
+        Vec4i operator*(const Vec4i& other) const;
+
+        Mat transpose() const;
+        Mat inverse() const;
+        Mat adjugate() const;
         float determinant() const;
-        Mat2x2 inverse() const;
-        Mat2x2 transpose() const;
-    };
+        float cofactor(int row, int col) const;
 
-    struct Mat3x3
-    {
-        float m00, m01, m02, m10, m11, m12, m20, m21, m22;
-
-        Mat3x3();
-        Mat3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22);
-        Mat3x3 operator+(const Mat3x3& other) const;
-        Mat3x3 operator-(const Mat3x3& other) const;
-        Mat3x3 operator*(const Mat3x3& other) const;
-        Mat3x3 operator*(const float& other) const;
-        Mat3x3 operator/(const Mat3x3& other) const;
-        Mat3x3 operator/(const float& other) const;
-        Mat3x3 operator+=(const Mat3x3& other);
-        Mat3x3 operator-=(const Mat3x3& other);
-        Mat3x3 operator*=(const Mat3x3& other);
-        Mat3x3 operator*=(const float& other);
-        Mat3x3 operator/=(const Mat3x3& other);
-        Mat3x3 operator/=(const float& other);
-        bool operator==(const Mat3x3& other) const;
-        bool operator!=(const Mat3x3& other) const;
-        float determinant() const;
-        Mat3x3 inverse() const;
-        Mat3x3 transpose() const;
-    };
-
-    struct Mat4x4
-    {
-        float m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33;
-
-        Mat4x4();
-        Mat4x4(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33);
-        Mat4x4 operator+(const Mat4x4& other) const;
-        Mat4x4 operator-(const Mat4x4& other) const;
-        Mat4x4 operator*(const Mat4x4& other) const;
-        Mat4x4 operator*(const float& other) const;
-        Mat4x4 operator/(const Mat4x4& other) const;
-        Mat4x4 operator/(const float& other) const;
-        Mat4x4 operator+=(const Mat4x4& other);
-        Mat4x4 operator-=(const Mat4x4& other);
-        Mat4x4 operator*=(const Mat4x4& other);
-        Mat4x4 operator*=(const float& other);
-        Mat4x4 operator/=(const Mat4x4& other);
-        Mat4x4 operator/=(const float& other);
-        bool operator==(const Mat4x4& other) const;
-        bool operator!=(const Mat4x4& other) const;
-        float determinant() const;
-        Mat4x4 inverse() const;
-        Mat4x4 transpose() const;
+        static Mat identity(int size);
+        static Mat zero(int rows, int cols);
+        static Mat perspective(float fov, float aspect, float near, float far);
+        static Mat orthographic(float left, float right, float bottom, float top, float near, float far);
+        static Mat look_at(const Vec3& eye, const Vec3& center, const Vec3& up);
+        static Mat translate(const Vec3& translation);
+        static Mat rotate(float angle, const Vec3& axis);
+        static Mat scale(const Vec3& scale);
     };
 }
 

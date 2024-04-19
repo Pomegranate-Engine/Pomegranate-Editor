@@ -79,39 +79,6 @@ namespace Pomegranate
     {
         return this->x != other.x || this->y != other.y;
     }
-    Vec2 Vec2::operator*(const Mat2x2& other) const
-    {
-        return {this->x * other.m00 + this->y * other.m10, this->x * other.m01 + this->y * other.m11};
-    }
-    Vec2 Vec2::operator*=(const Mat2x2& other)
-    {
-        float x = this->x;
-        this->x = x * other.m00 + this->y * other.m10;
-        this->y = x * other.m01 + this->y * other.m11;
-        return *this;
-    }
-    Vec2 Vec2::operator*(const Mat3x3& other) const
-    {
-        return {this->x * other.m00 + this->y * other.m10 + other.m20, this->x * other.m01 + this->y * other.m11 + other.m21};
-    }
-    Vec2 Vec2::operator*=(const Mat3x3& other)
-    {
-        float x = this->x;
-        this->x = x * other.m00 + this->y * other.m10 + other.m20;
-        this->y = x * other.m01 + this->y * other.m11 + other.m21;
-        return *this;
-    }
-    Vec2 Vec2::operator*(const Mat4x4& other) const
-    {
-        return {this->x * other.m00 + this->y * other.m10 + other.m30, this->x * other.m01 + this->y * other.m11 + other.m31};
-    }
-    Vec2 Vec2::operator*=(const Mat4x4& other)
-    {
-        float x = this->x;
-        this->x = x * other.m00 + this->y * other.m10 + other.m30;
-        this->y = x * other.m01 + this->y * other.m11 + other.m31;
-        return *this;
-    }
     float Vec2::dot(const Vec2& other) const
     {
         return this->x * other.x + this->y * other.y;
@@ -234,39 +201,6 @@ namespace Pomegranate
     bool Vec2i::operator!=(const Vec2i& other) const
     {
         return this->x != other.x || this->y != other.y;
-    }
-    Vec2i Vec2i::operator*(const Mat2x2& other) const
-    {
-        return {(int)((float)this->x * other.m00 + (float)this->y * other.m10), (int)((float)this->x * other.m01 + (float)this->y * other.m11)};
-    }
-    Vec2i Vec2i::operator*=(const Mat2x2& other)
-    {
-        int x = this->x;
-        this->x = (int)((float)x * other.m00 + (float)this->y * other.m10);
-        this->y = (int)((float)x * other.m01 + (float)this->y * other.m11);
-        return *this;
-    }
-    Vec2i Vec2i::operator*(const Mat3x3& other) const
-    {
-        return {(int)((float)this->x * other.m00 + (float)this->y * other.m10 + other.m20), (int)((float)this->x * other.m01 + (float)this->y * other.m11 + other.m21)};
-    }
-    Vec2i Vec2i::operator*=(const Mat3x3& other)
-    {
-        int x = this->x;
-        this->x = (int)((float)x * other.m00 + (float)this->y * other.m10 + other.m20);
-        this->y = (int)((float)x * other.m01 + (float)this->y * other.m11 + other.m21);
-        return *this;
-    }
-    Vec2i Vec2i::operator*(const Mat4x4& other) const
-    {
-        return {(int)((float)this->x * other.m00 + (float)this->y * other.m10 + other.m30), (int)((float)this->x * other.m01 + (float)this->y * other.m11 + other.m31)};
-    }
-    Vec2i Vec2i::operator*=(const Mat4x4& other)
-    {
-        int x = this->x;
-        this->x = (int)((float)x * other.m00 + (float)this->y * other.m10 + other.m30);
-        this->y = (int)((float)x * other.m01 + (float)this->y * other.m11 + other.m31);
-        return *this;
     }
     float Vec2i::dot(const Vec2i& other) const
     {
@@ -397,32 +331,6 @@ namespace Pomegranate
     bool Vec3::operator!=(const Vec3& other) const
     {
         return this->x != other.x || this->y != other.y || this->z != other.z;
-    }
-    Vec3 Vec3::operator*(const Mat3x3& other) const
-    {
-        return {this->x * other.m00 + this->y * other.m10 + this->z * other.m20, this->x * other.m01 + this->y * other.m11 + this->z * other.m21, this->x * other.m02 + this->y * other.m12 + this->z * other.m22};
-    }
-    Vec3 Vec3::operator*=(const Mat3x3& other)
-    {
-        float x = this->x;
-        float y = this->y;
-        this->x = x * other.m00 + y * other.m10 + this->z * other.m20;
-        this->y = x * other.m01 + y * other.m11 + this->z * other.m21;
-        this->z = x * other.m02 + y * other.m12 + this->z * other.m22;
-        return *this;
-    }
-    Vec3 Vec3::operator*(const Mat4x4& other) const
-    {
-        return {this->x * other.m00 + this->y * other.m10 + this->z * other.m20 + other.m30, this->x * other.m01 + this->y * other.m11 + this->z * other.m21 + other.m31, this->x * other.m02 + this->y * other.m12 + this->z * other.m22 + other.m32};
-    }
-    Vec3 Vec3::operator*=(const Mat4x4& other)
-    {
-        float x = this->x;
-        float y = this->y;
-        this->x = x * other.m00 + y * other.m10 + this->z * other.m20 + other.m30;
-        this->y = x * other.m01 + y * other.m11 + this->z * other.m21 + other.m31;
-        this->z = x * other.m02 + y * other.m12 + this->z * other.m22 + other.m32;
-        return *this;
     }
     float Vec3::dot(const Vec3& other) const
     {
@@ -557,32 +465,6 @@ namespace Pomegranate
     bool Vec3i::operator!=(const Vec3i& other) const
     {
         return this->x != other.x || this->y != other.y || this->z != other.z;
-    }
-    Vec3i Vec3i::operator*(const Mat3x3& other) const
-    {
-        return {(int)((float)this->x * other.m00 + (float)this->y * other.m10 + other.m20), (int)((float)this->x * other.m01 + (float)this->y * other.m11 + other.m21), (int)((float)this->x * other.m02 + (float)this->y * other.m12 + other.m22)};
-    }
-    Vec3i Vec3i::operator*=(const Mat3x3& other)
-    {
-        int x = this->x;
-        int y = this->y;
-        this->x = (int)((float)x * other.m00 + (float)y * other.m10 + other.m20);
-        this->y = (int)((float)x * other.m01 + (float)y * other.m11 + other.m21);
-        this->z = (int)((float)x * other.m02 + (float)y * other.m12 + other.m22);
-        return *this;
-    }
-    Vec3i Vec3i::operator*(const Mat4x4& other) const
-    {
-        return {(int)((float)this->x * other.m00 + (float)this->y * other.m10 + other.m30), (int)((float)this->x * other.m01 + (float)this->y * other.m11 + other.m31), (int)((float)this->x * other.m02 + (float)this->y * other.m12 + other.m32)};
-    }
-    Vec3i Vec3i::operator*=(const Mat4x4& other)
-    {
-        int x = this->x;
-        int y = this->y;
-        this->x = (int)((float)x * other.m00 + (float)y * other.m10 + other.m30);
-        this->y = (int)((float)x * other.m01 + (float)y * other.m11 + other.m31);
-        this->z = (int)((float)x * other.m02 + (float)y * other.m12 + other.m32);
-        return *this;
     }
     float Vec3i::dot(const Vec3i& other) const
     {
@@ -720,21 +602,6 @@ namespace Pomegranate
     bool Vec4::operator!=(const Vec4& other) const
     {
         return this->x != other.x || this->y != other.y || this->z != other.z || this->w != other.w;
-    }
-    Vec4 Vec4::operator*(const Mat4x4& other) const
-    {
-        return {this->x * other.m00 + this->y * other.m10 + this->z * other.m20 + this->w * other.m30, this->x * other.m01 + this->y * other.m11 + this->z * other.m21 + this->w * other.m31, this->x * other.m02 + this->y * other.m12 + this->z * other.m22 + this->w * other.m32, this->x * other.m03 + this->y * other.m13 + this->z * other.m23 + this->w * other.m33};
-    }
-    Vec4 Vec4::operator*=(const Mat4x4& other)
-    {
-        float x = this->x;
-        float y = this->y;
-        float z = this->z;
-        this->x = x * other.m00 + y * other.m10 + z * other.m20 + this->w * other.m30;
-        this->y = x * other.m01 + y * other.m11 + z * other.m21 + this->w * other.m31;
-        this->z = x * other.m02 + y * other.m12 + z * other.m22 + this->w * other.m32;
-        this->w = x * other.m03 + y * other.m13 + z * other.m23 + this->w * other.m33;
-        return *this;
     }
     float Vec4::dot(const Vec4& other) const
     {
@@ -919,571 +786,434 @@ namespace Pomegranate
         return atan2((float)other.y - (float)this->y, (float)other.x - (float)this->x);
     }
 
-    Mat2x2::Mat2x2()
+    Mat::Mat()
     {
-        this->m00 = 1.0;
-        this->m01 = 0.0;
-        this->m10 = 0.0;
-        this->m11 = 1.0;
+        this->rows = 0;
+        this->cols = 0;
     }
-    Mat2x2::Mat2x2(float m00, float m01, float m10, float m11)
+    Mat::Mat(int rows, int cols)
     {
-        this->m00 = m00;
-        this->m01 = m01;
-        this->m10 = m10;
-        this->m11 = m11;
+        this->rows = rows;
+        this->cols = cols;
+        this->data = std::vector<std::vector<float>>(rows, std::vector<float>(cols, 0.0));
     }
-    Mat2x2 Mat2x2::operator+(const Mat2x2& other) const
+    Mat::Mat(int rows, int cols, float** data)
     {
-        return {this->m00 + other.m00, this->m01 + other.m01, this->m10 + other.m10, this->m11 + other.m11};
+        this->rows = rows;
+        this->cols = cols;
+        this->data = std::vector<std::vector<float>>(rows, std::vector<float>(cols, 0.0));
     }
-    Mat2x2 Mat2x2::operator-(const Mat2x2& other) const
+    Mat::Mat(const Mat& other)
     {
-        return {this->m00 - other.m00, this->m01 - other.m01, this->m10 - other.m10, this->m11 - other.m11};
+        this->rows = other.rows;
+        this->cols = other.cols;
+        this->data = other.data;
     }
-    Mat2x2 Mat2x2::operator*(const Mat2x2& other) const
+    Mat::~Mat()
     {
-        return {this->m00 * other.m00 + this->m01 * other.m10, this->m00 * other.m01 + this->m01 * other.m11, this->m10 * other.m00 + this->m11 * other.m10, this->m10 * other.m01 + this->m11 * other.m11};
+
     }
-    Mat2x2 Mat2x2::operator*(const float& other) const
+    Mat Mat::operator+(const Mat& other) const
     {
-        return {this->m00 * other, this->m01 * other, this->m10 * other, this->m11 * other};
+        Mat result(this->rows, this->cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[i][j] = this->data[i][j] + other.data[i][j];
+            }
+        }
+        return result;
     }
-    Mat2x2 Mat2x2::operator/(const Mat2x2& other) const
+    Mat Mat::operator-(const Mat& other) const
     {
-        return {this->m00 / other.m00, this->m01 / other.m01, this->m10 / other.m10, this->m11 / other.m11};
+        Mat result(this->rows, this->cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[i][j] = this->data[i][j] - other.data[i][j];
+            }
+        }
+        return result;
     }
-    Mat2x2 Mat2x2::operator/(const float& other) const
+    Mat Mat::operator*(const Mat& other) const
     {
-        return {this->m00 / other, this->m01 / other, this->m10 / other, this->m11 / other};
+        Mat result(this->rows, other.cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < other.cols; j++)
+            {
+                for (int k = 0; k < this->cols; k++)
+                {
+                    result.data[i][j] += this->data[i][k] * other.data[k][j];
+                }
+            }
+        }
+        return result;
     }
-    Mat2x2 Mat2x2::operator+=(const Mat2x2& other)
+    Mat Mat::operator*(const float& other) const
     {
-        this->m00 += other.m00;
-        this->m01 += other.m01;
-        this->m10 += other.m10;
-        this->m11 += other.m11;
+        Mat result(this->rows, this->cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[i][j] = this->data[i][j] * other;
+            }
+        }
+        return result;
+    }
+    Mat Mat::operator/(const Mat& other) const
+    {
+        Mat result(this->rows, this->cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[i][j] = this->data[i][j] / other.data[i][j];
+            }
+        }
+        return result;
+    }
+    Mat Mat::operator/(const float& other) const
+    {
+        Mat result(this->rows, this->cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[i][j] = this->data[i][j] / other;
+            }
+        }
+        return result;
+    }
+    Mat Mat::operator+=(const Mat& other)
+    {
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                this->data[i][j] += other.data[i][j];
+            }
+        }
         return *this;
     }
-    Mat2x2 Mat2x2::operator-=(const Mat2x2& other)
+    Mat Mat::operator-=(const Mat& other)
     {
-        this->m00 -= other.m00;
-        this->m01 -= other.m01;
-        this->m10 -= other.m10;
-        this->m11 -= other.m11;
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                this->data[i][j] -= other.data[i][j];
+            }
+        }
         return *this;
     }
-    Mat2x2 Mat2x2::operator*=(const Mat2x2& other)
+    Mat Mat::operator*=(const Mat& other)
     {
-        this->m00 = this->m00 * other.m00 + this->m01 * other.m10;
-        this->m01 = this->m00 * other.m01 + this->m01 * other.m11;
-        this->m10 = this->m10 * other.m00 + this->m11 * other.m10;
-        this->m11 = this->m10 * other.m01 + this->m11 * other.m11;
+        Mat result(this->rows, other.cols);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < other.cols; j++)
+            {
+                for (int k = 0; k < this->cols; k++)
+                {
+                    result.data[i][j] += this->data[i][k] * other.data[k][j];
+                }
+            }
+        }
+        return result;
+    }
+    Mat Mat::operator*=(const float& other)
+    {
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                this->data[i][j] *= other;
+            }
+        }
         return *this;
     }
-    Mat2x2 Mat2x2::operator*=(const float& other)
+    Mat Mat::operator/=(const Mat& other)
     {
-        this->m00 *= other;
-        this->m01 *= other;
-        this->m10 *= other;
-        this->m11 *= other;
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                this->data[i][j] /= other.data[i][j];
+            }
+        }
         return *this;
     }
-    Mat2x2 Mat2x2::operator/=(const Mat2x2& other)
+    Mat Mat::operator/=(const float& other)
     {
-        this->m00 /= other.m00;
-        this->m01 /= other.m01;
-        this->m10 /= other.m10;
-        this->m11 /= other.m11;
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                this->data[i][j] /= other;
+            }
+        }
         return *this;
     }
-    Mat2x2 Mat2x2::operator/=(const float& other)
+    bool Mat::operator==(const Mat& other) const
     {
-        this->m00 /= other;
-        this->m01 /= other;
-        this->m10 /= other;
-        this->m11 /= other;
-        return *this;
+        if (this->rows != other.rows || this->cols != other.cols)
+        {
+            return false;
+        }
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                if (this->data[i][j] != other.data[i][j])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
-    bool Mat2x2::operator==(const Mat2x2& other) const
+    bool Mat::operator!=(const Mat& other) const
     {
-        return this->m00 == other.m00 && this->m01 == other.m01 && this->m10 == other.m10 && this->m11 == other.m11;
+        if (this->rows != other.rows || this->cols != other.cols)
+        {
+            return true;
+        }
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                if (this->data[i][j] != other.data[i][j])
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-    bool Mat2x2::operator!=(const Mat2x2& other) const
+    Vec2 Mat::operator*(const Vec2& other) const
     {
-        return this->m00 != other.m00 || this->m01 != other.m01 || this->m10 != other.m10 || this->m11 != other.m11;
+        return {this->data[0][0] * other.x + this->data[0][1] * other.y, this->data[1][0] * other.x + this->data[1][1] * other.y};
     }
-    Mat2x2 Mat2x2::transpose() const
+    Vec3 Mat::operator*(const Vec3& other) const
     {
-        return {this->m00, this->m10, this->m01, this->m11};
+        return {this->data[0][0] * other.x + this->data[0][1] * other.y + this->data[0][2] * other.z, this->data[1][0] * other.x + this->data[1][1] * other.y + this->data[1][2] * other.z, this->data[2][0] * other.x + this->data[2][1] * other.y + this->data[2][2] * other.z};
     }
-    Mat2x2 Mat2x2::inverse() const
+    Vec4 Mat::operator*(const Vec4& other) const
     {
-        float det = this->m00 * this->m11 - this->m01 * this->m10;
+        return {this->data[0][0] * other.x + this->data[0][1] * other.y + this->data[0][2] * other.z + this->data[0][3] * other.w, this->data[1][0] * other.x + this->data[1][1] * other.y + this->data[1][2] * other.z + this->data[1][3] * other.w, this->data[2][0] * other.x + this->data[2][1] * other.y + this->data[2][2] * other.z + this->data[2][3] * other.w, this->data[3][0] * other.x + this->data[3][1] * other.y + this->data[3][2] * other.z + this->data[3][3] * other.w};
+    }
+    Vec2i Mat::operator*(const Vec2i& other) const
+    {
+        return {(int)(this->data[0][0] * other.x + this->data[0][1] * other.y), (int)(this->data[1][0] * other.x + this->data[1][1] * other.y)};
+    }
+    Vec3i Mat::operator*(const Vec3i& other) const
+    {
+        return {(int)(this->data[0][0] * other.x + this->data[0][1] * other.y + this->data[0][2] * other.z), (int)(this->data[1][0] * other.x + this->data[1][1] * other.y + this->data[1][2] * other.z), (int)(this->data[2][0] * other.x + this->data[2][1] * other.y + this->data[2][2] * other.z)};
+    }
+    Vec4i Mat::operator*(const Vec4i& other) const
+    {
+        return {(int)(this->data[0][0] * other.x + this->data[0][1] * other.y + this->data[0][2] * other.z + this->data[0][3] * other.w), (int)(this->data[1][0] * other.x + this->data[1][1] * other.y + this->data[1][2] * other.z + this->data[1][3] * other.w), (int)(this->data[2][0] * other.x + this->data[2][1] * other.y + this->data[2][2] * other.z + this->data[2][3] * other.w), (int)(this->data[3][0] * other.x + this->data[3][1] * other.y + this->data[3][2] * other.z + this->data[3][3] * other.w)};
+    }
+    Mat Mat::transpose() const
+    {
+        Mat result(this->cols, this->rows);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[j][i] = this->data[i][j];
+            }
+        }
+        return result;
+    }
+    Mat Mat::inverse() const
+    {
+        if (this->rows != this->cols)
+        {
+            return Mat();
+        }
+        Mat result(this->rows, this->cols);
+        float det = this->determinant();
         if (det == 0.0)
         {
-            return *this;
+            return Mat();
         }
-        return {this->m11 / det, -this->m01 / det, -this->m10 / det, this->m00 / det};
-    }
-    float Mat2x2::determinant() const
-    {
-        return this->m00 * this->m11 - this->m01 * this->m10;
-    }
-
-    Mat3x3::Mat3x3()
-    {
-        this->m00 = 1.0;
-        this->m01 = 0.0;
-        this->m02 = 0.0;
-        this->m10 = 0.0;
-        this->m11 = 1.0;
-        this->m12 = 0.0;
-        this->m20 = 0.0;
-        this->m21 = 0.0;
-        this->m22 = 1.0;
-    }
-    Mat3x3::Mat3x3(float m00, float m01, float m02, float m10, float m11, float m12, float m20, float m21, float m22)
-    {
-        this->m00 = m00;
-        this->m01 = m01;
-        this->m02 = m02;
-        this->m10 = m10;
-        this->m11 = m11;
-        this->m12 = m12;
-        this->m20 = m20;
-        this->m21 = m21;
-        this->m22 = m22;
-    }
-    Mat3x3 Mat3x3::operator+(const Mat3x3& other) const {
-        return {this->m00 + other.m00, this->m01 + other.m01, this->m02 + other.m02, this->m10 + other.m10,
-                this->m11 + other.m11, this->m12 + other.m12, this->m20 + other.m20, this->m21 + other.m21,
-                this->m22 + other.m22};
-    }
-    Mat3x3 Mat3x3::operator-(const Mat3x3& other) const {
-        return {this->m00 - other.m00, this->m01 - other.m01, this->m02 - other.m02, this->m10 - other.m10,
-                this->m11 - other.m11, this->m12 - other.m12, this->m20 - other.m20, this->m21 - other.m21,
-                this->m22 - other.m22};
-    }
-    Mat3x3 Mat3x3::operator*(const Mat3x3& other) const {
-        return {this->m00 * other.m00 + this->m01 * other.m10 + this->m02 * other.m20,
-                this->m00 * other.m01 + this->m01 * other.m11 + this->m02 * other.m21,
-                this->m00 * other.m02 + this->m01 * other.m12 + this->m02 * other.m22,
-                this->m10 * other.m00 + this->m11 * other.m10 + this->m12 * other.m20,
-                this->m10 * other.m01 + this->m11 * other.m11 + this->m12 * other.m21,
-                this->m10 * other.m02 + this->m11 * other.m12 + this->m12 * other.m22,
-                this->m20 * other.m00 + this->m21 * other.m10 + this->m22 * other.m20,
-                this->m20 * other.m01 + this->m21 * other.m11 + this->m22 * other.m21,
-                this->m20 * other.m02 + this->m21 * other.m12 + this->m22 * other.m22};
-    }
-    Mat3x3 Mat3x3::operator*(const float& other) const {
-        return {this->m00 * other, this->m01 * other, this->m02 * other, this->m10 * other, this->m11 * other,
-                this->m12 * other, this->m20 * other, this->m21 * other, this->m22 * other};
-    }
-    Mat3x3 Mat3x3::operator/(const Mat3x3& other) const {
-        return {this->m00 / other.m00, this->m01 / other.m01, this->m02 / other.m02, this->m10 / other.m10,
-                this->m11 / other.m11, this->m12 / other.m12, this->m20 / other.m20, this->m21 / other.m21,
-                this->m22 / other.m22};
-    }
-    Mat3x3 Mat3x3::operator/(const float& other) const {
-        return {this->m00 / other, this->m01 / other, this->m02 / other, this->m10 / other, this->m11 / other,
-                this->m12 / other, this->m20 / other, this->m21 / other, this->m22 / other};
-    }
-    Mat3x3 Mat3x3::operator+=(const Mat3x3& other)
-    {
-        this->m00 += other.m00;
-        this->m01 += other.m01;
-        this->m02 += other.m02;
-        this->m10 += other.m10;
-        this->m11 += other.m11;
-        this->m12 += other.m12;
-        this->m20 += other.m20;
-        this->m21 += other.m21;
-        this->m22 += other.m22;
-        return *this;
-    }
-    Mat3x3 Mat3x3::operator-=(const Mat3x3& other)
-    {
-        this->m00 -= other.m00;
-        this->m01 -= other.m01;
-        this->m02 -= other.m02;
-        this->m10 -= other.m10;
-        this->m11 -= other.m11;
-        this->m12 -= other.m12;
-        this->m20 -= other.m20;
-        this->m21 -= other.m21;
-        this->m22 -= other.m22;
-        return *this;
-    }
-    Mat3x3 Mat3x3::operator*=(const Mat3x3& other)
-    {
-        this->m00 = this->m00 * other.m00 + this->m01 * other.m10 + this->m02 * other.m20;
-        this->m01 = this->m00 * other.m01 + this->m01 * other.m11 + this->m02 * other.m21;
-        this->m02 = this->m00 * other.m02 + this->m01 * other.m12 + this->m02 * other.m22;
-        this->m10 = this->m10 * other.m00 + this->m11 * other.m10 + this->m12 * other.m20;
-        this->m11 = this->m10 * other.m01 + this->m11 * other.m11 + this->m12 * other.m21;
-        this->m12 = this->m10 * other.m02 + this->m11 * other.m12 + this->m12 * other.m22;
-        this->m20 = this->m20 * other.m00 + this->m21 * other.m10 + this->m22 * other.m20;
-        this->m21 = this->m20 * other.m01 + this->m21 * other.m11 + this->m22 * other.m21;
-        this->m22 = this->m20 * other.m02 + this->m21 * other.m12 + this->m22 * other.m22;
-        return *this;
-    }
-    Mat3x3 Mat3x3::operator*=(const float& other)
-    {
-        this->m00 *= other;
-        this->m01 *= other;
-        this->m02 *= other;
-        this->m10 *= other;
-        this->m11 *= other;
-        this->m12 *= other;
-        this->m20 *= other;
-        this->m21 *= other;
-        this->m22 *= other;
-        return *this;
-    }
-    Mat3x3 Mat3x3::operator/=(const Mat3x3& other)
-    {
-        this->m00 /= other.m00;
-        this->m01 /= other.m01;
-        this->m02 /= other.m02;
-        this->m10 /= other.m10;
-        this->m11 /= other.m11;
-        this->m12 /= other.m12;
-        this->m20 /= other.m20;
-        this->m21 /= other.m21;
-        this->m22 /= other.m22;
-        return *this;
-    }
-    Mat3x3 Mat3x3::operator/=(const float& other) {
-        this->m00 /= other;
-        this->m01 /= other;
-        this->m02 /= other;
-        this->m10 /= other;
-        this->m11 /= other;
-        this->m12 /= other;
-        this->m20 /= other;
-        this->m21 /= other;
-        this->m22 /= other;
-        return *this;
-    }
-    bool Mat3x3::operator==(const Mat3x3& other) const {
-        return this->m00 == other.m00 && this->m01 == other.m01 && this->m02 == other.m02 && this->m10 == other.m10 &&
-               this->m11 == other.m11 && this->m12 == other.m12 && this->m20 == other.m20 && this->m21 == other.m21 &&
-               this->m22 == other.m22;
-    }
-    bool Mat3x3::operator!=(const Mat3x3& other) const {
-        return this->m00 != other.m00 || this->m01 != other.m01 || this->m02 != other.m02 || this->m10 != other.m10 ||
-               this->m11 != other.m11 || this->m12 != other.m12 || this->m20 != other.m20 || this->m21 != other.m21 ||
-               this->m22 != other.m22;
-    }
-    Mat3x3 Mat3x3::transpose() const {
-        return {this->m00, this->m10, this->m20, this->m01, this->m11, this->m21, this->m02, this->m12, this->m22};
-    }
-    Mat3x3 Mat3x3::inverse() const {
-        float det = this->m00 * (this->m11 * this->m22 - this->m12 * this->m21) -
-                    this->m01 * (this->m10 * this->m22 - this->m12 * this->m20) +
-                    this->m02 * (this->m10 * this->m21 - this->m11 * this->m20);
-        if (det == 0.0) {
-            return *this;
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                result.data[i][j] = this->cofactor(i, j) / det;
+            }
         }
-        return {(this->m11 * this->m22 - this->m12 * this->m21) / det,
-                (this->m02 * this->m21 - this->m01 * this->m22) / det,
-                (this->m01 * this->m12 - this->m02 * this->m11) / det,
-                (this->m12 * this->m20 - this->m10 * this->m22) / det,
-                (this->m00 * this->m22 - this->m02 * this->m20) / det,
-                (this->m02 * this->m10 - this->m00 * this->m12) / det,
-                (this->m10 * this->m21 - this->m11 * this->m20) / det,
-                (this->m01 * this->m20 - this->m00 * this->m21) / det,
-                (this->m00 * this->m11 - this->m01 * this->m10) / det};
+        return result;
     }
-    float Mat3x3::determinant() const {
-        return this->m00 * (this->m11 * this->m22 - this->m12 * this->m21) -
-               this->m01 * (this->m10 * this->m22 - this->m12 * this->m20) +
-               this->m02 * (this->m10 * this->m21 - this->m11 * this->m20);
-    }
-
-    Mat4x4::Mat4x4()
+    float Mat::determinant() const
     {
-        this->m00 = 1.0;
-        this->m01 = 0.0;
-        this->m02 = 0.0;
-        this->m03 = 0.0;
-        this->m10 = 0.0;
-        this->m11 = 1.0;
-        this->m12 = 0.0;
-        this->m13 = 0.0;
-        this->m20 = 0.0;
-        this->m21 = 0.0;
-        this->m22 = 1.0;
-        this->m23 = 0.0;
-        this->m30 = 0.0;
-        this->m31 = 0.0;
-        this->m32 = 0.0;
-        this->m33 = 1.0;
-    }
-    Mat4x4::Mat4x4(float m00, float m01, float m02, float m03, float m10, float m11, float m12, float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33)
-    {
-        this->m00 = m00;
-        this->m01 = m01;
-        this->m02 = m02;
-        this->m03 = m03;
-        this->m10 = m10;
-        this->m11 = m11;
-        this->m12 = m12;
-        this->m13 = m13;
-        this->m20 = m20;
-        this->m21 = m21;
-        this->m22 = m22;
-        this->m23 = m23;
-        this->m30 = m30;
-        this->m31 = m31;
-        this->m32 = m32;
-        this->m33 = m33;
-    }
-    Mat4x4 Mat4x4::operator+(const Mat4x4& other) const {
-        return {this->m00 + other.m00, this->m01 + other.m01, this->m02 + other.m02, this->m03 + other.m03,
-                this->m10 + other.m10, this->m11 + other.m11, this->m12 + other.m12, this->m13 + other.m13,
-                this->m20 + other.m20, this->m21 + other.m21, this->m22 + other.m22, this->m23 + other.m23,
-                this->m30 + other.m30, this->m31 + other.m31, this->m32 + other.m32, this->m33 + other.m33};
-    }
-    Mat4x4 Mat4x4::operator-(const Mat4x4& other) const {
-        return {this->m00 - other.m00, this->m01 - other.m01, this->m02 - other.m02, this->m03 - other.m03,
-                this->m10 - other.m10, this->m11 - other.m11, this->m12 - other.m12, this->m13 - other.m13,
-                this->m20 - other.m20, this->m21 - other.m21, this->m22 - other.m22, this->m23 - other.m23,
-                this->m30 - other.m30, this->m31 - other.m31, this->m32 - other.m32, this->m33 - other.m33};
-    }
-    Mat4x4 Mat4x4::operator*(const Mat4x4& other) const {
-        return {this->m00 * other.m00 + this->m01 * other.m10 + this->m02 * other.m20 + this->m03 * other.m30,
-                this->m00 * other.m01 + this->m01 * other.m11 + this->m02 * other.m21 + this->m03 * other.m31,
-                this->m00 * other.m02 + this->m01 * other.m12 + this->m02 * other.m22 + this->m03 * other.m32,
-                this->m00 * other.m03 + this->m01 * other.m13 + this->m02 * other.m23 + this->m03 * other.m33,
-                this->m10 * other.m00 + this->m11 * other.m10 + this->m12 * other.m20 + this->m13 * other.m30,
-                this->m10 * other.m01 + this->m11 * other.m11 + this->m12 * other.m21 + this->m13 * other.m31,
-                this->m10 * other.m02 + this->m11 * other.m12 + this->m12 * other.m22 + this->m13 * other.m32,
-                this->m10 * other.m03 + this->m11 * other.m13 + this->m12 * other.m23 + this->m13 * other.m33,
-                this->m20 * other.m00 + this->m21 * other.m10 + this->m22 * other.m20 + this->m23 * other.m30,
-                this->m20 * other.m01 + this->m21 * other.m11 + this->m22 * other.m21 + this->m23 * other.m31,
-                this->m20 * other.m02 + this->m21 * other.m12 + this->m22 * other.m22 + this->m23 * other.m32,
-                this->m20 * other.m03 + this->m21 * other.m13 + this->m22 * other.m23 + this->m23 * other.m33,
-                this->m30 * other.m00 + this->m31 * other.m10 + this->m32 * other.m20 + this->m33 * other.m30,
-                this->m30 * other.m01 + this->m31 * other.m11 + this->m32 * other.m21 + this->m33 * other.m31,
-                this->m30 * other.m02 + this->m31 * other.m12 + this->m32 * other.m22 + this->m33 * other.m32,
-                this->m30 * other.m03 + this->m31 * other.m13 + this->m32 * other.m23 + this->m33 * other.m33};
-    }
-    Mat4x4 Mat4x4::operator*(const float& other) const {
-        return {this->m00 * other, this->m01 * other, this->m02 * other, this->m03 * other,
-                this->m10 * other, this->m11 * other, this->m12 * other, this->m13 * other,
-                this->m20 * other, this->m21 * other, this->m22 * other, this->m23 * other,
-                this->m30 * other, this->m31 * other, this->m32 * other, this->m33 * other};
-    }
-    Mat4x4 Mat4x4::operator/(const Mat4x4& other) const {
-        return {this->m00 / other.m00, this->m01 / other.m01, this->m02 / other.m02, this->m03 / other.m03,
-                this->m10 / other.m10, this->m11 / other.m11, this->m12 / other.m12, this->m13 / other.m13,
-                this->m20 / other.m20, this->m21 / other.m21, this->m22 / other.m22, this->m23 / other.m23,
-                this->m30 / other.m30, this->m31 / other.m31, this->m32 / other.m32, this->m33 / other.m33};
-    }
-    Mat4x4 Mat4x4::operator/(const float& other) const {
-        return {this->m00 / other, this->m01 / other, this->m02 / other, this->m03 / other,
-                this->m10 / other, this->m11 / other, this->m12 / other, this->m13 / other,
-                this->m20 / other, this->m21 / other, this->m22 / other, this->m23 / other,
-                this->m30 / other, this->m31 / other, this->m32 / other, this->m33 / other};
-    }
-    Mat4x4 Mat4x4::operator+=(const Mat4x4& other)
-    {
-        this->m00 += other.m00;
-        this->m01 += other.m01;
-        this->m02 += other.m02;
-        this->m03 += other.m03;
-        this->m10 += other.m10;
-        this->m11 += other.m11;
-        this->m12 += other.m12;
-        this->m13 += other.m13;
-        this->m20 += other.m20;
-        this->m21 += other.m21;
-        this->m22 += other.m22;
-        this->m23 += other.m23;
-        this->m30 += other.m30;
-        this->m31 += other.m31;
-        this->m32 += other.m32;
-        this->m33 += other.m33;
-        return *this;
-    }
-    Mat4x4 Mat4x4::operator-=(const Mat4x4& other)
-    {
-        this->m00 -= other.m00;
-        this->m01 -= other.m01;
-        this->m02 -= other.m02;
-        this->m03 -= other.m03;
-        this->m10 -= other.m10;
-        this->m11 -= other.m11;
-        this->m12 -= other.m12;
-        this->m13 -= other.m13;
-        this->m20 -= other.m20;
-        this->m21 -= other.m21;
-        this->m22 -= other.m22;
-        this->m23 -= other.m23;
-        this->m30 -= other.m30;
-        this->m31 -= other.m31;
-        this->m32 -= other.m32;
-        this->m33 -= other.m33;
-        return *this;
-    }
-    Mat4x4 Mat4x4::operator*=(const Mat4x4& other) {
-        this->m00 = this->m00 * other.m00 + this->m01 * other.m10 + this->m02 * other.m20 + this->m03 * other.m30;
-        this->m01 = this->m00 * other.m01 + this->m01 * other.m11 + this->m02 * other.m21 + this->m03 * other.m31;
-        this->m02 = this->m00 * other.m02 + this->m01 * other.m12 + this->m02 * other.m22 + this->m03 * other.m32;
-        this->m03 = this->m00 * other.m03 + this->m01 * other.m13 + this->m02 * other.m23 + this->m03 * other.m33;
-        this->m10 = this->m10 * other.m00 + this->m11 * other.m10 + this->m12 * other.m20 + this->m13 * other.m30;
-        this->m11 = this->m10 * other.m01 + this->m11 * other.m11 + this->m12 * other.m21 + this->m13 * other.m31;
-        this->m12 = this->m10 * other.m02 + this->m11 * other.m12 + this->m12 * other.m22 + this->m13 * other.m32;
-        this->m13 = this->m10 * other.m03 + this->m11 * other.m13 + this->m12 * other.m23 + this->m13 * other.m33;
-        this->m20 = this->m20 * other.m00 + this->m21 * other.m10 + this->m22 * other.m20 + this->m23 * other.m30;
-        this->m21 = this->m20 * other.m01 + this->m21 * other.m11 + this->m22 * other.m21 + this->m23 * other.m31;
-        this->m22 = this->m20 * other.m02 + this->m21 * other.m12 + this->m22 * other.m22 + this->m23 * other.m32;
-        this->m23 = this->m20 * other.m03 + this->m21 * other.m13 + this->m22 * other.m23 + this->m23 * other.m33;
-        this->m30 = this->m30 * other.m00 + this->m31 * other.m10 + this->m32 * other.m20 + this->m33 * other.m30;
-        this->m31 = this->m30 * other.m01 + this->m31 * other.m11 + this->m32 * other.m21 + this->m33 * other.m31;
-        this->m32 = this->m30 * other.m02 + this->m31 * other.m12 + this->m32 * other.m22 + this->m33 * other.m32;
-        this->m33 = this->m30 * other.m03 + this->m31 * other.m13 + this->m32 * other.m23 + this->m33 * other.m33;
-        return *this;
-    }
-    Mat4x4 Mat4x4::operator*=(const float& other) {
-        this->m00 *= other;
-        this->m01 *= other;
-        this->m02 *= other;
-        this->m03 *= other;
-        this->m10 *= other;
-        this->m11 *= other;
-        this->m12 *= other;
-        this->m13 *= other;
-        this->m20 *= other;
-        this->m21 *= other;
-        this->m22 *= other;
-        this->m23 *= other;
-        this->m30 *= other;
-        this->m31 *= other;
-        this->m32 *= other;
-        this->m33 *= other;
-        return *this;
-    }
-    Mat4x4 Mat4x4::operator/=(const Mat4x4& other) {
-        this->m00 /= other.m00;
-        this->m01 /= other.m01;
-        this->m02 /= other.m02;
-        this->m03 /= other.m03;
-        this->m10 /= other.m10;
-        this->m11 /= other.m11;
-        this->m12 /= other.m12;
-        this->m13 /= other.m13;
-        this->m20 /= other.m20;
-        this->m21 /= other.m21;
-        this->m22 /= other.m22;
-        this->m23 /= other.m23;
-        this->m30 /= other.m30;
-        this->m31 /= other.m31;
-        this->m32 /= other.m32;
-        this->m33 /= other.m33;
-        return *this;
-    }
-    Mat4x4 Mat4x4::operator/=(const float& other) {
-        this->m00 /= other;
-        this->m01 /= other;
-        this->m02 /= other;
-        this->m03 /= other;
-        this->m10 /= other;
-        this->m11 /= other;
-        this->m12 /= other;
-        this->m13 /= other;
-        this->m20 /= other;
-        this->m21 /= other;
-        this->m22 /= other;
-        this->m23 /= other;
-        this->m30 /= other;
-        this->m31 /= other;
-        this->m32 /= other;
-        this->m33 /= other;
-        return *this;
-    }
-    bool Mat4x4::operator==(const Mat4x4& other) const {
-        return this->m00 == other.m00 && this->m01 == other.m01 && this->m02 == other.m02 && this->m03 == other.m03 &&
-               this->m10 == other.m10 && this->m11 == other.m11 && this->m12 == other.m12 && this->m13 == other.m13 &&
-               this->m20 == other.m20 && this->m21 == other.m21 && this->m22 == other.m22 && this->m23 == other.m23 &&
-               this->m30 == other.m30 && this->m31 == other.m31 && this->m32 == other.m32 && this->m33 == other.m33;
-    }
-    bool Mat4x4::operator!=(const Mat4x4& other) const {
-        return this->m00 != other.m00 || this->m01 != other.m01 || this->m02 != other.m02 || this->m03 != other.m03 ||
-               this->m10 != other.m10 || this->m11 != other.m11 || this->m12 != other.m12 || this->m13 != other.m13 ||
-               this->m20 != other.m20 || this->m21 != other.m21 || this->m22 != other.m22 || this->m23 != other.m23 ||
-               this->m30 != other.m30 || this->m31 != other.m31 || this->m32 != other.m32 || this->m33 != other.m33;
-    }
-    Mat4x4 Mat4x4::transpose() const {
-        return {this->m00, this->m10, this->m20, this->m30, this->m01, this->m11, this->m21, this->m31,
-                this->m02, this->m12, this->m22, this->m32, this->m03, this->m13, this->m23, this->m33};
-    }
-    Mat4x4 Mat4x4::inverse() const {
-        float det = this->m00 * (this->m11 * (this->m22 * this->m33 - this->m23 * this->m32) -
-                                 this->m12 * (this->m21 * this->m33 - this->m23 * this->m31) +
-                                 this->m13 * (this->m21 * this->m32 - this->m22 * this->m31)) -
-                    this->m01 * (this->m10 * (this->m22 * this->m33 - this->m23 * this->m32) -
-                                 this->m12 * (this->m20 * this->m33 - this->m23 * this->m30) +
-                                 this->m13 * (this->m20 * this->m32 - this->m22 * this->m30)) +
-                    this->m02 * (this->m10 * (this->m21 * this->m33 - this->m23 * this->m31) -
-                                 this->m11 * (this->m20 * this->m33 - this->m23 * this->m30) +
-                                 this->m13 * (this->m20 * this->m31 - this->m21 * this->m30)) -
-                    this->m03 * (this->m10 * (this->m21 * this->m32 - this->m22 * this->m31) -
-                                 this->m11 * (this->m20 * this->m32 - this->m22 * this->m30) +
-                                 this->m12 * (this->m20 * this->m31 - this->m21 * this->m30));
-        if (det == 0.0) {
-            return *this;
+        if (this->rows != this->cols)
+        {
+            return 0.0;
         }
-        return {(this->m11 * (this->m22 * this->m33 - this->m23 * this->m32) -
-                 this->m12 * (this->m21 * this->m33 - this->m23 * this->m31) +
-                 this->m13 * (this->m21 * this->m32 - this->m22 * this->m31)) / det,
-                (this->m02 * (this->m23 * this->m31 - this->m21 * this->m33) -
-                 this->m03 * (this->m22 * this->m31 - this->m21 * this->m32) +
-                 this->m01 * (this->m22 * this->m33 - this->m23 * this->m32)) / det,
-                (this->m03 * (this->m11 * this->m22 - this->m12 * this->m21) -
-                 this->m01 * (this->m13 * this->m22 - this->m12 * this->m23) +
-                 this->m02 * (this->m13 * this->m21 - this->m11 * this->m23)) / det,
-                (this->m01 * (this->m13 * this->m32 - this->m12 * this->m33) -
-                 this->m02 * (this->m11 * this->m33 - this->m13 * this->m31) +
-                 this->m03 * (this->m12 * this->m31 - this->m11 * this->m32)) / det,
-                (this->m12 * (this->m20 * this->m33 - this->m23 * this->m30) -
-                 this->m13 * (this->m20 * this->m32 - this->m22 * this->m30) +
-                 this->m10 * (this->m22 * this->m33 - this->m23 * this->m32)) / det,
-                (this->m03 * (this->m20 * this->m32 - this->m22 * this->m30) -
-                 this->m00 * (this->m22 * this->m33 - this->m23 * this->m32) +
-                 this->m02 * (this->m23 * this->m30 - this->m20 * this->m33)) / det,
-                (this->m00 * (this->m13 * this->m32 - this->m12 * this->m33) -
-                 this->m02 * (this->m10 * this->m33 - this->m13 * this->m30) +
-                 this->m03 * (this->m12 * this->m30 - this->m10 * this->m32)) / det,
-                (this->m02 * (this->m10 * this->m33 - this->m13 * this->m30) -
-                 this->m03 * (this->m10 * this->m32 - this->m12 * this->m30) +
-                 this->m00 * (this->m12 * this->m33 - this->m13 * this->m32)) / det,
-                (this->m13 * (this->m20 * this->m31 - this->m21 * this->m30) -
-                 this->m10 * (this->m23 * this->m31 - this->m21 * this->m33) +
-                 this->m11 * (this->m23 * this->m30 - this->m20 * this->m33)) / det,
-                (this->m00 * (this->m21 * this->m33 - this->m23 * this->m31) -
-                 this->m01 * (this->m20 * this->m33 - this->m23 * this->m30) +
-                 this->m03 * (this->m20 * this->m31 - this->m21 * this->m30)) / det,
-                (this->m01 * (this->m10 * this->m33 - this->m13 * this->m30) -
-                 this->m03 * (this->m10 * this->m31 - this->m11 * this->m30) +
-                 this->m00 * (this->m13 * this->m31 - this->m11 * this->m33)) / det,
-                (this->m03 * (this->m10 * this->m21 - this->m11 * this->m20) -
-                 this->m00 * (this->m13 * this->m21 - this->m11 * this->m23) +
-                 this->m01 * (this->m13 * this->m20 - this->m10 * this->m23)) / det,
-                (this->m11 * (this->m20 * this->m32 - this->m22 * this->m30) -
-                 this->m10 * (this->m21 * this->m32 - this->m22 * this->m31) +
-                 this->m12 * (this->m21 * this->m30 - this->m20 * this->m31)) / det,
-                (this->m00 * (this->m22 * this->m31 - this->m21 * this->m32) -
-                 this->m01 * (this->m20 * this->m32 - this->m22 * this->m30) +
-                 this->m02 * (this->m21 * this->m30 - this->m20 * this->m31)) / det,
-                (this->m01 * (this->m10 * this->m32 - this->m12 * this->m30) -
-                 this->m02 * (this->m10 * this->m31 - this->m11 * this->m30) +
-                 this->m00 * (this->m12 * this->m31 - this->m11 * this->m32)) / det,
-                (this->m02 * (this->m11 * this->m20 - this->m10 * this->m21) -
-                 this->m00 * (this->m12 * this->m21 - this->m11 * this->m22) +
-                 this->m01 * (this->m10 * this->m22 - this->m12 * this->m20)) / det};
+        if (this->rows == 2)
+        {
+            return this->data[0][0] * this->data[1][1] - this->data[0][1] * this->data[1][0];
+        }
+        float det = 0.0;
+        for (int i = 0; i < this->rows; i++)
+        {
+            det += this->data[0][i] * this->cofactor(0, i);
+        }
+        return det;
     }
-
+    float Mat::cofactor(int row, int col) const
+    {
+        Mat submatrix(this->rows - 1, this->cols - 1);
+        for (int i = 0; i < this->rows; i++)
+        {
+            for (int j = 0; j < this->cols; j++)
+            {
+                if (i != row && j != col)
+                {
+                    submatrix.data[i - (i > row ? 1 : 0)][j - (j > col ? 1 : 0)] = this->data[i][j];
+                }
+            }
+        }
+        return submatrix.determinant() * (row + col % 2 == 0 ? 1 : -1);
+    }
+    Mat Mat::identity(int size)
+    {
+        Mat result(size, size);
+        for (int i = 0; i < size; i++)
+        {
+            result.data[i][i] = 1.0;
+        }
+        return result;
+    }
+    Mat Mat::zero(int rows, int cols)
+    {
+        Mat result(rows, cols);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                result.data[i][j] = 0.0;
+            }
+        }
+        return result;
+    }
+    Mat Mat::translate(const Pomegranate::Vec3 &translation)
+    {
+        Mat result(4, 4);
+        result.data[0][0] = 1.0;
+        result.data[1][1] = 1.0;
+        result.data[2][2] = 1.0;
+        result.data[3][3] = 1.0;
+        result.data[0][3] = translation.x;
+        result.data[1][3] = translation.y;
+        result.data[2][3] = translation.z;
+        return result;
+    }
+    Mat Mat::scale(const Pomegranate::Vec3 &scale)
+    {
+        Mat result(4, 4);
+        result.data[0][0] = scale.x;
+        result.data[1][1] = scale.y;
+        result.data[2][2] = scale.z;
+        result.data[3][3] = 1.0;
+        return result;
+    }
+    Mat Mat::rotate(float angle, const Pomegranate::Vec3 &axis)
+    {
+        float s = sin(angle);
+        float c = cos(angle);
+        float oc = 1.0f - c;
+        Mat result(4, 4);
+        result.data[0][0] = oc * axis.x * axis.x + c;
+        result.data[0][1] = oc * axis.x * axis.y - axis.z * s;
+        result.data[0][2] = oc * axis.x * axis.z + axis.y * s;
+        result.data[0][3] = 0.0;
+        result.data[1][0] = oc * axis.x * axis.y + axis.z * s;
+        result.data[1][1] = oc * axis.y * axis.y + c;
+        result.data[1][2] = oc * axis.y * axis.z - axis.x * s;
+        result.data[1][3] = 0.0;
+        result.data[2][0] = oc * axis.x * axis.z - axis.y * s;
+        result.data[2][1] = oc * axis.y * axis.z + axis.x * s;
+        result.data[2][2] = oc * axis.z * axis.z + c;
+        result.data[2][3] = 0.0;
+        result.data[3][0] = 0.0;
+        result.data[3][1] = 0.0;
+        result.data[3][2] = 0.0;
+        result.data[3][3] = 1.0;
+        return result;
+    }
+    Mat Mat::look_at(const Pomegranate::Vec3 &eye, const Pomegranate::Vec3 &center, const Pomegranate::Vec3 &up)
+    {
+        Pomegranate::Vec3 f = (center - eye).normalized();
+        Pomegranate::Vec3 r = f.cross(up).normalized();
+        Pomegranate::Vec3 u = r.cross(f);
+        Mat result(4, 4);
+        result.data[0][0] = r.x;
+        result.data[0][1] = r.y;
+        result.data[0][2] = r.z;
+        result.data[0][3] = -r.dot(eye);
+        result.data[1][0] = u.x;
+        result.data[1][1] = u.y;
+        result.data[1][2] = u.z;
+        result.data[1][3] = -u.dot(eye);
+        result.data[2][0] = -f.x;
+        result.data[2][1] = -f.y;
+        result.data[2][2] = -f.z;
+        result.data[2][3] = f.dot(eye);
+        result.data[3][0] = 0.0;
+        result.data[3][1] = 0.0;
+        result.data[3][2] = 0.0;
+        result.data[3][3] = 1.0;
+        return result;
+    }
+    Mat Mat::perspective(float fov, float aspect, float near, float far)
+    {
+        float f = 1.0f / tan(fov / 2.0f);
+        Mat result(4, 4);
+        result.data[0][0] = f / aspect;
+        result.data[0][1] = 0.0;
+        result.data[0][2] = 0.0;
+        result.data[0][3] = 0.0;
+        result.data[1][0] = 0.0;
+        result.data[1][1] = f;
+        result.data[1][2] = 0.0;
+        result.data[1][3] = 0.0;
+        result.data[2][0] = 0.0;
+        result.data[2][1] = 0.0;
+        result.data[2][2] = -((far) / (near - far));
+        result.data[2][3] = -((far * near) / (near - far));
+        result.data[3][0] = 0.0;
+        result.data[3][1] = 0.0;
+        result.data[3][2] = -1.0;
+        result.data[3][3] = 0.0;
+        return result;
+    }
+    Mat Mat::orthographic(float left, float right, float bottom, float top, float near, float far)
+    {
+        Mat result(4, 4);
+        result.data[0][0] = 2.0f / (right - left);
+        result.data[0][1] = 0.0;
+        result.data[0][2] = 0.0;
+        result.data[0][3] = -(right + left) / (right - left);
+        result.data[1][0] = 0.0;
+        result.data[1][1] = 2.0f / (top - bottom);
+        result.data[1][2] = 0.0;
+        result.data[1][3] = -(top + bottom) / (top - bottom);
+        result.data[2][0] = 0.0;
+        result.data[2][1] = 0.0;
+        result.data[2][2] = -2.0f / (far - near);
+        result.data[2][3] = -(far + near) / (far - near);
+        result.data[3][0] = 0.0;
+        result.data[3][1] = 0.0;
+        result.data[3][2] = 0.0;
+        result.data[3][3] = 1.0;
+        return result;
+    }
 }
