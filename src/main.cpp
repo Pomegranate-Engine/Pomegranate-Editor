@@ -21,6 +21,7 @@ using namespace Pomegranate;
 #include "theme.h"
 #include "notifications.h"
 #include "hotkey_manager.h"
+#include <vulkan/vulkan.hpp>
 
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
@@ -259,6 +260,23 @@ public:
 
 int main(int argc, char* argv[])
 {
+    //init vulkan
+    VkInstance instance;
+    VkApplicationInfo app_info = {};
+    app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    app_info.pApplicationName = "Pomegranate";
+    app_info.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    app_info.pEngineName = "Pomegranate";
+    app_info.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    app_info.apiVersion = VK_API_VERSION_1_0;
+    VkInstanceCreateInfo create_info = {};
+    create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    create_info.pApplicationInfo = &app_info;
+    if(vkCreateInstance(&create_info, nullptr, &instance) != VK_SUCCESS)
+    {
+        print_error("Failed to create vulkan instance");
+        return -1;
+    }
     //region init
     pomegranate_init(); //Init
     ImGui::CreateContext(); //Create imgui context

@@ -102,6 +102,10 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_mixer.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_ttf.dylib
             ${LUAJIT_LIBRARY}
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libvulkan.1.3.275.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libvulkan.1.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libvulkan.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libMoltenVK.dylib
     )
 elseif(WIN32)
     find_package(OpenMP)
