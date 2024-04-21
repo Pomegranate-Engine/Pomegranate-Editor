@@ -9,8 +9,6 @@
 #include<backends/imgui_impl_sdl3.h>
 #include<backends/imgui_impl_sdlrenderer3.h>
 using namespace Pomegranate;
-#include <vulkan/vulkan.hpp>
-#include <SDL3/SDL_vulkan.h>
 
 //Editor
 #include "editor_window.h"
@@ -24,21 +22,6 @@ using namespace Pomegranate;
 #include "notifications.h"
 #include "hotkey_manager.h"
 
-
-//Vulkan
-#ifdef _WIN32
-#pragma comment(linker, "/subsystem:console")
-#define VK_USE_PLATFORM_WIN32_KHR
-#define PLATFORM_SURFACE_EXTENSION_NAME VK_KHR_WIN32_SURFACE_EXTENSION_NAME
-#endif
-
-#define APP_NAME "hello-triangle"
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
-#ifndef UINT32_MAX
-#define UINT32_MAX 0xffffffff
-#endif
-
-
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
 const std::string VERSION = "0.0.1";
@@ -47,22 +30,14 @@ const std::string VERSION = "0.0.1";
 
 #include "components.cpp"
 
-#include "vulkan.cpp"
-
 int main(int argc, char* argv[])
 {
     //region init
     pomegranate_init(); //Init
-    SDL_Vulkan_LoadLibrary(nullptr);
     ImGui::CreateContext(); //Create imgui context
     main_window.open(); //Open window
     main_window.make_current(); //Make window current
     main_window.set_icon("engine/pomegranate.png");
-
-    VkInstance vkInst;
-    VkDevice device;
-    init_vulkan(&vkInst,&device);
-
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -182,9 +157,6 @@ int main(int argc, char* argv[])
         tick_time += delta_time;
     }
     main_window.close();
-    vkDestroyDevice(device, nullptr);
-    vkDestroyInstance(vkInst, nullptr);
-    SDL_Vulkan_UnloadLibrary();
     pomegranate_quit(); //Cleanup
     return 0;
 }
