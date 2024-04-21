@@ -109,7 +109,11 @@ if(APPLE)
     )
 elseif(WIN32)
     find_package(OpenMP)
+    find_package(Vulkan REQUIRED)
+    target_include_directories(Pomegranate_Engine PRIVATE ${Vulkan_INCLUDE_DIRS})
+
     target_link_libraries(Pomegranate_Engine PRIVATE
+            Vulkan::Vulkan
             ${SDL_LIBRARY_DIR}/SDL3.lib
             ${SDL_LIBRARY_DIR}/SDL3_ttf.lib
             ${SDL_LIBRARY_DIR}/SDL3_image.lib

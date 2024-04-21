@@ -3,6 +3,7 @@
 #include<cstdio>
 #include <iostream>
 #include <cmath>
+#include <vector>
 namespace Pomegranate
 {
     struct Vec2;
