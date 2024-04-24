@@ -10,12 +10,6 @@
 #include<backends/imgui_impl_sdlrenderer3.h>
 using namespace Pomegranate;
 
-#include<glew/glew.h>
-#include<GL/GL.h>
-
-#include"gl/shader.h"
-#include"gl/mesh.h"
-
 
 //Editor
 #include "editor_window.h"
@@ -34,6 +28,14 @@ Window main_window = Window("Pomegranate Editor", 1024, 720);
 const std::string VERSION = "0.0.1";
 
 #define EDITOR_MODE
+
+#ifdef USE_OPENGL
+#include<glew/glew.h>
+#include<GL/GL.h>
+
+#include"gl/shader.h"
+#include"gl/mesh.h"
+#endif
 
 #include "components.cpp"
 
@@ -63,6 +65,7 @@ int main(int argc, char* argv[])
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
+#ifdef USE_OPENGL
     //OpenGL
     SDL_GLContext gl_context = SDL_GL_CreateContext(main_window.get_sdl_window());
     //Set version
@@ -74,7 +77,6 @@ int main(int argc, char* argv[])
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
-
 
     //Load default shader
     auto* shader = ResourceManager::load<Shader>("res/default.glsl");
@@ -132,6 +134,7 @@ int main(int argc, char* argv[])
     };
 
     Mesh mesh = Mesh(vertices,indices,face_normals);
+#endif
 
     //Set font
     io.Fonts->AddFontFromFileTTF("engine/zed_font.ttf", 18.0f);
@@ -216,10 +219,8 @@ int main(int argc, char* argv[])
         HotkeyManager::tick();
         windows_manager.update();
         //- - - - - # RENDERING # - - - - -
-        //Clear SDL renderer
-        //SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
-        //SDL_RenderClear(Window::current->get_sdl_renderer());
 
+#ifdef USE_OPENGL
         glViewport(0,0,main_window.get_width(),main_window.get_height());
         glClearColor(0.0,0.0,0.0,1.0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -235,9 +236,14 @@ int main(int argc, char* argv[])
         shader->set<Mat>("model", create_transform_matrix(Vec3(cos(time)*2,sin(time)*2,-5.0f),Vec3(0.0f,-time,time),Vec3(1.0f,1.0f,1.0f)));
         //Draw triangle with uvs
         mesh.draw();
+        SDL_GL_SwapWindow(main_window.get_sdl_window());
+#endif
 
+#ifndef USE_OPENGL
+        //Clear SDL renderer
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
+        SDL_RenderClear(Window::current->get_sdl_renderer());
 
-        /*
         //Begin imgui
         ImGui_ImplSDLRenderer3_NewFrame();
         ImGui_ImplSDL3_NewFrame();
@@ -248,11 +254,8 @@ int main(int argc, char* argv[])
         Notify::render(delta_time);
         ImGui::Render();
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
-        */
-
-
-        SDL_GL_SwapWindow(main_window.get_sdl_window());
-        //SDL_RenderPresent(Window::current->get_sdl_renderer()); //Present
+        SDL_RenderPresent(Window::current->get_sdl_renderer()); //Present
+#endif
 
         //- - - - - # AFTER FRAME # - - - - -
 

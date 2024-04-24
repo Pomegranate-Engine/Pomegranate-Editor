@@ -1,8 +1,6 @@
-//
-// Created by rlebg on 4/21/2024.
-//
-
 #include "Mesh.h"
+
+#ifdef USE_OPENGL
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Vec3> face_normals)
 {
@@ -84,3 +82,5 @@ Mesh::~Mesh()
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
 }
+
+#endif

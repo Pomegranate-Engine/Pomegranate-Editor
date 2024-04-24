@@ -1,5 +1,8 @@
 #ifndef POMEGRANATE_ENGINE_SHADER_H
 #define POMEGRANATE_ENGINE_SHADER_H
+
+#ifdef USE_OPENGL
+
 #include<SDL3/SDL.h>
 #include<glew/glew.h>
 #include<GL/GL.h>
@@ -24,4 +27,6 @@ public:
 };
 
 #include "shader.inl"
+
+#endif
 #endif //POMEGRANATE_ENGINE_SHADER_H

@@ -1,6 +1,6 @@
 #ifndef POMEGRANATE_ENGINE_MESH_H
 #define POMEGRANATE_ENGINE_MESH_H
-
+#ifdef USE_OPENGL
 #include<SDL3/SDL.h>
 #include<glew/glew.h>
 #include<GL/GL.h>
@@ -36,5 +36,5 @@ public:
     ~Mesh();
 };
 
-
+#endif
 #endif //POMEGRANATE_ENGINE_MESH_H

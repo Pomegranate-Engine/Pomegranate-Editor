@@ -1,5 +1,5 @@
 #include "shader.h"
-
+#ifdef USE_OPENGL
 Shader::Shader(const char* path)
 {
     //Load shader from file
@@ -90,3 +90,4 @@ void Shader::use()
 {
     glUseProgram(ID);
 }
+#endif
