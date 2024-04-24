@@ -44,7 +44,7 @@ namespace Pomegranate
 #if defined(__APPLE__) //TODO: Implement better solution for HIGH_DPI
         HIGH_DPI = true;
 #endif
-        int flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED;
+        int flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_OPENGL;
         if(HIGH_DPI)
         {
             flags = flags | SDL_WINDOW_HIGH_PIXEL_DENSITY;

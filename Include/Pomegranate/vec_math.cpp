@@ -1175,6 +1175,7 @@ namespace Pomegranate
     }
     Mat Mat::perspective(float fov, float aspect, float near, float far)
     {
+        fov = fov * 3.14159265358979323846 / 180.0;
         float f = 1.0f / tan(fov / 2.0f);
         Mat result(4, 4);
         result.data[0][0] = f / aspect;

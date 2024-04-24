@@ -85,6 +85,12 @@ set(IMGUI_SOURCES
         src/hotkey_manager.h
         src/lua.cpp
         src/lua.h
+        src/gl/shader.cpp
+        src/gl/shader.h
+        src/gl/Mesh.cpp
+        src/gl/Mesh.h
+        src/gl/Mesh.cpp
+        src/gl/Mesh.h
 )
 
 # Add executable
@@ -109,17 +115,19 @@ if(APPLE)
     )
 elseif(WIN32)
     find_package(OpenMP)
-    find_package(Vulkan REQUIRED)
-    target_include_directories(Pomegranate_Engine PRIVATE ${Vulkan_INCLUDE_DIRS})
+    find_package(OpenGL REQUIRED)
+    target_include_directories(Pomegranate_Engine PRIVATE ${OpenGL_INCLUDE_DIRS})
 
     target_link_libraries(Pomegranate_Engine PRIVATE
-            Vulkan::Vulkan
+            OpenGL::GL
             ${SDL_LIBRARY_DIR}/SDL3.lib
             ${SDL_LIBRARY_DIR}/SDL3_ttf.lib
             ${SDL_LIBRARY_DIR}/SDL3_image.lib
             ${SDL_LIBRARY_DIR}/SDL3_mixer.lib
             ${SDL_LIBRARY_DIR}/lua51.lib
             OpenMP::OpenMP_CXX
+            ${SDL_LIBRARY_DIR}/glew32.lib
+            ${SDL_LIBRARY_DIR}/glew32s.lib
     )
 endif()
 

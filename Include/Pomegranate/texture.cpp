@@ -15,7 +15,7 @@ namespace Pomegranate
 	{
 		this->width = width;
 		this->height = height;
-		this->texture = SDL_CreateTexture(Window::current->get_sdl_renderer(),SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32,SDL_TextureAccess::SDL_TEXTUREACCESS_STATIC,width,height);
+		this->texture = SDL_CreateTexture(Window::current->get_sdl_renderer(),SDL_PixelFormatEnum::SDL_PIXELFORMAT_RGBA32,SDL_TextureAccess::SDL_TEXTUREACCESS_STREAMING,width,height);
 	}
 
     Texture::Texture(SDL_Texture *tex)
