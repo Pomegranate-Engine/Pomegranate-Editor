@@ -49,6 +49,22 @@ std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
 }
 json save_scene_as_json(EntityGroup* scene)
 {
+    //Coalesce groups and entities
+    EntityGroup::groups_id.clear();
+    int group_id = 0;
+    for (auto& group : EntityGroup::groups)
+    {
+        group.second->id = group_id;
+        EntityGroup::groups_id[group_id] = group.second;
+        group_id++;
+    }
+    int entity_id = 0;
+    for (auto& entity : Entity::entities)
+    {
+        entity.second->id = entity_id;
+        entity_id++;
+    }
+
     json j;
     //Get all groups
     auto groups = get_all_groups(scene);
@@ -58,6 +74,19 @@ json save_scene_as_json(EntityGroup* scene)
     {
         j["groups"][std::to_string(group->id)] = json::object();
         j["groups"][std::to_string(group->id)]["name"] = group->name;
+        if(typeid(*group) == typeid(AutoGroup))
+        {
+            j["groups"][std::to_string(group->id)]["type"] = "auto";
+            j["groups"][std::to_string(group->id)]["components"] = json::array();
+            for(auto& component : ((AutoGroup*)group)->component_types)
+            {
+                j["groups"][std::to_string(group->id)]["components"].push_back(component->name());
+            }
+        }
+        else
+        {
+            j["groups"][std::to_string(group->id)]["type"] = "normal";
+        }
         if(group->get_parent() != nullptr)
             j["groups"][std::to_string(group->id)]["parent"] = group->get_parent()->id;
     }
@@ -351,8 +380,21 @@ EntityGroup* open_scene_from_json(json data)
     //Load groups
     for (auto& [id, group] : data["groups"].items())
     {
-        EntityGroup* g = new EntityGroup(group["name"].get<std::string>());
-        print_info("Created group: " + g->name);
+        //Check if it is a auto group
+        if (group["type"] == "auto")
+        {
+            AutoGroup *g = new AutoGroup(group["name"].get<std::string>());
+            for (auto& component : group["components"])
+            {
+                g->add_component_type(component.get<std::string>());
+            }
+            print_info("Created group: " + g->name);
+        }
+        else
+        {
+            EntityGroup *g = new EntityGroup(group["name"].get<std::string>());
+            print_info("Created group: " + g->name);
+        }
     }
     //Link the groups together
     for (auto& [id, group] : data["groups"].items())

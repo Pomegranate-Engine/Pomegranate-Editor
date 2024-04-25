@@ -124,6 +124,13 @@ void Window_SceneView::render() {
                     SDL_RenderLine(Window::current->get_sdl_renderer(), (selected_entity_arrow_vert_pos.x-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y-this->position.y)*zoom + screen_h/2, (selected_entity_arrow_vert_pos.x-8-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y+8-this->position.y)*zoom + screen_h/2);
                     SDL_RenderLine(Window::current->get_sdl_renderer(), (selected_entity_arrow_vert_pos.x-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y-this->position.y)*zoom + screen_h/2, (selected_entity_arrow_vert_pos.x+8-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y+8-this->position.y)*zoom + screen_h/2);
 
+                    //Draw circle around entity transform position
+                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::color_palette_white.x,EditorTheme::color_palette_white.y,EditorTheme::color_palette_white.z, 255);
+                    //With bezier curve
+                    draw_bezier(transform->pos + Vec2(16, 0),transform->pos + Vec2(16, 16),transform->pos + Vec2(0, 16), this->position,zoom, Color(255,255,255));
+                    draw_bezier(transform->pos + Vec2(-16, 0),transform->pos + Vec2(-16, -16),transform->pos + Vec2(0, -16), this->position,zoom, Color(255,255,255));
+                    draw_bezier(transform->pos + Vec2(16, 0),transform->pos + Vec2(16, -16),transform->pos + Vec2(0, -16), this->position,zoom, Color(255,255,255));
+                    draw_bezier(transform->pos + Vec2(-16, 0),transform->pos + Vec2(-16, 16),transform->pos + Vec2(0, 16), this->position,zoom, Color(255,255,255));
                     //Move entity
                     if(ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity && !dragging_entity_horizontal && !dragging_entity_vertical)
                     {

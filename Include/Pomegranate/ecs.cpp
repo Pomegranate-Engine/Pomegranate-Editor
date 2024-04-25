@@ -435,7 +435,7 @@ namespace Pomegranate
             {
                 if(entity.second->has_component(component->name()))
                 {
-                    enties.push_back(entity.second);
+
                 }
                 else
                 {
@@ -504,6 +504,7 @@ namespace Pomegranate
             if(!std::count(enties.begin(),enties.end(),entity))
             {
                 this->remove_entity(entity);
+                print_info("Entity removed from group");
             }
         }
         //Draw the group
