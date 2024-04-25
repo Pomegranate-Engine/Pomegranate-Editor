@@ -790,6 +790,34 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     {
         group_node->open = false;
     }
+
+    std::vector<Node*> linked = group_node->linked;
+
+    //Remove all linked nodes that are not in the group
+    for (auto & i : linked) {
+        if(i->entity != nullptr)
+        {
+            if(std::find(entities.begin(), entities.end(), i->entity.get()) == entities.end())
+            {
+                group_node->linked.erase(std::remove(group_node->linked.begin(), group_node->linked.end(), i), group_node->linked.end());
+            }
+        }
+        else if(i->group != nullptr)
+        {
+            if(std::find(groups.begin(), groups.end(), i->group.get()) == groups.end())
+            {
+                group_node->linked.erase(std::remove(group_node->linked.begin(), group_node->linked.end(), i), group_node->linked.end());
+            }
+        }
+        else if(i->system != nullptr)
+        {
+            if(std::find(systems.begin(), systems.end(), i->system.get()) == systems.end())
+            {
+                group_node->linked.erase(std::remove(group_node->linked.begin(), group_node->linked.end(), i), group_node->linked.end());
+            }
+        }
+    }
+
     for (auto & entitie : entities) {
         //Check nodes to see if it already exists
         bool exists = false;

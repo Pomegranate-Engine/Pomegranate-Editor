@@ -481,6 +481,7 @@ namespace Pomegranate
             if(!std::count(enties.begin(),enties.end(),entity))
             {
                 this->remove_entity(entity);
+                print_info("Entity removed from group");
             }
         }
         //Tick the group
