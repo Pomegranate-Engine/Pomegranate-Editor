@@ -204,10 +204,33 @@ void ResourcesWindow::render()
 
         //Begin drag and drop source
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-            Texture *texture = ResourceManager::load<Texture>(file.path);
-            ImGui::SetDragDropPayload("resource", &texture, sizeof(Texture **));
-            ImGui::Text(file.path.c_str());
-            ImGui::EndDragDropSource();
+            if(file.type == ResourceType::RESOURCE_TYPE_TEXTURE)
+            {
+                Texture *texture = ResourceManager::load<Texture>(file.path);
+                ImGui::SetDragDropPayload("resource_texture", &texture, sizeof(Texture **));
+                ImGui::Text(file.path.c_str());
+                ImGui::EndDragDropSource();
+            }
+            else if(file.type == ResourceType::RESOURCE_TYPE_AUDIO)
+            {
+                Audio *audio = ResourceManager::load<Audio>(file.path);
+                ImGui::SetDragDropPayload("resource_audio", &audio, sizeof(Audio **));
+                ImGui::Text(file.path.c_str());
+                ImGui::EndDragDropSource();
+            }
+            else if(file.type == ResourceType::RESOURCE_TYPE_FONT)
+            {
+                TTFFont *font = ResourceManager::load<TTFFont>(file.path);
+                ImGui::SetDragDropPayload("resource_font", &font, sizeof(TTFFont **));
+                ImGui::Text(file.path.c_str());
+                ImGui::EndDragDropSource();
+            }
+            else if(file.type == ResourceType::RESOURCE_TYPE_SCENE)
+            {
+                ImGui::SetDragDropPayload("resource_scene", file.path.c_str(), file.path.size());
+                ImGui::Text(file.path.c_str());
+                ImGui::EndDragDropSource();
+            }
         }
         ImGui::PopID();
         i++;

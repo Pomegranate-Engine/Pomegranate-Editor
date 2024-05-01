@@ -8,6 +8,7 @@
 #include "Pomegranate/standard_ecs_rendering.h"
 #include "scene.h"
 #include "theme.h"
+#include "entity_hierarchy_window.h"
 using namespace Pomegranate;
 
 class Window_SceneView : public EditorWindow
@@ -21,7 +22,8 @@ public:
     Vec2 selected_entity_arrow_hor_half = Vec2(0, 0);
     Vec2 selected_entity_arrow_vert_pos = Vec2(0, 0);
     Vec2 selected_entity_arrow_vert_half = Vec2(0, 0);
-    Entity* entity_selected = nullptr;
+    Node* previous_selected_node = nullptr;
+    std::vector<Entity*> entities_selected;
     bool dragging_entity = false;
     bool dragging_entity_horizontal = false;
     bool dragging_entity_vertical = false;

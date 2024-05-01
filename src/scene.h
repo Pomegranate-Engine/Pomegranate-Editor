@@ -9,6 +9,15 @@
 
 using namespace Pomegranate;
 using json = nlohmann::json;
+
+class SceneGroup : public EntityGroup
+{
+public:
+    std::string path;
+    SceneGroup(std::string name, std::string path);
+    void instantiate();
+};
+
 void unload_all();
 json save_scene_as_json(EntityGroup* scene);
 void save_scene(const char* path, EntityGroup* scene);

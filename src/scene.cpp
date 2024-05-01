@@ -8,6 +8,18 @@
 
 #include "entity_hierarchy_window.h"
 
+SceneGroup::SceneGroup(std::string name, std::string path) : EntityGroup(name)
+{
+    this->path = path;
+}
+
+void SceneGroup::instantiate()
+{
+    EntityGroup* scene = open_scene(path.c_str());
+    add_group(scene);
+    print_info("Instantiated scene: " + name);
+}
+
 std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
 {
 	std::vector<EntityGroup*> groups;
@@ -47,6 +59,31 @@ std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
 	}
 	return systems;
 }
+std::vector<EntityGroup*> get_all_parents(EntityGroup* group)
+{
+    EntityGroup* parent = group->get_parent();
+    std::vector<EntityGroup*> parents;
+    if(parent != nullptr)
+    {
+        parents.push_back(parent);
+        //Recursively get parents
+        auto parent_parents = get_all_parents(parent);
+        parents.insert(parents.end(), parent_parents.begin(), parent_parents.end());
+    }
+    return parents;
+}
+std::vector<EntityGroup*> get_all_parents(Entity* entity)
+{
+    std::vector<EntityGroup*> parents;
+    for (auto& parent : entity->get_parent_groups())
+    {
+        parents.push_back(parent);
+        //Recursively get parents
+        auto parent_parents = get_all_parents(parent);
+        parents.insert(parents.end(), parent_parents.begin(), parent_parents.end());
+    }
+    return parents;
+}
 json save_scene_as_json(EntityGroup* scene)
 {
     //Coalesce groups and entities
@@ -83,12 +120,32 @@ json save_scene_as_json(EntityGroup* scene)
                 j["groups"][std::to_string(group->id)]["components"].push_back(component->name());
             }
         }
+        else if(typeid(*group) == typeid(SceneGroup))
+        {
+            j["groups"][std::to_string(group->id)]["type"] = "scene";
+            j["groups"][std::to_string(group->id)]["path"] = ((SceneGroup*)group)->path;
+        }
         else
         {
             j["groups"][std::to_string(group->id)]["type"] = "normal";
         }
         if(group->get_parent() != nullptr)
+        {
+            //Make sure it's not a scene group
+            bool skip = false;
+            auto parents = get_all_parents(group);
+            for (auto& parent : parents)
+            {
+                if(typeid(*parent) == typeid(SceneGroup))
+                    skip = true;
+            }
+            if(skip)
+            {
+                print_info("Skipping group: " + group->name + " because it is in a scene group");
+                continue;
+            }
             j["groups"][std::to_string(group->id)]["parent"] = group->get_parent()->id;
+        }
     }
     //Get all entities
     auto entities = get_all_entities(scene);
@@ -96,11 +153,23 @@ json save_scene_as_json(EntityGroup* scene)
     j["entities"] = json::object();
     for (auto& entity : entities)
     {
+        auto parents = get_all_parents(entity);
+        bool skip = false;
+        for (auto& parent : parents)
+        {
+            if(typeid(*parent) == typeid(SceneGroup))
+                skip = true;
+        }
+        if(skip)
+        {
+            print_info("Skipping entity: " + entity->name + " because it is in a scene group");
+            continue;
+        }
         j["entities"][std::to_string(entity->id)] = json::object();
         j["entities"][std::to_string(entity->id)]["name"] = entity->name;
         //write linked parents
         j["entities"][std::to_string(entity->id)]["parents"] = json::array();
-        auto parents = entity->get_parent_groups();
+        parents = entity->get_parent_groups();
         for (auto& parent : parents)
         {
             j["entities"][std::to_string(entity->id)]["parents"].push_back(parent->id);
@@ -324,6 +393,19 @@ json save_scene_as_json(EntityGroup* scene)
     j["systems"] = json::object();
     for (auto& [system, linked] : systems)
     {
+        EntityGroup* group = EntityGroup::groups_id[linked];
+        //Make sure it's not a scene group
+        bool skip = false;
+        auto parents = get_all_parents(group);
+        for (auto& parent : parents)
+        {
+            if(typeid(*parent) == typeid(SceneGroup))
+                skip = true;
+        }
+        if(skip)
+        {
+            continue;
+        }
         j["systems"][typeid(*system).name()] = json::object();
         j["systems"][typeid(*system).name()]["linked"] = json::array();
         j["systems"][typeid(*system).name()]["linked"].push_back(linked);
@@ -377,6 +459,10 @@ EntityGroup* open_scene_from_json(json data)
 {
     int id_append_entity = Entity::entity_count;
     int id_append_group = EntityGroup::group_count;
+    std::vector<SceneGroup*> scene_groups;
+
+    EntityGroup* root = nullptr;
+
     //Load groups
     for (auto& [id, group] : data["groups"].items())
     {
@@ -389,6 +475,12 @@ EntityGroup* open_scene_from_json(json data)
                 g->add_component_type(component.get<std::string>());
             }
             print_info("Created group: " + g->name);
+        }
+        else if(group["type"] == "scene")
+        {
+            SceneGroup *g = new SceneGroup(group["name"].get<std::string>(), group["path"].get<std::string>());
+            print_info("Created group: " + g->name);
+            scene_groups.push_back(g);
         }
         else
         {
@@ -407,6 +499,10 @@ EntityGroup* open_scene_from_json(json data)
             uint32_t parent_id = group["parent"].get<uint32_t>();
             EntityGroup* parent = EntityGroup::groups_id[parent_id];
             parent->add_group(g);
+        }
+        else
+        {
+            root = g;
         }
     }
 
@@ -538,9 +634,14 @@ EntityGroup* open_scene_from_json(json data)
             EntityGroup::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
         }
     }
+    //Initalize scene groups
+    for(auto& group : scene_groups)
+    {
+        group->instantiate();
+    }
+
     std::unordered_map<uint32_t,EntityGroup*> groups = EntityGroup::groups_id;
     std::unordered_map<std::string, EntityGroup*> groups_name = EntityGroup::groups;
-    EntityGroup *root = EntityGroup::groups_id[0];
     return root;
 }
 

@@ -320,6 +320,26 @@ namespace Pomegranate
         return this->parent;
     }
 
+    std::vector<Entity *> *EntityGroup::get_all_entities()
+    {
+        //Recursively get all entities
+        std::vector<Entity*> *all_entities = new std::vector<Entity*>();
+        for(auto & entity : this->entities)
+        {
+            all_entities->push_back(entity);
+        }
+        for(auto & group : this->child_groups)
+        {
+            auto *child_entities = group->get_all_entities();
+            for(auto & entity : *child_entities)
+            {
+                all_entities->push_back(entity);
+            }
+            delete child_entities;
+        }
+        return all_entities;
+    }
+
     void Entity::add_to_group(EntityGroup * group)
     {
         this->parents.push_back(group);

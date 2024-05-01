@@ -1,7 +1,5 @@
 #include "scene_window.h"
 
-#include "entity_hierarchy_window.h"
-
 Window_SceneView::Window_SceneView()
 {
     render_texture = SDL_CreateTexture(Window::current->get_sdl_renderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1, 1);
@@ -90,92 +88,164 @@ void Window_SceneView::render() {
         //Draw movement arrows around selected entity
         if (Node::selected != nullptr)
         {
+            if(previous_selected_node != Node::selected)
+            {
+                entities_selected.clear();
+            }
             if(Node::selected->entity != nullptr)
             {
                 if(Node::selected->entity->get_component<Transform>())
                 {
-                    if(entity_selected != Node::selected->entity.get())
+                    if(std::find(entities_selected.begin(), entities_selected.end(),Node::selected->entity.get()) == entities_selected.end())
                     {
                         selected_entity_arrow_hor_pos = Node::selected->entity->get_component<Transform>()->pos;
                         selected_entity_arrow_hor_half = Node::selected->entity->get_component<Transform>()->pos;
                         selected_entity_arrow_vert_pos = Node::selected->entity->get_component<Transform>()->pos;
                         selected_entity_arrow_vert_half = Node::selected->entity->get_component<Transform>()->pos;
-                    }
-                    entity_selected = Node::selected->entity.get();
-                    Entity* entity = Node::selected->entity.get();
-                    auto* transform = entity->get_component<Transform>();
-                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_x.x,EditorTheme::scene_view_x.y,EditorTheme::scene_view_x.z, 255);
-                    //Draw arrow
-                    if(!dragging_entity_horizontal)
-                        selected_entity_arrow_hor_pos = selected_entity_arrow_hor_pos.lerp(transform->pos + Vec2(64, 0),15*delta_time);
-                    selected_entity_arrow_hor_half = selected_entity_arrow_hor_half.lerp(transform->pos + Vec2(32, 0),30*delta_time);
-                    draw_bezier(transform->pos,selected_entity_arrow_hor_half,selected_entity_arrow_hor_pos, this->position,zoom, Color(255,0,0));
-                    //Draw arrow tip
-                    SDL_RenderLine(Window::current->get_sdl_renderer(), (selected_entity_arrow_hor_pos.x-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_hor_pos.y-this->position.y)*zoom + screen_h/2, (selected_entity_arrow_hor_pos.x-8-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_hor_pos.y-8-this->position.y)*zoom + screen_h/2);
-                    SDL_RenderLine(Window::current->get_sdl_renderer(), (selected_entity_arrow_hor_pos.x-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_hor_pos.y-this->position.y)*zoom + screen_h/2, (selected_entity_arrow_hor_pos.x-8-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_hor_pos.y+8-this->position.y)*zoom + screen_h/2);
-
-                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_y.x,EditorTheme::scene_view_y.y,EditorTheme::scene_view_y.z, 255);
-                    //Draw arrow
-                    if(!dragging_entity_vertical)
-                        selected_entity_arrow_vert_pos = selected_entity_arrow_vert_pos.lerp(transform->pos + Vec2(0, -64),15*delta_time);
-                    selected_entity_arrow_vert_half = selected_entity_arrow_vert_half.lerp(transform->pos + Vec2(0, -32),30*delta_time);
-                    draw_bezier(transform->pos,selected_entity_arrow_vert_half,selected_entity_arrow_vert_pos, this->position,zoom, Color(0,255,0));
-                    //Draw arrow tip
-                    SDL_RenderLine(Window::current->get_sdl_renderer(), (selected_entity_arrow_vert_pos.x-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y-this->position.y)*zoom + screen_h/2, (selected_entity_arrow_vert_pos.x-8-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y+8-this->position.y)*zoom + screen_h/2);
-                    SDL_RenderLine(Window::current->get_sdl_renderer(), (selected_entity_arrow_vert_pos.x-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y-this->position.y)*zoom + screen_h/2, (selected_entity_arrow_vert_pos.x+8-this->position.x)*zoom + screen_w/2, (selected_entity_arrow_vert_pos.y+8-this->position.y)*zoom + screen_h/2);
-
-                    //Draw circle around entity transform position
-                    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::color_palette_white.x,EditorTheme::color_palette_white.y,EditorTheme::color_palette_white.z, 255);
-                    //With bezier curve
-                    draw_bezier(transform->pos + Vec2(16, 0),transform->pos + Vec2(16, 16),transform->pos + Vec2(0, 16), this->position,zoom, Color(255,255,255));
-                    draw_bezier(transform->pos + Vec2(-16, 0),transform->pos + Vec2(-16, -16),transform->pos + Vec2(0, -16), this->position,zoom, Color(255,255,255));
-                    draw_bezier(transform->pos + Vec2(16, 0),transform->pos + Vec2(16, -16),transform->pos + Vec2(0, -16), this->position,zoom, Color(255,255,255));
-                    draw_bezier(transform->pos + Vec2(-16, 0),transform->pos + Vec2(-16, 16),transform->pos + Vec2(0, 16), this->position,zoom, Color(255,255,255));
-                    //Move entity
-                    if(ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity && !dragging_entity_horizontal && !dragging_entity_vertical)
-                    {
-                        if(transform->pos.distance_to(mouse_world_pos) < 16)
-                        {
-                            dragging_entity = true;
-                        }
-                        if(selected_entity_arrow_hor_pos.distance_to(mouse_world_pos) < 16)
-                        {
-                            dragging_entity_horizontal = true;
-                        }
-                        if(selected_entity_arrow_vert_pos.distance_to(mouse_world_pos) < 16)
-                        {
-                            dragging_entity_vertical = true;
-                        }
-                    }
-                    if(dragging_entity)
-                    {
-                        transform->pos = mouse_world_pos;
-                    }
-                    if(dragging_entity_horizontal)
-                    {
-                        transform->pos.x = mouse_world_pos.x - 64;
-                        selected_entity_arrow_hor_pos = mouse_world_pos;
-                    }
-                    if(dragging_entity_vertical)
-                    {
-                        transform->pos.y = mouse_world_pos.y + 64;
-                        selected_entity_arrow_vert_pos = mouse_world_pos;
+                        entities_selected.push_back(Node::selected->entity.get());
                     }
                 }
                 else
                 {
-                    entity_selected = nullptr;
+                    entities_selected.clear();
+                }
+            }
+            else if(Node::selected->group != nullptr)
+            {
+                std::vector<Entity*>* entities = Node::selected->group->get_all_entities();
+                if(entities->size() > 0)
+                {
+                    if (std::find(entities_selected.begin(), entities_selected.end(), entities->at(0)) ==
+                        entities_selected.end()) {
+                        if(entities->at(0)->has_component<Transform>())
+                        {
+                            selected_entity_arrow_hor_pos = entities->at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_hor_half = entities->at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_vert_pos = entities->at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_vert_half = entities->at(0)->get_component<Transform>()->pos;
+                        }
+                        for (Entity *entity: *entities) {
+                            entities_selected.push_back(entity);
+                        }
+                    }
                 }
             }
             else
             {
-                entity_selected = nullptr;
+                entities_selected.clear();
             }
+            previous_selected_node = Node::selected;
         }
         else
         {
-            entity_selected = nullptr;
+            entities_selected.clear();
+            previous_selected_node = nullptr;
         }
+
+        //Transform
+
+        //Get all the transforms
+        std::vector<Transform*> transforms;
+        for(Entity* entity : entities_selected)
+        {
+            if(entity->has_component<Transform>())
+                transforms.push_back(entity->get_component<Transform>());
+        }
+
+        Vec2 pos = Vec2();
+        //Get average position
+        for(Transform* transform : transforms)
+        {
+            pos += transform->pos;
+        }
+        pos /= transforms.size();
+        Vec2 initial_pos = pos;
+
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_x.x,
+                               EditorTheme::scene_view_x.y, EditorTheme::scene_view_x.z, 255);
+        //Draw arrow
+        if (!dragging_entity_horizontal)
+            selected_entity_arrow_hor_pos = selected_entity_arrow_hor_pos.lerp(
+                    pos + Vec2(64, 0), 15 * delta_time);
+        selected_entity_arrow_hor_half = selected_entity_arrow_hor_half.lerp(
+                pos + Vec2(32, 0), 30 * delta_time);
+        draw_bezier(pos, selected_entity_arrow_hor_half, selected_entity_arrow_hor_pos,
+                    this->position, zoom, Color(255, 0, 0));
+        //Draw arrow tip
+        SDL_RenderLine(Window::current->get_sdl_renderer(),
+                       (selected_entity_arrow_hor_pos.x - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_hor_pos.y - this->position.y) * zoom + screen_h / 2,
+                       (selected_entity_arrow_hor_pos.x - 8 - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_hor_pos.y - 8 - this->position.y) * zoom + screen_h / 2);
+        SDL_RenderLine(Window::current->get_sdl_renderer(),
+                       (selected_entity_arrow_hor_pos.x - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_hor_pos.y - this->position.y) * zoom + screen_h / 2,
+                       (selected_entity_arrow_hor_pos.x - 8 - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_hor_pos.y + 8 - this->position.y) * zoom + screen_h / 2);
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_y.x,
+                               EditorTheme::scene_view_y.y, EditorTheme::scene_view_y.z, 255);
+        //Draw arrow
+        if (!dragging_entity_vertical)
+            selected_entity_arrow_vert_pos = selected_entity_arrow_vert_pos.lerp(
+                    pos + Vec2(0, -64), 15 * delta_time);
+        selected_entity_arrow_vert_half = selected_entity_arrow_vert_half.lerp(
+                pos + Vec2(0, -32), 30 * delta_time);
+        draw_bezier(pos, selected_entity_arrow_vert_half, selected_entity_arrow_vert_pos,
+                    this->position, zoom, Color(0, 255, 0));
+        //Draw arrow tip
+        SDL_RenderLine(Window::current->get_sdl_renderer(),
+                       (selected_entity_arrow_vert_pos.x - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_vert_pos.y - this->position.y) * zoom + screen_h / 2,
+                       (selected_entity_arrow_vert_pos.x - 8 - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_vert_pos.y + 8 - this->position.y) * zoom + screen_h / 2);
+        SDL_RenderLine(Window::current->get_sdl_renderer(),
+                       (selected_entity_arrow_vert_pos.x - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_vert_pos.y - this->position.y) * zoom + screen_h / 2,
+                       (selected_entity_arrow_vert_pos.x + 8 - this->position.x) * zoom + screen_w / 2,
+                       (selected_entity_arrow_vert_pos.y + 8 - this->position.y) * zoom + screen_h / 2);
+        //Draw circle around entity transform position
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::color_palette_white.x,
+                               EditorTheme::color_palette_white.y, EditorTheme::color_palette_white.z,
+                               255);
+        //With bezier curve
+        draw_bezier(pos + Vec2(16, 0), pos + Vec2(16, 16),
+                    pos + Vec2(0, 16), this->position, zoom, Color(255, 255, 255));
+        draw_bezier(pos + Vec2(-16, 0), pos + Vec2(-16, -16),
+                    pos + Vec2(0, -16), this->position, zoom, Color(255, 255, 255));
+        draw_bezier(pos + Vec2(16, 0), pos + Vec2(16, -16),
+                    pos + Vec2(0, -16), this->position, zoom, Color(255, 255, 255));
+        draw_bezier(pos + Vec2(-16, 0), pos + Vec2(-16, 16),
+                    pos + Vec2(0, 16), this->position, zoom, Color(255, 255, 255));
+        //Move entity
+        if (ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity &&
+            !dragging_entity_horizontal && !dragging_entity_vertical) {
+            if (pos.distance_to(mouse_world_pos) < 16) {
+                dragging_entity = true;
+            }
+            if (selected_entity_arrow_hor_pos.distance_to(mouse_world_pos) < 16) {
+                dragging_entity_horizontal = true;
+            }
+            if (selected_entity_arrow_vert_pos.distance_to(mouse_world_pos) < 16) {
+                dragging_entity_vertical = true;
+            }
+        }
+        if (dragging_entity) {
+            pos = mouse_world_pos;
+        }
+        if (dragging_entity_horizontal) {
+            pos.x = mouse_world_pos.x - 64;
+            selected_entity_arrow_hor_pos = mouse_world_pos;
+        }
+        if (dragging_entity_vertical) {
+            pos.y = mouse_world_pos.y + 64;
+            selected_entity_arrow_vert_pos = mouse_world_pos;
+        }
+        //Adjust all the transforms
+        Vec2 delta = pos - initial_pos;
+        for (Transform *transform : transforms) {
+            transform->pos += delta;
+        }
+
         if(!ImGui::IsWindowFocused() || !InputManager::get_mouse_button(1))
         {
             if(dragging_entity || dragging_entity_horizontal || dragging_entity_vertical)
@@ -208,7 +278,29 @@ void Window_SceneView::render() {
     }
     ImGui::SetCursorPos(ImVec2(0,0));
     ImGui::Image(render_texture, ImVec2(ImGui::GetWindowWidth(), ImGui::GetWindowHeight()));
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_texture"))
+        {
+            Texture* tex = *(Texture**) payload->Data;
+            std::string entity_name = tex->path;
+            Entity *entity = new Entity();
+            entity->add_component<Transform>();
+            entity->add_component<Sprite>();
+            entity->get_component<Sprite>()->texture = tex;
+            entity->get_component<Transform>()->pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(size.x/2,size.y/2))/zoom+this->position;
 
+            Editor::current_scene->add_entity(entity);
+        }
+        else if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_scene"))
+        {
+            const char* scene_path = (const char*)payload->Data;
+            SceneGroup* group = new SceneGroup("Scene", scene_path);
+            group->instantiate();
+            group->name = group->get_child_groups()[0][0]->name;
+            Editor::current_scene->add_group(group);
+        }
+    }
     //Draw debug info
     //Set cursor position to top left with margin
     ImGui::SetCursorPos(ImVec2(5,25));

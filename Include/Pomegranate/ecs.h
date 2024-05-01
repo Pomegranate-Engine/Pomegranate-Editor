@@ -135,6 +135,7 @@ namespace Pomegranate
         virtual void tick();
         virtual void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
         virtual std::vector<Entity*>* get_entities();
+        virtual std::vector<Entity*>* get_all_entities();
         virtual std::vector<System*>* get_systems();
         virtual std::vector<EntityGroup*>* get_child_groups();
 

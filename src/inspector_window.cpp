@@ -264,7 +264,7 @@ void InspectorWindow::property_field(const char *name, Texture **value)
     //Drop target
     if(ImGui::BeginDragDropTarget())
     {
-        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource"))
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_texture"))
         {
             Texture* texture = *(Texture**)payload->Data;
             *value = texture;
@@ -288,7 +288,7 @@ void InspectorWindow::property_field(const char *name, TTFFont **value)
     //Drop target
     if(ImGui::BeginDragDropTarget())
     {
-        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource"))
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_texture"))
         {
             TTFFont* ttf = *(TTFFont**)payload->Data;
             *value = ttf;
@@ -415,7 +415,7 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
     //Drop target
     if(ImGui::BeginDragDropTarget())
     {
-        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource"))
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_script"))
         {
             LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
             lua->run_script();

@@ -555,8 +555,49 @@ void ImageRotated(ImTextureID tex_id, ImVec2 center, ImVec2 size, ImVec4 color, 
     ImU32 col = IM_COL32((int)(color.x * 255), (int)(color.y * 255), (int)(color.z * 255), (int)(color.w * 255));
     draw_list->AddImageQuad(tex_id, pos[0], pos[1], pos[2], pos[3], uvs[0], uvs[1], uvs[2], uvs[3], col);
 }
+std::vector<Node*> Window_EntityHierarchy::find_all_parents(Node* node)
+{
+    //Find parents and parents of parents based on linkages use recursion and do not add itself
+    std::vector<Node*> parents;
+    for (auto & n : nodes)
+    {
+        if (n != node && n->group != nullptr)
+        {
+            if (std::find(n->linked.begin(), n->linked.end(), node) != n->linked.end())
+            {
+                parents.push_back(n);
+            }
+        }
+    }
+    return parents;
+}
+bool Window_EntityHierarchy::is_node_visible(Node *node)
+{
+    std::vector<Node*> parents = find_all_parents(node);
+    if(parents.size() > 0)
+    {
+        //Check if its open
+        bool any_open = false;
+        for (auto & parent : parents) {
+            if (parent->open && is_node_visible(parent)) {
+                any_open = true;
+                break;
+            }
+        }
+        if(!any_open)
+        {
+            return false;
+        }
+    }
+    return true;
+}
 void Window_EntityHierarchy::draw_node(Node* n)
 {
+    if(!is_node_visible(n))
+    {
+        return;
+    }
+
     Vec2 pos = n->pos;
     float s = n->size;
     Color color = n->color;
@@ -612,6 +653,10 @@ void Window_EntityHierarchy::draw_node(Node* n)
     {
         color = color * 0.5f;
     }
+    if(!n->open)
+    {
+        color = color * 0.75f;
+    }
     if(linking && currently_linking != n)
     {
         float d = Vec2(ImGui::GetMousePos().x,ImGui::GetMousePos().y).distance_to(Vec2(node_pos.x,node_pos.y+node_size*3))/64.0f;
@@ -636,6 +681,8 @@ void Window_EntityHierarchy::draw_node(Node* n)
     //Make it DragDrop for the inspector
     ImGui::SetItemAllowOverlap();
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
+    ImGui::InvisibleButton(name.c_str(), ImVec2(node_size * 2, node_size * 2));
+
     if(InputManager::get_mouse_button(SDL_BUTTON_MIDDLE))
     {
         print_info("Middle clicked!");
@@ -655,53 +702,60 @@ void Window_EntityHierarchy::draw_node(Node* n)
             ImGui::EndDragDropSource();
         }
     }
-
+    else
+    {
+        if(ImGui::IsItemHovered() && ImGui::GetMouseClickedCount(0) == 2)
+        {
+            if(n->group != nullptr)
+            {
+                print_info("Toggled open");
+                n->open = !n->open;
+            }
+        }
+    }
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-(float)name.size()*4, node_pos.y+node_size));
     ImGui::Text(name.c_str());
-
-    for (auto & i : n->linked) {
-        Vec2 linked_pos = i->pos;
-        linked_pos.x -= cam_pos.x;
-        linked_pos.y -= cam_pos.y;
-        linked_pos.x /= zoom;
-        linked_pos.y /= zoom;
-        linked_pos.x += (float)size.x / 2;
-        linked_pos.y += (float)size.y / 2;
-
-
-        Vec2 mouse = Vec2(ImGui::GetMousePos().x,ImGui::GetMousePos().y);
+    if(n->open)
+    {
+        for (auto &i: n->linked) {
+            Vec2 linked_pos = i->pos;
+            linked_pos.x -= cam_pos.x;
+            linked_pos.y -= cam_pos.y;
+            linked_pos.x /= zoom;
+            linked_pos.y /= zoom;
+            linked_pos.x += (float) size.x / 2;
+            linked_pos.y += (float) size.y / 2;
 
 
-        Vec2 point = find_closest_point_on_line(node_pos+Vec2(0,24),linked_pos+Vec2(0,24),mouse);
-        if(ImGui::IsMouseClicked(1))
-        {
-            if((node_pos+Vec2(0,24)).distance_to(mouse) > 32 && (linked_pos+Vec2(0,24)).distance_to(mouse) > 32)
-            {
-                if (point.distance_to(Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) < 4)
-                {
-                    //Remove the link and remove enitty from group
-                    i->linked.erase(std::remove(i->linked.begin(), i->linked.end(), n), i->linked.end());
-                    n->linked.erase(std::remove(n->linked.begin(), n->linked.end(), i), n->linked.end());
-                    if(i->entity != nullptr)
-                    {
-                        n->group->remove_entity(i->entity.get());
-                    }
-                    else if(i->group != nullptr)
-                    {
-                        n->group->remove_group(i->group.get());
-                    }
-                    else if(i->system != nullptr)
-                    {
-                        n->group->remove_system(i->system.get());
+            Vec2 mouse = Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+
+
+            Vec2 point = find_closest_point_on_line(node_pos + Vec2(0, 24), linked_pos + Vec2(0, 24), mouse);
+            if (ImGui::IsMouseClicked(1)) {
+                if ((node_pos + Vec2(0, 24)).distance_to(mouse) > 32 &&
+                    (linked_pos + Vec2(0, 24)).distance_to(mouse) > 32) {
+                    if (point.distance_to(Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y)) < 4) {
+                        //Remove the link and remove enitty from group
+                        i->linked.erase(std::remove(i->linked.begin(), i->linked.end(), n), i->linked.end());
+                        n->linked.erase(std::remove(n->linked.begin(), n->linked.end(), i), n->linked.end());
+                        if (i->entity != nullptr) {
+                            n->group->remove_entity(i->entity.get());
+                        } else if (i->group != nullptr) {
+                            n->group->remove_group(i->group.get());
+                        } else if (i->system != nullptr) {
+                            n->group->remove_system(i->system.get());
+                        }
                     }
                 }
             }
-        }
 
-        //Draw point on line
-        //ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImVec2(point.x, point.y), 4, IM_COL32(255, 255, 255, 255));
-        ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + 24), ImVec2(linked_pos.x, linked_pos.y + 24), IM_COL32(127, 127, 127, 80), 2);
+            //Draw point on line
+            //ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImVec2(point.x, point.y), 4, IM_COL32(255, 255, 255, 255));
+            ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + 24),
+                                                         ImVec2(linked_pos.x, linked_pos.y + 24),
+                                                         IM_COL32(127, 127, 127, 80), 2);
+        }
     }
 }
 
@@ -786,11 +840,6 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
             parent->linked.push_back(group_node);
         }
     }
-    else
-    {
-        group_node->open = false;
-    }
-
     std::vector<Node*> linked = group_node->linked;
 
     //Remove all linked nodes that are not in the group
@@ -886,8 +935,17 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
             group_node->linked.push_back(node);
         }
     }
-    for (auto & g : groups) {
-        build_graph(g, group_node);
+    for (auto & g : groups)
+    {
+        if(typeid(*g) == typeid(SceneGroup))
+        {
+            //Skip the first group as it's the root of the scene group build the graph
+            build_graph(g->get_child_groups()[0][0], group_node);
+        }
+        else
+        {
+            build_graph(g, group_node);
+        }
     }
 }
 

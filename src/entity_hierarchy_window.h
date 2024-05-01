@@ -31,6 +31,8 @@ public:
     std::unique_ptr<Entity> entity;
     std::unique_ptr<EntityGroup> group;
     std::unique_ptr<System> system;
+
+    std::vector<Node*> children;
     bool open;
     Node(Entity* entity);
     Node(EntityGroup* group);
@@ -53,6 +55,8 @@ public:
     static Node* selected_node;
     static Node* dragging_node;
     Window_EntityHierarchy();
+    std::vector<Node*> find_all_parents(Node* node);
+    bool is_node_visible(Node* node);
     void build_graph(EntityGroup* group, Node* parent = nullptr);
     void draw_node(Node*n);
     void simulate_node(Node* node);
