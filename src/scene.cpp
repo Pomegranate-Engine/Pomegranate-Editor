@@ -61,6 +61,8 @@ std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
 }
 std::vector<EntityGroup*> get_all_parents(EntityGroup* group)
 {
+    if(group == nullptr)
+        return std::vector<EntityGroup*>();
     EntityGroup* parent = group->get_parent();
     std::vector<EntityGroup*> parents;
     if(parent != nullptr)

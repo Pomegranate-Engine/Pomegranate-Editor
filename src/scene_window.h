@@ -27,6 +27,8 @@ public:
     bool dragging_entity = false;
     bool dragging_entity_horizontal = false;
     bool dragging_entity_vertical = false;
+    bool dragging_entity_rotation = false;
+    float dragging_start_angle = 0;
     SDL_Texture* render_texture;
     Window_SceneView();
     void update() override;

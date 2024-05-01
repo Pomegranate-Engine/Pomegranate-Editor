@@ -40,6 +40,29 @@ void draw_bezier(Vec2 a, Vec2 b, Vec2 c, Vec2 position, float zoom, Color color)
     }
     SDL_RenderLines(Window::current->get_sdl_renderer(), points.data(), points.size());
 }
+void draw_circle(Vec2 pos, float radius, Vec2 position, float zoom, Color color)
+{
+    int screen_w = 0;
+    int screen_h = 0;
+    SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
+    //Adjust for camera position
+    pos -= position;
+
+    //Adjust for zoom
+    pos *= zoom;
+
+    //Adjust for screen position
+    pos.x += screen_w/2;
+    pos.y += screen_h/2;
+
+    //Draw circle
+    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), color.r, color.g, color.b, 255);
+    for(float t = 0; t < 2*M_PI; t+=0.01)
+    {
+        Vec2 p = pos + Vec2(cos(t), sin(t))*radius*zoom;
+        SDL_RenderPoint(Window::current->get_sdl_renderer(), p.x, p.y);
+    }
+}
 
 void Window_SceneView::render() {
     //Check if render texture is the correct size
@@ -161,6 +184,15 @@ void Window_SceneView::render() {
         pos /= transforms.size();
         Vec2 initial_pos = pos;
 
+        float rotation = 0;
+        //Get average rotation
+        for(Transform* transform : transforms)
+        {
+            rotation += transform->rot;
+        }
+        rotation /= (float)transforms.size();
+        float inital_rot = rotation;
+
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_x.x,
                                EditorTheme::scene_view_x.y, EditorTheme::scene_view_x.z, 255);
         //Draw arrow
@@ -216,9 +248,28 @@ void Window_SceneView::render() {
                     pos + Vec2(0, -16), this->position, zoom, Color(255, 255, 255));
         draw_bezier(pos + Vec2(-16, 0), pos + Vec2(-16, 16),
                     pos + Vec2(0, 16), this->position, zoom, Color(255, 255, 255));
-        //Move entity
+
+        //Draw larger circle for rotation
+        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::color_palette_blue.x,
+                               EditorTheme::color_palette_blue.y, EditorTheme::color_palette_blue.z,
+                               255);
+        draw_circle(pos, 48, this->position, zoom, Color(255, 255, 255));
+
+        //Rotation
         if (ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity &&
             !dragging_entity_horizontal && !dragging_entity_vertical) {
+            if (pos.distance_to(mouse_world_pos) < 56 && pos.distance_to(mouse_world_pos) > 40) {
+                if(!dragging_entity_rotation)
+                {
+                    dragging_start_angle = Vec2(0,0).angle_to((mouse_world_pos - pos)) - Vec2(0,0).angle_to((pos - Vec2(0, 0)));
+                }
+                dragging_entity_rotation = true;
+            }
+        }
+
+        //Move entity
+        if (ImGui::IsWindowFocused() && InputManager::get_mouse_button(1) && !dragging_entity &&
+            !dragging_entity_horizontal && !dragging_entity_vertical && !dragging_entity_rotation) {
             if (pos.distance_to(mouse_world_pos) < 16) {
                 dragging_entity = true;
             }
@@ -240,21 +291,39 @@ void Window_SceneView::render() {
             pos.y = mouse_world_pos.y + 64;
             selected_entity_arrow_vert_pos = mouse_world_pos;
         }
+        if (dragging_entity_rotation) {
+            rotation = Vec2(0,0).angle_to((mouse_world_pos - pos)) - Vec2(0,0).angle_to((pos - Vec2(0, 0)));
+        }
         //Adjust all the transforms
         Vec2 delta = pos - initial_pos;
         for (Transform *transform : transforms) {
             transform->pos += delta;
+            if(dragging_entity_rotation)
+            {
+                float rotation_delta = rotation - dragging_start_angle;
+                transform->rot += rotation_delta;
+                //Rotate transform position
+                Vec2 new_pos = pos + (transform->pos - pos).rotate(rotation_delta);
+                transform->pos = new_pos;
+            }
         }
+        dragging_start_angle = rotation;
 
-        if(!ImGui::IsWindowFocused() || !InputManager::get_mouse_button(1))
+        if(!InputManager::get_mouse_button(1))
         {
-            if(dragging_entity || dragging_entity_horizontal || dragging_entity_vertical)
+            if(dragging_entity || dragging_entity_horizontal || dragging_entity_vertical || dragging_entity_rotation)
             {
                 Editor::action();
             }
             dragging_entity = false;
             dragging_entity_horizontal = false;
             dragging_entity_vertical = false;
+            dragging_entity_rotation = false;
+            dragging_start_angle = 0;
+        }
+        else
+        {
+            print_info("Not entity");
         }
         //Destroy camera entity
         camera->force_destroy();
@@ -265,7 +334,7 @@ void Window_SceneView::render() {
     //Move camera
     if(ImGui::IsWindowFocused()) {
         if (InputManager::get_mouse_button(1) && !dragging_entity &&
-            !dragging_entity_horizontal && !dragging_entity_vertical) {
+            !dragging_entity_horizontal && !dragging_entity_vertical && !dragging_entity_rotation) {
             this->position -= InputManager::mouse_delta / zoom;
         }
         if (InputManager::get_mouse_scrolled()) {
