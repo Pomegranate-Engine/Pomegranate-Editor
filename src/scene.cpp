@@ -88,22 +88,6 @@ std::vector<EntityGroup*> get_all_parents(Entity* entity)
 }
 json save_scene_as_json(EntityGroup* scene)
 {
-    //Coalesce groups and entities
-    EntityGroup::groups_id.clear();
-    int group_id = 0;
-    for (auto& group : EntityGroup::groups)
-    {
-        group.second->id = group_id;
-        EntityGroup::groups_id[group_id] = group.second;
-        group_id++;
-    }
-    int entity_id = 0;
-    for (auto& entity : Entity::entities)
-    {
-        entity.second->id = entity_id;
-        entity_id++;
-    }
-
     json j;
     //Get all groups
     auto groups = get_all_groups(scene);
@@ -111,6 +95,20 @@ json save_scene_as_json(EntityGroup* scene)
     j["groups"] = json::object();
     for (auto& group : groups)
     {
+        //Make sure it's not a scene group
+        bool skip = false;
+        auto parents = get_all_parents(group);
+        for (auto& parent : parents)
+        {
+            if(typeid(*parent) == typeid(SceneGroup))
+                skip = true;
+        }
+        if(skip)
+        {
+            print_info("Skipping group: " + group->name + " because it is in a scene group");
+            continue;
+        }
+
         j["groups"][std::to_string(group->id)] = json::object();
         j["groups"][std::to_string(group->id)]["name"] = group->name;
         if(typeid(*group) == typeid(AutoGroup))
@@ -133,19 +131,6 @@ json save_scene_as_json(EntityGroup* scene)
         }
         if(group->get_parent() != nullptr)
         {
-            //Make sure it's not a scene group
-            bool skip = false;
-            auto parents = get_all_parents(group);
-            for (auto& parent : parents)
-            {
-                if(typeid(*parent) == typeid(SceneGroup))
-                    skip = true;
-            }
-            if(skip)
-            {
-                print_info("Skipping group: " + group->name + " because it is in a scene group");
-                continue;
-            }
             j["groups"][std::to_string(group->id)]["parent"] = group->get_parent()->id;
         }
     }
@@ -448,7 +433,6 @@ void unload_all()
 	}
 
 	Window_EntityHierarchy::nodes.clear();
-	//TODO: For some reason can't delete entities or groups, causes crash
 
 	Entity::entities.clear();
 	EntityGroup::groups_id.clear();
@@ -464,7 +448,6 @@ EntityGroup* open_scene_from_json(json data)
     std::vector<SceneGroup*> scene_groups;
 
     EntityGroup* root = nullptr;
-
     //Load groups
     for (auto& [id, group] : data["groups"].items())
     {
@@ -472,6 +455,7 @@ EntityGroup* open_scene_from_json(json data)
         if (group["type"] == "auto")
         {
             AutoGroup *g = new AutoGroup(group["name"].get<std::string>());
+            g->set_id(std::stoul(id) + id_append_group);
             for (auto& component : group["components"])
             {
                 g->add_component_type(component.get<std::string>());
@@ -481,12 +465,14 @@ EntityGroup* open_scene_from_json(json data)
         else if(group["type"] == "scene")
         {
             SceneGroup *g = new SceneGroup(group["name"].get<std::string>(), group["path"].get<std::string>());
+            g->set_id(std::stoul(id) + id_append_group);
             print_info("Created group: " + g->name);
             scene_groups.push_back(g);
         }
         else
         {
             EntityGroup *g = new EntityGroup(group["name"].get<std::string>());
+            g->set_id(std::stoul(id) + id_append_group);
             print_info("Created group: " + g->name);
         }
     }
@@ -512,6 +498,7 @@ EntityGroup* open_scene_from_json(json data)
     for (auto& [id, entity] : data["entities"].items())
     {
         Entity* e = new Entity();
+        e->set_id(std::stoul(id) + id_append_entity);
         e->name = entity["name"].get<std::string>();
         for (auto& parent : entity["parents"])
         {

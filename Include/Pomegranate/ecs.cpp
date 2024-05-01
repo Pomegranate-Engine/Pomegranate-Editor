@@ -340,6 +340,19 @@ namespace Pomegranate
         return all_entities;
     }
 
+    void EntityGroup::set_id(uint32_t id)
+    {
+        //Remove the old id
+        EntityGroup::groups_id.erase(this->id);
+        this->id = id;
+        //Add the new id
+        EntityGroup::groups_id.emplace(this->id,this);
+        if(EntityGroup::group_count <= id)
+        {
+            EntityGroup::group_count = id + 1;
+        }
+    }
+
     void Entity::add_to_group(EntityGroup * group)
     {
         this->parents.push_back(group);
@@ -429,6 +442,19 @@ namespace Pomegranate
             }
         }
         return entity;
+    }
+
+    void Entity::set_id(uint32_t id)
+    {
+        //Remove the old id
+        Entity::entities.erase(this->id);
+        this->id = id;
+        //Add the new id
+        Entity::entities.emplace(this->id,this);
+        if(Entity::entity_count <= id)
+        {
+            Entity::entity_count = id + 1;
+        }
     }
 
     void Component::init(Entity *){}

@@ -96,6 +96,7 @@ namespace Pomegranate
         Entity();
         ~Entity();
         [[nodiscard]] uint32_t get_id() const;
+        void set_id(uint32_t id);
         //Add a static list of all entities
         static std::unordered_map<uint32_t,Entity*> entities;
         static uint32_t entity_count;
@@ -138,7 +139,7 @@ namespace Pomegranate
         virtual std::vector<Entity*>* get_all_entities();
         virtual std::vector<System*>* get_systems();
         virtual std::vector<EntityGroup*>* get_child_groups();
-
+        void set_id(uint32_t id);
         static std::unordered_map<std::string,EntityGroup*> groups;
         static std::unordered_map<uint32_t,EntityGroup*> groups_id;
         static EntityGroup* get_group(const std::string& name);
