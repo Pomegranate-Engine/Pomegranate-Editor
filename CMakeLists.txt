@@ -29,7 +29,9 @@ set(SOURCE_FILES src/main.cpp
         src/inspector_window.cpp
         src/inspector_window.h
         src/resources_window.cpp
-        src/resources_window.h)
+        src/resources_window.h
+        src/audio.cpp
+        src/audio.h)
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/Include/Imgui)
@@ -128,6 +130,7 @@ elseif(WIN32)
             OpenMP::OpenMP_CXX
             ${SDL_LIBRARY_DIR}/glew32.lib
             ${SDL_LIBRARY_DIR}/glew32s.lib
+            ${SDL_LIBRARY_DIR}/portaudio_x64.lib
     )
 endif()
 

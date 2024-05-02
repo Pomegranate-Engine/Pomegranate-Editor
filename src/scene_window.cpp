@@ -57,7 +57,7 @@ void draw_circle(Vec2 pos, float radius, Vec2 position, float zoom, Color color)
 
     //Draw circle
     SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), color.r, color.g, color.b, 255);
-    for(float t = 0; t < 2*M_PI; t+=0.01)
+    for(float t = 0; t < 2.0f*3.14159f; t+=0.01f)
     {
         Vec2 p = pos + Vec2(cos(t), sin(t))*radius*zoom;
         SDL_RenderPoint(Window::current->get_sdl_renderer(), p.x, p.y);

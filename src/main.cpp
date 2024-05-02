@@ -10,6 +10,8 @@
 #include<backends/imgui_impl_sdlrenderer3.h>
 using namespace Pomegranate;
 
+//Pomegranate Extensions
+#include "audio.h"
 
 //Editor
 #include "editor_window.h"
@@ -57,6 +59,7 @@ int main(int argc, char* argv[])
     main_window.open(); //Open window
     main_window.make_current(); //Make window current
     main_window.set_icon("engine/pomegranate.png");
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
