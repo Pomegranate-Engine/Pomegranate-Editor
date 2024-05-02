@@ -22,6 +22,7 @@ using namespace Pomegranate;
 #include "theme.h"
 #include "notifications.h"
 #include "hotkey_manager.h"
+#include "scene.h"
 
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
@@ -173,7 +174,8 @@ int main(int argc, char* argv[])
     register_system(LuaSystem);
     register_system(Render3D);
 
-    Editor::current_scene = new EntityGroup("root");
+
+    Editor::current_scene = create_default_scene();
 
     //Create windows
     WindowsManager windows_manager;

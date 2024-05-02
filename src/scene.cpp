@@ -644,3 +644,14 @@ EntityGroup *open_scene(const char *path)
 	}
 	return nullptr;
 }
+
+EntityGroup* create_default_scene()
+{
+    EntityGroup* group = new EntityGroup("Main");
+    AutoGroup* render = new AutoGroup("Render");
+    render->add_system(new Render());
+    render->add_component_type<Sprite>();
+    render->add_component_type<Transform>();
+    group->add_group(render);
+    return group;
+}

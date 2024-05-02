@@ -102,7 +102,7 @@ void run_scene()
 void force_new_scene()
 {
     unload_all();
-    Editor::current_scene = new EntityGroup("root");
+    Editor::current_scene = create_default_scene();
     Editor::current_scene_path = "";
 }
 void new_scene()

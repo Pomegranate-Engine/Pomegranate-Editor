@@ -37,6 +37,8 @@ namespace Pomegranate
     template <typename T> inline bool Entity::has_single_component()
     {
         const std::type_info* type = &typeid(T);
+        if(components.size() == 0)
+            return false;
         return this->components.find(type) != this->components.end();
     }
     template <typename... T> inline bool Entity::has_component()
