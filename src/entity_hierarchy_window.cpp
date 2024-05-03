@@ -716,8 +716,6 @@ void Window_EntityHierarchy::draw_node(Node* n)
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-(float)name.size()*4, node_pos.y+node_size));
     ImGui::Text(name.c_str());
-    if(n->open)
-    {
         for (auto &i: n->linked) {
             Vec2 linked_pos = i->pos;
             linked_pos.x -= cam_pos.x;
@@ -756,7 +754,6 @@ void Window_EntityHierarchy::draw_node(Node* n)
                                                          ImVec2(linked_pos.x, linked_pos.y + 24),
                                                          IM_COL32(127, 127, 127, 80), 2);
         }
-    }
 }
 
 void Window_EntityHierarchy::simulate_node(Node *node)
