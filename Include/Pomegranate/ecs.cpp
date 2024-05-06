@@ -20,7 +20,7 @@ namespace Pomegranate
         this->components = std::unordered_multimap<const std::type_info*,Component*>();
         this->parents = std::vector<EntityGroup*>();
         this->refs = std::vector<Entity*>();
-        this->name = "NewEntity";
+        this->name = "New Entity";
     }
 
     uint32_t Entity::get_id() const
@@ -390,7 +390,6 @@ namespace Pomegranate
 
     void Entity::force_destroy()
     {
-        clean_refs();
         this->orphan();
         delete this;
     }
@@ -404,29 +403,13 @@ namespace Pomegranate
         destroy_queue.clear();
     }
 
-    void Entity::clean_refs()
-    {
-        for (auto & ref : this->refs)
-        {
-            ref = nullptr;
-        }
-        this->refs.clear();
-    }
-
-    void Entity::get_ref(Entity * &e)
-    {
-        e = this;
-        this->refs.push_back(e);
-    }
-
     std::unordered_multimap<const std::type_info*,Component*> Entity::get_components() {
         return components;
     }
 
-    Entity *Entity::duplicate()
+    Entity* Entity::duplicate()
     {
-        auto* entity = new Entity();
-        entity->name = this->name;
+        auto* entity = Entity::create(this->name);
         for (auto & component : this->components)
         {
             if(entity->get_component(component.first->name()) == nullptr)
@@ -455,6 +438,12 @@ namespace Pomegranate
         {
             Entity::entity_count = id + 1;
         }
+    }
+
+    Entity* Entity::create(std::string name)
+    {
+        Entity* entity = new Entity();
+        return entity;
     }
 
     void Component::init(Entity *){}

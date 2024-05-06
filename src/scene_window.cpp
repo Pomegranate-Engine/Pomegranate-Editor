@@ -81,7 +81,7 @@ void Window_SceneView::render() {
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_background.x,EditorTheme::scene_view_background.y,EditorTheme::scene_view_background.z, 255);
         SDL_RenderClear(Window::current->get_sdl_renderer());
         //Create camera entity
-        Entity* camera = new Entity();
+        Entity* camera = Entity::create("_Editor_Camera");
         camera->add_components<Camera,Transform>();
         Camera::make_current(camera);
 
@@ -353,7 +353,7 @@ void Window_SceneView::render() {
         {
             Texture* tex = *(Texture**) payload->Data;
             std::string entity_name = tex->path;
-            Entity *entity = new Entity();
+            Entity *entity = Entity::create(entity_name);
             entity->add_component<Transform>();
             entity->add_component<Sprite>();
             entity->get_component<Sprite>()->texture = tex;

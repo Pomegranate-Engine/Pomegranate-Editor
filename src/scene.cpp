@@ -497,7 +497,7 @@ EntityGroup* open_scene_from_json(json data)
     //Load entities
     for (auto& [id, entity] : data["entities"].items())
     {
-        Entity* e = new Entity();
+        Entity* e = Entity::create(entity["name"].get<std::string>());
         e->set_id(std::stoul(id) + id_append_entity);
         e->name = entity["name"].get<std::string>();
         for (auto& parent : entity["parents"])

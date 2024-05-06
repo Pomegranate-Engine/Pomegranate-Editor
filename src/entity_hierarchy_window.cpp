@@ -409,8 +409,7 @@ void Window_EntityHierarchy::create_entity()
         if(selected_node->group != nullptr)
         {
             //Create a new entity
-            auto *entity = new Entity();
-            entity->name = "New Entity";
+            auto *entity = Entity::create("New Entity");
             selected_node->group->add_entity(entity);
             Editor::action();
         }
@@ -427,8 +426,7 @@ void Window_EntityHierarchy::create_entity()
                 }
             }
             //Create a new entity and link it to the parents
-            auto *entity = new Entity();
-            entity->name = "New Entity";
+            auto *entity = Entity::create("New Entity");
             for (auto & parent : parents) {
                 parent->add_entity(entity);
             }

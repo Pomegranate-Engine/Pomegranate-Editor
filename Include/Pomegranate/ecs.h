@@ -104,9 +104,8 @@ namespace Pomegranate
         void orphan();
         void destroy();
         void force_destroy();
-        void clean_refs();
-        void get_ref(Entity*&e);
         static void apply_destruction_queue();
+        static Entity* create(std::string name);
     };
 
     class EntityGroup
