@@ -681,7 +681,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     //Make it DragDrop for the inspector
     ImGui::SetItemAllowOverlap();
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
-    ImGui::InvisibleButton(name.c_str(), ImVec2(node_size * 2, node_size * 2));
+    ImGui::InvisibleButton(("invisible_button_" + name).c_str(), ImVec2(node_size * 2, node_size * 2));
 
     if(InputManager::get_mouse_button(SDL_BUTTON_MIDDLE))
     {

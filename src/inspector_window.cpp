@@ -187,6 +187,13 @@ void InspectorWindow::render()
                     ImGui::EndPopup();
                 }
             }
+            else if(typeid(*Node::selected->group.get()).hash_code() == typeid(SceneGroup).hash_code()) {
+                EntityGroup *group = Node::selected->group.get();
+                property_field("Name", &group->name);
+                if (ImGui::IsItemDeactivatedAfterEdit()) {
+                    Editor::action();
+                }
+            }
         }
     }
     else
