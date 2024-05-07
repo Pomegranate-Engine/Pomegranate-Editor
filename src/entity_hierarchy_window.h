@@ -28,13 +28,13 @@ public:
     float size;
     Color color;
     Texture* texture;
-    std::unique_ptr<Entity> entity;
+    EntityRef entity;
     std::unique_ptr<EntityGroup> group;
     std::unique_ptr<System> system;
 
     std::vector<Node*> children;
     bool open;
-    Node(Entity* entity);
+    Node(EntityRef entity);
     Node(EntityGroup* group);
     Node(System* system);
 };

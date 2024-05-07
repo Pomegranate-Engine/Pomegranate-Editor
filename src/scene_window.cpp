@@ -81,7 +81,7 @@ void Window_SceneView::render() {
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_background.x,EditorTheme::scene_view_background.y,EditorTheme::scene_view_background.z, 255);
         SDL_RenderClear(Window::current->get_sdl_renderer());
         //Create camera entity
-        Entity* camera = Entity::create("_Editor_Camera");
+        EntityRef camera = Entity::create("_Editor_Camera");
         camera->add_components<Camera,Transform>();
         Camera::make_current(camera);
 
@@ -138,19 +138,19 @@ void Window_SceneView::render() {
             }
             else if(Node::selected->group != nullptr)
             {
-                std::vector<Entity*>* entities = Node::selected->group->get_all_entities();
-                if(entities->size() > 0)
+                std::vector<EntityRef> entities = Node::selected->group->get_all_entities();
+                if(entities.size() > 0)
                 {
-                    if (std::find(entities_selected.begin(), entities_selected.end(), entities->at(0)) ==
+                    if (std::find(entities_selected.begin(), entities_selected.end(), entities.at(0)) ==
                         entities_selected.end()) {
-                        if(entities->at(0)->has_component<Transform>())
+                        if(entities.at(0)->has_component<Transform>())
                         {
-                            selected_entity_arrow_hor_pos = entities->at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_hor_half = entities->at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_vert_pos = entities->at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_vert_half = entities->at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_hor_pos = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_hor_half = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_vert_pos = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_vert_half = entities.at(0)->get_component<Transform>()->pos;
                         }
-                        for (Entity *entity: *entities) {
+                        for (EntityRef entity: entities) {
                             entities_selected.push_back(entity);
                         }
                     }
@@ -172,7 +172,7 @@ void Window_SceneView::render() {
 
         //Get all the transforms
         std::vector<Transform*> transforms;
-        for(Entity* entity : entities_selected)
+        for(EntityRef entity : entities_selected)
         {
             if(entity->has_component<Transform>())
                 transforms.push_back(entity->get_component<Transform>());
@@ -353,7 +353,7 @@ void Window_SceneView::render() {
         {
             Texture* tex = *(Texture**) payload->Data;
             std::string entity_name = tex->path;
-            Entity *entity = Entity::create(entity_name);
+            EntityRef entity = Entity::create(entity_name);
             entity->add_component<Transform>();
             entity->add_component<Sprite>();
             entity->get_component<Sprite>()->texture = tex;

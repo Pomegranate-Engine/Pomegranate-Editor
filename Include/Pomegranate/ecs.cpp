@@ -12,6 +12,7 @@ namespace Pomegranate
     std::unordered_map<std::string, EntityGroup*> EntityGroup::groups = std::unordered_map<std::string, EntityGroup*>();
     std::unordered_map<uint32_t, EntityGroup*> EntityGroup::groups_id = std::unordered_map<uint32_t, EntityGroup*>();
     std::vector<Entity*> Entity::destroy_queue = std::vector<Entity*>();
+    std::unordered_set<EntityRef*> EntityRef::refs = std::unordered_set<EntityRef*>();
 
     Entity::Entity()
     {
@@ -19,7 +20,6 @@ namespace Pomegranate
         Entity::entities.emplace(this->id,this);
         this->components = std::unordered_multimap<const std::type_info*,Component*>();
         this->parents = std::vector<EntityGroup*>();
-        this->refs = std::vector<Entity*>();
         this->name = "New Entity";
     }
 
@@ -69,6 +69,10 @@ namespace Pomegranate
 
     Entity::~Entity()
     {
+        this->orphan();
+        //delete from Entity::entities
+        //Destroy references
+        EntityRef::destroy(this);
         for (auto & component : this->components)
         {
             delete component.second;
@@ -92,6 +96,164 @@ namespace Pomegranate
         }
     }
 
+    void Entity::add_to_group(EntityGroup * group)
+    {
+        this->parents.push_back(group);
+    }
+
+    void Entity::remove_from_group(EntityGroup * group)
+    {
+        for (int i = 0; i < this->parents.size(); ++i)
+        {
+            if (this->parents[i] == group)
+            {
+                this->parents.erase(this->parents.begin() + i);
+                return;
+            }
+        }
+    }
+
+    std::vector<EntityGroup*> Entity::get_parent_groups()
+    {
+        return this->parents;
+    }
+
+    void Entity::orphan()
+    {
+        for (auto & parent : this->parents)
+        {
+            parent->remove_entity(this);
+        }
+    }
+
+    void Entity::destroy()
+    {
+        destroy_queue.push_back(this);
+    }
+
+    void Entity::force_destroy()
+    {
+        delete this;
+    }
+
+    void Entity::apply_destruction_queue()
+    {
+        for (auto & entity : destroy_queue)
+        {
+            entity->force_destroy();
+        }
+        destroy_queue.clear();
+    }
+
+    std::unordered_multimap<const std::type_info*,Component*> Entity::get_components() {
+        return components;
+    }
+
+    EntityRef Entity::duplicate()
+    {
+        auto entity = Entity::create(this->name);
+        for (auto & component : this->components)
+        {
+            if(entity->get_component(component.first->name()) == nullptr)
+            {
+                entity->add_component(component.first->name());
+            }
+            //Set data
+            auto* my = this->get_component(component.first->name());
+            auto* c = entity->get_component(component.first->name());
+            for (auto& [type,data] : c->component_data)
+            {
+                std::memcpy(data.second, my->component_data[type].second, sizeof(data.first));
+            }
+        }
+        return entity;
+    }
+
+    void Entity::set_id(uint32_t id)
+    {
+        //Remove the old id
+        Entity::entities.erase(this->id);
+        this->id = id;
+        //Add the new id
+        Entity::entities.emplace(this->id,this);
+        if(Entity::entity_count <= id)
+        {
+            Entity::entity_count = id + 1;
+        }
+    }
+
+    EntityRef Entity::create(std::string name)
+    {
+        Entity* entity = new Entity();
+        return EntityRef(entity);
+    }
+
+    EntityRef::EntityRef()
+    {
+        this->entity = nullptr;
+        EntityRef::refs.insert(this);
+    }
+    EntityRef::EntityRef(Entity *entity)
+    {
+        this->entity = entity;
+        EntityRef::refs.insert(this);
+    }
+    EntityRef::~EntityRef()
+    {
+        EntityRef::refs.erase(this);
+    }
+    Entity* EntityRef::operator->()
+    {
+        return this->entity;
+    }
+    Entity* EntityRef::operator=(Entity* entity)
+    {
+        this->entity = entity;
+        return this->entity;
+    }
+    Entity* EntityRef::operator=(const EntityRef& entity)
+    {
+        this->entity = entity.entity;
+        return this->entity;
+    }
+    bool EntityRef::operator==(Entity* entity)
+    {
+        return this->entity == entity;
+    }
+    bool EntityRef::operator!=(Entity* entity)
+    {
+        return this->entity != entity;
+    }
+    bool EntityRef::operator==(const EntityRef& entity)
+    {
+        return this->entity == entity.entity;
+    }
+    bool EntityRef::operator!=(const EntityRef& entity)
+    {
+        return this->entity != entity.entity;
+    }
+    Entity* EntityRef::get()
+    {
+        return this->entity;
+    }
+    void EntityRef::destroy(Entity* entity)
+    {
+        //Find all references to this entity and nullify them
+        for (auto & ref : EntityRef::refs)
+        {
+            if(ref->entity == entity)
+            {
+                ref->entity = nullptr;
+            }
+        }
+    }
+
+#pragma region Component
+    void Component::init(Entity *){}
+
+#pragma endregion
+
+#pragma region System
 
     System::System() = default;
 
@@ -162,9 +324,13 @@ namespace Pomegranate
         }
     }
 
+#pragma endregion
+
+#pragma region EntityGroup
+
     EntityGroup::EntityGroup(const std::string& name)
     {
-        this->entities = std::vector<Entity*>();
+        this->entities = std::vector<EntityRef>();
         this->systems = std::vector<System*>();
         this->child_groups = std::vector<EntityGroup*>();
         this->name = name;
@@ -179,20 +345,21 @@ namespace Pomegranate
         groups.erase(this->name);
     }
 
-    void EntityGroup::add_entity(Entity* entity)
+    void EntityGroup::add_entity(EntityRef entity)
     {
         entity->add_to_group(this);
         this->entities.push_back(entity);
     }
 
-    void EntityGroup::remove_entity(Entity* entity)
+    void EntityGroup::remove_entity(EntityRef entity)
     {
         for (auto & entitie : entities)
         {
             if (entitie->get_id() == entity->get_id())
             {
                 entitie->remove_from_group(this);
-                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), entitie), this->entities.end());
+                entities.erase(std::remove(entities.begin(), entities.end(), entitie), entities.end());
+
                 return;
             }
         }
@@ -260,7 +427,7 @@ namespace Pomegranate
 
                 for (auto &entitie: this->entities)
                 {
-                    system->tick(entitie);
+                    system->tick(entitie.get());
                 }
                 Entity::apply_destruction_queue();
                 system->post_tick();
@@ -273,11 +440,11 @@ namespace Pomegranate
         }
     }
 
-    void EntityGroup::draw(const std::function<bool(Entity*, Entity*)>& sortingFunction)
+    void EntityGroup::draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction)
     {
         // Sort entities using the provided sorting function
         if(sortingFunction!= nullptr)
-        std::sort(this->entities.begin(), this->entities.end(), sortingFunction);
+            std::sort(this->entities.begin(), this->entities.end(), sortingFunction);
         for(auto & system : this->systems)
         {
             if(system->active)
@@ -286,7 +453,7 @@ namespace Pomegranate
                 Entity::apply_destruction_queue();
                 for (auto &entity: this->entities)
                 {
-                    system->draw(entity);
+                    system->draw(entity.get());
                 }
                 Entity::apply_destruction_queue();
                 system->post_draw();
@@ -303,9 +470,9 @@ namespace Pomegranate
     {
         return groups[name];
     }
-    std::vector<Entity*>* EntityGroup::get_entities()
+    std::vector<EntityRef> EntityGroup::get_entities()
     {
-        return &this->entities;
+        return this->entities;
     }
     std::vector<System*>* EntityGroup::get_systems()
     {
@@ -320,22 +487,21 @@ namespace Pomegranate
         return this->parent;
     }
 
-    std::vector<Entity *> *EntityGroup::get_all_entities()
+    std::vector<EntityRef> EntityGroup::get_all_entities()
     {
         //Recursively get all entities
-        std::vector<Entity*> *all_entities = new std::vector<Entity*>();
+        std::vector<EntityRef> all_entities = std::vector<EntityRef>();
         for(auto & entity : this->entities)
         {
-            all_entities->push_back(entity);
+            all_entities.push_back(entity);
         }
         for(auto & group : this->child_groups)
         {
-            auto *child_entities = group->get_all_entities();
-            for(auto & entity : *child_entities)
+            auto child_entities = group->get_all_entities();
+            for(auto & entity : child_entities)
             {
-                all_entities->push_back(entity);
+                all_entities.push_back(entity);
             }
-            delete child_entities;
         }
         return all_entities;
     }
@@ -353,103 +519,9 @@ namespace Pomegranate
         }
     }
 
-    void Entity::add_to_group(EntityGroup * group)
-    {
-        this->parents.push_back(group);
-    }
+#pragma endregion
 
-    void Entity::remove_from_group(EntityGroup * group)
-    {
-        for (int i = 0; i < this->parents.size(); ++i)
-        {
-            if (this->parents[i] == group)
-            {
-                this->parents.erase(this->parents.begin() + i);
-                return;
-            }
-        }
-    }
-
-    std::vector<EntityGroup*> Entity::get_parent_groups()
-    {
-        return this->parents;
-    }
-
-    void Entity::orphan()
-    {
-        for (auto & parent : this->parents)
-        {
-            parent->remove_entity(this);
-        }
-    }
-
-    void Entity::destroy()
-    {
-        destroy_queue.push_back(this);
-    }
-
-    void Entity::force_destroy()
-    {
-        this->orphan();
-        //delete from Entity::entities
-        Entity::entities.erase(this->id);
-
-        delete this;
-    }
-
-    void Entity::apply_destruction_queue()
-    {
-        for (auto & entity : destroy_queue)
-        {
-            entity->force_destroy();
-        }
-        destroy_queue.clear();
-    }
-
-    std::unordered_multimap<const std::type_info*,Component*> Entity::get_components() {
-        return components;
-    }
-
-    Entity* Entity::duplicate()
-    {
-        auto* entity = Entity::create(this->name);
-        for (auto & component : this->components)
-        {
-            if(entity->get_component(component.first->name()) == nullptr)
-            {
-                entity->add_component(component.first->name());
-            }
-            //Set data
-            auto* my = this->get_component(component.first->name());
-            auto* c = entity->get_component(component.first->name());
-            for (auto& [type,data] : c->component_data)
-            {
-                std::memcpy(data.second, my->component_data[type].second, sizeof(data.first));
-            }
-        }
-        return entity;
-    }
-
-    void Entity::set_id(uint32_t id)
-    {
-        //Remove the old id
-        Entity::entities.erase(this->id);
-        this->id = id;
-        //Add the new id
-        Entity::entities.emplace(this->id,this);
-        if(Entity::entity_count <= id)
-        {
-            Entity::entity_count = id + 1;
-        }
-    }
-
-    Entity* Entity::create(std::string name)
-    {
-        Entity* entity = new Entity();
-        return entity;
-    }
-
-    void Component::init(Entity *){}
+#pragma region AutoGroup
 
     AutoGroup::AutoGroup(const std::string& name) : EntityGroup(name)
     {
@@ -463,9 +535,9 @@ namespace Pomegranate
         }
         this->component_types.clear();
     }
-    std::vector<Entity*> AutoGroup::find_entities()
+    std::vector<EntityRef> AutoGroup::find_entities()
     {
-        std::vector<Entity*> enties = std::vector<Entity*>();
+        std::vector<EntityRef> enties = std::vector<EntityRef>();
         for (auto & entity : Entity::entities)
         {
             bool has_all = true;
@@ -504,7 +576,7 @@ namespace Pomegranate
     }
     void AutoGroup::tick()
     {
-        std::vector<Entity*> enties = find_entities();
+        std::vector<EntityRef> enties = find_entities();
         //Add entities to this group if they're not already
         for (auto & entity : enties)
         {
@@ -525,9 +597,9 @@ namespace Pomegranate
         //Tick the group
         EntityGroup::tick();
     }
-    void AutoGroup::draw(const std::function<bool(Entity*, Entity*)>& sortingFunction)
+    void AutoGroup::draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction)
     {
-        std::vector<Entity*> enties = find_entities();
+        std::vector<EntityRef> enties = find_entities();
         //Add entities to this group if they're not already
         for (auto & entity : enties)
         {
@@ -548,4 +620,6 @@ namespace Pomegranate
         //Draw the group
         EntityGroup::draw(sortingFunction);
     }
+
+#pragma endregion
 }

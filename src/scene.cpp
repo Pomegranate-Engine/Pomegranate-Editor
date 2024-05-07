@@ -31,10 +31,10 @@ std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
 	}
 	return groups;
 }
-std::vector<Entity*> get_all_entities(EntityGroup* group)
+std::vector<EntityRef> get_all_entities(EntityGroup* group)
 {
-	std::vector<Entity*> entities;
-	for (auto& entity : *group->get_entities())
+	std::vector<EntityRef> entities;
+	for (auto& entity : group->get_entities())
 	{
 		entities.push_back(entity);
 	}
@@ -74,7 +74,7 @@ std::vector<EntityGroup*> get_all_parents(EntityGroup* group)
     }
     return parents;
 }
-std::vector<EntityGroup*> get_all_parents(Entity* entity)
+std::vector<EntityGroup*> get_all_parents(EntityRef entity)
 {
     std::vector<EntityGroup*> parents;
     for (auto& parent : entity->get_parent_groups())
@@ -497,7 +497,7 @@ EntityGroup* open_scene_from_json(json data)
     //Load entities
     for (auto& [id, entity] : data["entities"].items())
     {
-        Entity* e = Entity::create(entity["name"].get<std::string>());
+        EntityRef e = Entity::create(entity["name"].get<std::string>());
         e->set_id(std::stoul(id) + id_append_entity);
         e->name = entity["name"].get<std::string>();
         for (auto& parent : entity["parents"])

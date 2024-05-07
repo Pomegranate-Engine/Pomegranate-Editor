@@ -3,6 +3,7 @@
 #include <typeinfo>
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 #if defined(_OPENMP)
 #include <omp.h>
 #endif
@@ -68,13 +69,33 @@ namespace Pomegranate
     };
 #define register_system(T) System::register_system_with_name<T>(typeid(T).name())
 
+    class EntityRef
+    {
+    private:
+        /* data */
+        Entity* entity;
+        static std::unordered_set<EntityRef*> refs;
+    public:
+        EntityRef();
+        EntityRef(Entity* entity);
+        ~EntityRef();
+        Entity* operator->();
+        Entity* operator=(Entity* entity);
+        Entity* operator=(const EntityRef& entity);
+        bool operator==(Entity* entity);
+        bool operator!=(Entity* entity);
+        bool operator==(const EntityRef& entity);
+        bool operator!=(const EntityRef& entity);
+        Entity* get();
+        static void destroy(Entity* entity);
+    };
+
     class Entity
     {
     private:
         /* data */
         std::unordered_multimap<const std::type_info*,Component*> components;
         std::vector<EntityGroup*> parents;
-        std::vector<Entity*> refs;
     public:
         uint32_t id;
         std::string name;
@@ -92,7 +113,7 @@ namespace Pomegranate
         template <typename T> bool has_single_component();
         template <typename... T> bool has_component();
         bool has_component(const char*);
-        Entity* duplicate();
+        EntityRef duplicate();
         Entity();
         ~Entity();
         [[nodiscard]] uint32_t get_id() const;
@@ -105,7 +126,7 @@ namespace Pomegranate
         void destroy();
         void force_destroy();
         static void apply_destruction_queue();
-        static Entity* create(std::string name);
+        static EntityRef create(std::string name);
     };
 
     class EntityGroup
@@ -114,7 +135,7 @@ namespace Pomegranate
         /* data */
 
     public:
-        std::vector<Entity*> entities;
+        std::vector<EntityRef> entities;
         std::vector<System*> systems;
         std::vector<EntityGroup*> child_groups;
         EntityGroup* parent = nullptr;
@@ -125,17 +146,17 @@ namespace Pomegranate
 
         ~EntityGroup();
         EntityGroup* get_parent();
-        virtual void add_entity(Entity*);
-        virtual void remove_entity(Entity*);
+        virtual void add_entity(EntityRef);
+        virtual void remove_entity(EntityRef);
         virtual void add_system(System*);
         virtual void remove_system(System*);
         virtual bool has_system(System*);
         virtual void add_group(EntityGroup*);
         virtual void remove_group(EntityGroup*);
         virtual void tick();
-        virtual void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
-        virtual std::vector<Entity*>* get_entities();
-        virtual std::vector<Entity*>* get_all_entities();
+        virtual void draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction);
+        virtual std::vector<EntityRef> get_entities();
+        virtual std::vector<EntityRef> get_all_entities();
         virtual std::vector<System*>* get_systems();
         virtual std::vector<EntityGroup*>* get_child_groups();
         void set_id(uint32_t id);
@@ -150,7 +171,7 @@ namespace Pomegranate
         /* data */
     public:
         std::vector<const std::type_info*> component_types;
-        std::vector<Entity*> find_entities();
+        std::vector<EntityRef> find_entities();
         AutoGroup(const std::string& name);
 
         template<typename... T> static AutoGroup* create(const std::string& name);
@@ -160,7 +181,7 @@ namespace Pomegranate
         template <typename T> void remove_component_type();
         void remove_component_type(std::string);
         void tick() override;
-        void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction) override;
+        void draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction) override;
     };
 }
 

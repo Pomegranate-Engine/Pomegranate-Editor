@@ -1,7 +1,7 @@
 #include "standard_ecs_rendering.h"
 namespace Pomegranate
 {
-    Entity* Camera::current = nullptr;
+    EntityRef Camera::current = nullptr;
 
     Sprite::Sprite()
     {
@@ -61,7 +61,7 @@ namespace Pomegranate
         register_component(Camera);
     }
 
-    void Camera::make_current(Entity*entity)
+    void Camera::make_current(EntityRef entity)
     {
         current = entity;
     }
