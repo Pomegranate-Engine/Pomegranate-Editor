@@ -107,6 +107,9 @@ void Window_SceneView::render() {
         //Render scene
         Editor::current_scene->draw(nullptr);
 
+        //Destroy camera entity
+        camera->force_destroy();
+
         Vec2 mouse_world_pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(screen_w/2,screen_h/2))/zoom+this->position;
         //Draw movement arrows around selected entity
         if (Node::selected != nullptr)
@@ -325,9 +328,6 @@ void Window_SceneView::render() {
         {
             print_info("Not entity");
         }
-        //Destroy camera entity
-        camera->force_destroy();
-        Entity::entity_count--;
         SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     }
 

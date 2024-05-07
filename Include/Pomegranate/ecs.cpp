@@ -391,6 +391,9 @@ namespace Pomegranate
     void Entity::force_destroy()
     {
         this->orphan();
+        //delete from Entity::entities
+        Entity::entities.erase(this->id);
+
         delete this;
     }
 

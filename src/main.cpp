@@ -212,15 +212,6 @@ int main(int argc, char* argv[])
 
         //- - - - - # UPDATE # - - - - -
 
-        if(test_entity != nullptr)
-        {
-            print_info("Test Entity found");
-        }
-        else
-        {
-            print_error("Test Entity not found");
-        }
-
         if (tick_time > 0.016)
         {
             tick_time = 0.0;
