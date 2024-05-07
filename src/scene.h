@@ -13,7 +13,7 @@
 using namespace Pomegranate;
 using json = nlohmann::json;
 
-class SceneGroup : public EntityGroup
+class SceneGroup : public Group
 {
 public:
     std::string path;
@@ -22,10 +22,10 @@ public:
 };
 
 void unload_all();
-json save_scene_as_json(EntityGroup* scene);
-void save_scene(const char* path, EntityGroup* scene);
-EntityGroup* open_scene_from_json(json j);
-EntityGroup* open_scene(const char* path);
-EntityGroup* create_default_scene();
+json save_scene_as_json(GroupRef scene);
+void save_scene(const char* path, GroupRef scene);
+GroupRef open_scene_from_json(json j);
+GroupRef open_scene(const char* path);
+GroupRef create_default_scene();
 
 #endif //SCENE_H

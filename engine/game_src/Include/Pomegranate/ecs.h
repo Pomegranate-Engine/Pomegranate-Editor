@@ -23,7 +23,7 @@ namespace Pomegranate
     class Entity;
     class Component;
     class System;
-    class EntityGroup;
+    class Group;
 
     class Component
     {
@@ -73,7 +73,7 @@ namespace Pomegranate
     private:
         /* data */
         std::unordered_multimap<const std::type_info*,Component*> components;
-        std::vector<EntityGroup*> parents;
+        std::vector<Group*> parents;
         std::vector<Entity*> refs;
     public:
         uint32_t id;
@@ -83,9 +83,9 @@ namespace Pomegranate
         template <typename... T> void add_components();
         Component* add_component(const char* name);
         void remove_component(Component*);
-        void add_to_group(EntityGroup*);
-        void remove_from_group(EntityGroup*);
-        std::vector<EntityGroup*> get_parent_groups();
+        void add_to_group(Group*);
+        void remove_from_group(Group*);
+        std::vector<Group*> get_parent_groups();
         template <typename T> T* get_component();
         Component* get_component(const char*);
         template <typename T> T* require_component();
@@ -107,36 +107,36 @@ namespace Pomegranate
         void get_ref(Entity*&e);
         static void apply_destruction_queue();
     };
-    class EntityGroup
+    class Group
     {
     private:
         /* data */
         std::vector<Entity*> entities;
         std::vector<System*> systems;
-        std::vector<EntityGroup*> child_groups;
-        EntityGroup* parent = nullptr;
+        std::vector<Group*> child_groups;
+        Group* parent = nullptr;
     public:
         static uint32_t group_count;
         uint32_t id;
         std::string name;
-        explicit EntityGroup(const std::string& name);
-        ~EntityGroup();
-        EntityGroup* get_parent();
+        explicit Group(const std::string& name);
+        ~Group();
+        Group* get_parent();
         void add_entity(Entity*);
         void remove_entity(Entity*);
         void add_system(System*);
         void remove_system(System*);
         bool has_system(System*);
-        void add_group(EntityGroup*);
-        void remove_group(EntityGroup*);
+        void add_group(Group*);
+        void remove_group(Group*);
         void tick();
         void draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
-        static std::unordered_map<std::string,EntityGroup*> groups;
-        static std::unordered_map<uint32_t,EntityGroup*> groups_id;
-        static EntityGroup* get_group(const std::string& name);
+        static std::unordered_map<std::string,Group*> groups;
+        static std::unordered_map<uint32_t,Group*> groups_id;
+        static Group* get_group(const std::string& name);
         std::vector<Entity*>* get_entities();
         std::vector<System*>* get_systems();
-        std::vector<EntityGroup*>* get_child_groups();
+        std::vector<Group*>* get_child_groups();
     };
 }
 

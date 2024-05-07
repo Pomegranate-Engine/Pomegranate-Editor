@@ -175,7 +175,7 @@ int main(int argc, char* argv[])
     register_system(Render3D);
 
 
-    Editor::current_scene = new EntityGroup("Root");
+    Editor::current_scene = new Group("Root");
 
 
     //Create windows

@@ -24,7 +24,49 @@ namespace Pomegranate
     class Entity;
     class Component;
     class System;
-    class EntityGroup;
+    class Group;
+
+    class EntityRef
+    {
+    private:
+        /* data */
+        Entity* entity;
+        static std::unordered_set<EntityRef*> refs;
+    public:
+        EntityRef();
+        EntityRef(Entity* entity);
+        ~EntityRef();
+        Entity* operator->();
+        Entity* operator=(Entity* entity);
+        Entity* operator=(const EntityRef& entity);
+        bool operator==(Entity* entity);
+        bool operator!=(Entity* entity);
+        bool operator==(const EntityRef& entity);
+        bool operator!=(const EntityRef& entity);
+        Entity* get();
+        static void destroy(Entity* entity);
+    };
+
+    class GroupRef
+    {
+    private:
+        /* data */
+        Group* group;
+        static std::unordered_set<GroupRef*> refs;
+    public:
+        GroupRef();
+        GroupRef(Group* group);
+        ~GroupRef();
+        Group* operator->();
+        Group* operator=(Group* group);
+        Group* operator=(const GroupRef& group);
+        bool operator==(Group* group);
+        bool operator!=(Group* group);
+        bool operator==(const GroupRef& group);
+        bool operator!=(const GroupRef& group);
+        Group* get();
+        static void destroy(Group* group);
+    };
 
     class Component
     {
@@ -69,33 +111,12 @@ namespace Pomegranate
     };
 #define register_system(T) System::register_system_with_name<T>(typeid(T).name())
 
-    class EntityRef
-    {
-    private:
-        /* data */
-        Entity* entity;
-        static std::unordered_set<EntityRef*> refs;
-    public:
-        EntityRef();
-        EntityRef(Entity* entity);
-        ~EntityRef();
-        Entity* operator->();
-        Entity* operator=(Entity* entity);
-        Entity* operator=(const EntityRef& entity);
-        bool operator==(Entity* entity);
-        bool operator!=(Entity* entity);
-        bool operator==(const EntityRef& entity);
-        bool operator!=(const EntityRef& entity);
-        Entity* get();
-        static void destroy(Entity* entity);
-    };
-
     class Entity
     {
     private:
         /* data */
         std::unordered_multimap<const std::type_info*,Component*> components;
-        std::vector<EntityGroup*> parents;
+        std::vector<GroupRef> parents;
     public:
         uint32_t id;
         std::string name;
@@ -104,9 +125,9 @@ namespace Pomegranate
         template <typename... T> void add_components();
         Component* add_component(const char* name);
         void remove_component(Component*);
-        void add_to_group(EntityGroup*);
-        void remove_from_group(EntityGroup*);
-        std::vector<EntityGroup*> get_parent_groups();
+        void add_to_group(GroupRef);
+        void remove_from_group(GroupRef);
+        std::vector<GroupRef> get_parent_groups();
         template <typename T> T* get_component();
         Component* get_component(const char*);
         template <typename T> T* require_component();
@@ -129,7 +150,7 @@ namespace Pomegranate
         static EntityRef create(std::string name);
     };
 
-    class EntityGroup
+    class Group
     {
     private:
         /* data */
@@ -137,35 +158,35 @@ namespace Pomegranate
     public:
         std::vector<EntityRef> entities;
         std::vector<System*> systems;
-        std::vector<EntityGroup*> child_groups;
-        EntityGroup* parent = nullptr;
+        std::vector<GroupRef> child_groups;
+        GroupRef parent = nullptr;
         static uint32_t group_count;
         uint32_t id;
         std::string name;
-        explicit EntityGroup(const std::string& name);
+        explicit Group(const std::string& name);
 
-        ~EntityGroup();
-        EntityGroup* get_parent();
+        ~Group();
+        GroupRef get_parent();
         virtual void add_entity(EntityRef);
         virtual void remove_entity(EntityRef);
         virtual void add_system(System*);
         virtual void remove_system(System*);
         virtual bool has_system(System*);
-        virtual void add_group(EntityGroup*);
-        virtual void remove_group(EntityGroup*);
+        virtual void add_group(GroupRef);
+        virtual void remove_group(GroupRef);
         virtual void tick();
         virtual void draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction);
         virtual std::vector<EntityRef> get_entities();
         virtual std::vector<EntityRef> get_all_entities();
         virtual std::vector<System*>* get_systems();
-        virtual std::vector<EntityGroup*>* get_child_groups();
+        virtual std::vector<GroupRef> get_child_groups();
         void set_id(uint32_t id);
-        static std::unordered_map<std::string,EntityGroup*> groups;
-        static std::unordered_map<uint32_t,EntityGroup*> groups_id;
-        static EntityGroup* get_group(const std::string& name);
+        static std::unordered_map<std::string,GroupRef> groups;
+        static std::unordered_map<uint32_t,GroupRef> groups_id;
+        static GroupRef get_group(const std::string& name);
     };
 
-    class AutoGroup : public EntityGroup
+    class AutoGroup : public Group
     {
     private:
         /* data */
@@ -174,7 +195,7 @@ namespace Pomegranate
         std::vector<EntityRef> find_entities();
         AutoGroup(const std::string& name);
 
-        template<typename... T> static AutoGroup* create(const std::string& name);
+        template<typename... T> static GroupRef create(const std::string& name);
         ~AutoGroup();
         template <typename T> void add_component_type();
         void add_component_type(std::string);

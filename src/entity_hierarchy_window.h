@@ -29,13 +29,13 @@ public:
     Color color;
     Texture* texture;
     EntityRef entity;
-    std::unique_ptr<EntityGroup> group;
+    GroupRef group;
     std::unique_ptr<System> system;
 
     std::vector<Node*> children;
     bool open;
     Node(EntityRef entity);
-    Node(EntityGroup* group);
+    Node(GroupRef group);
     Node(System* system);
 };
 
@@ -57,7 +57,7 @@ public:
     Window_EntityHierarchy();
     std::vector<Node*> find_all_parents(Node* node);
     bool is_node_visible(Node* node);
-    void build_graph(EntityGroup* group, Node* parent = nullptr);
+    void build_graph(GroupRef group, Node* parent = nullptr);
     void draw_node(Node*n);
     void simulate_node(Node* node);
     void render() override;

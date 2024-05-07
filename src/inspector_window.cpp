@@ -150,8 +150,8 @@ void InspectorWindow::render()
         }
         else if(Node::selected->group != nullptr)
         {
-            if(typeid(*Node::selected->group.get()).hash_code() == typeid(EntityGroup).hash_code()) {
-                EntityGroup *group = Node::selected->group.get();
+            if(typeid(*Node::selected->group.get()).hash_code() == typeid(Group).hash_code()) {
+                Group *group = Node::selected->group.get();
                 property_field("Name", &group->name);
                 if (ImGui::IsItemDeactivatedAfterEdit()) {
                     Editor::action();
@@ -188,7 +188,7 @@ void InspectorWindow::render()
                 }
             }
             else if(typeid(*Node::selected->group.get()).hash_code() == typeid(SceneGroup).hash_code()) {
-                EntityGroup *group = Node::selected->group.get();
+                Group *group = Node::selected->group.get();
                 property_field("Name", &group->name);
                 if (ImGui::IsItemDeactivatedAfterEdit()) {
                     Editor::action();

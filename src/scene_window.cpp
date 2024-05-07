@@ -366,7 +366,7 @@ void Window_SceneView::render() {
             const char* scene_path = (const char*)payload->Data;
             SceneGroup* group = new SceneGroup("Scene", scene_path);
             group->instantiate();
-            group->name = group->get_child_groups()[0][0]->name;
+            group->name = group->get_child_groups()[0]->name;
             Editor::current_scene->add_group(group);
         }
     }

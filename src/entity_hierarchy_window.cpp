@@ -325,7 +325,7 @@ void Window_EntityHierarchy::render()
                     else
                     {
                         //Find parents
-                        std::vector<EntityGroup*> parents;
+                        std::vector<Group*> parents;
                         for (auto & node : nodes) {
                             if (node->group != nullptr) {
                                 if (std::find(node->group->get_entities().begin(), node->group->get_entities().end(),
@@ -416,7 +416,7 @@ void Window_EntityHierarchy::create_entity()
         else
         {
             //Find parents
-            std::vector<EntityGroup*> parents;
+            std::vector<Group*> parents;
             for (auto & node : nodes) {
                 if (node->group != nullptr) {
                     if (std::find(node->group->get_entities().begin(), node->group->get_entities().end(),
@@ -443,14 +443,14 @@ void Window_EntityHierarchy::create_group()
         if(selected_node->group != nullptr)
         {
             //Create a new group
-            auto *group = new EntityGroup("New Group");
+            auto *group = new Group("New Group");
             selected_node->group->add_group(group);
             Editor::action();
         }
         else
         {
             //Find parents
-            std::vector<EntityGroup*> parents;
+            std::vector<Group*> parents;
             for (auto & node : nodes) {
                 if (node->group != nullptr) {
                     if (std::find(node->group->get_entities().begin(), node->group->get_entities().end(),
@@ -460,7 +460,7 @@ void Window_EntityHierarchy::create_group()
                 }
             }
             //Create a new group and link it to the parents
-            auto *group = new EntityGroup("New Group");
+            auto *group = new Group("New Group");
             for (auto & parent : parents) {
                 parent->add_group(group);
             }
@@ -484,7 +484,7 @@ void Window_EntityHierarchy::create_auto_group()
         else
         {
             //Find parents
-            std::vector<EntityGroup*> parents;
+            std::vector<Group*> parents;
             for (auto & node : nodes) {
                 if (node->group != nullptr) {
                     if (std::find(node->group->get_entities().begin(), node->group->get_entities().end(),
@@ -624,7 +624,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     if(n->group != nullptr)
     {
         name = n->group->name;
-        if(typeid(*n->group) == typeid(AutoGroup))
+        if(typeid(*n->group.get()) == typeid(AutoGroup))
         {
             n->texture = ResourceManager::load<Texture>("engine/auto_group.png");
             n->color = Color((int)EditorTheme::color_palette_purple.x,(int)EditorTheme::color_palette_purple.y,(int)EditorTheme::color_palette_purple.z,255);
@@ -692,7 +692,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
             if(n->entity != nullptr)
                 ImGui::SetDragDropPayload("Entity", &n->entity, sizeof(Entity *));
             if(n->group != nullptr)
-                ImGui::SetDragDropPayload("Group", &n->group, sizeof(EntityGroup *));
+                ImGui::SetDragDropPayload("Group", &n->group, sizeof(Group *));
             if(n->system != nullptr)
                 ImGui::SetDragDropPayload("System", &n->system, sizeof(System *));
             ImGui::Image((void *) n->texture->get_sdl_texture(), ImVec2(node_size * 2, node_size * 2), ImVec2(0, 0),
@@ -796,15 +796,15 @@ void Window_EntityHierarchy::simulate_node(Node *node)
     }
 }
 
-void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
+void Window_EntityHierarchy::build_graph(GroupRef group, Node* parent)
 {
     std::vector<EntityRef> entities = group->get_entities();
-    std::vector<EntityGroup*> groups = *group->get_child_groups();
+    std::vector<GroupRef> groups = group->get_child_groups();
     std::vector<System*> systems = *group->get_systems();
     bool group_exists = false;
     Node* group_node;
     for (auto & node : nodes) {
-        if(node->group.get() == group)
+        if(node->group.get() == group.get())
         {
             group_exists = true;
             group_node = node;
@@ -932,10 +932,10 @@ void Window_EntityHierarchy::build_graph(EntityGroup *group, Node* parent)
     }
     for (auto & g : groups)
     {
-        if(typeid(*g) == typeid(SceneGroup))
+        if(typeid(*g.get()) == typeid(SceneGroup))
         {
             //Skip the first group as it's the root of the scene group build the graph
-            build_graph(g->get_child_groups()[0][0], group_node);
+            build_graph(g->get_child_groups()[0], group_node);
         }
         else
         {
@@ -958,20 +958,20 @@ void Window_EntityHierarchy::delete_node()
         }
         if(selected_node->group != nullptr)
         {
-            //Get the nodes parent EntityGroup* and remove the group from it
-            EntityGroup* parent = selected_node->group->get_parent();
+            //Get the nodes parent Group* and remove the group from it
+            GroupRef parent = selected_node->group->get_parent();
             if(parent != nullptr)
             {
-                EntityGroup* group = selected_node->group.get();
+                Group* group = selected_node->group.get();
                 parent->remove_group(group);
                 Editor::action();
             }
         }
         if(selected_node->system != nullptr)
         {
-            //Get the node parent EntityGroup* and remove the system from it
+            //Get the node parent Group* and remove the system from it
             //Sort through nodes to find the parent group
-            EntityGroup* parent;
+            Group* parent;
             for (auto & node : nodes) {
                 if(node->group != nullptr)
                 {
@@ -1028,7 +1028,7 @@ void Window_EntityHierarchy::duplicate()
     {
         if(selected_node->entity != nullptr)
         {
-            std::vector<EntityGroup*> groups = std::vector<EntityGroup*>();
+            std::vector<Group*> groups = std::vector<Group*>();
             for (auto & node : nodes) {
                 if(node->group != nullptr)
                 {
@@ -1152,7 +1152,7 @@ Node::Node(Pomegranate::System *system)
     this->group = nullptr;
     this->open = true;
 }
-Node::Node(Pomegranate::EntityGroup *group)
+Node::Node(Pomegranate::GroupRef group)
 {
     this->pos = Vec2((float)Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
@@ -1161,6 +1161,6 @@ Node::Node(Pomegranate::EntityGroup *group)
     this->texture = ResourceManager::load<Texture>("engine/group.png");
     this->entity = nullptr;
     this->system = nullptr;
-    this->group = std::unique_ptr<EntityGroup>(group);
+    this->group = GroupRef(group);
     this->open = true;
 }

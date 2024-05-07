@@ -8,9 +8,9 @@ namespace Pomegranate
     std::unordered_map<std::string, std::function<Component*()>> Component::component_types = std::unordered_map<std::string, std::function<Component*()>>();
     std::unordered_map<std::string, std::function<System*()>> System::system_types = std::unordered_map<std::string, std::function<System*()>>();
     uint32_t Entity::entity_count = 0;
-    uint32_t EntityGroup::group_count = 0;
-    std::unordered_map<std::string, EntityGroup*> EntityGroup::groups = std::unordered_map<std::string, EntityGroup*>();
-    std::unordered_map<uint32_t, EntityGroup*> EntityGroup::groups_id = std::unordered_map<uint32_t, EntityGroup*>();
+    uint32_t Group::group_count = 0;
+    std::unordered_map<std::string, Group*> Group::groups = std::unordered_map<std::string, Group*>();
+    std::unordered_map<uint32_t, Group*> Group::groups_id = std::unordered_map<uint32_t, Group*>();
     std::vector<Entity*> Entity::destroy_queue = std::vector<Entity*>();
 
     Entity::Entity()
@@ -18,7 +18,7 @@ namespace Pomegranate
         this->id = Entity::entity_count++;
         Entity::entities.emplace(this->id,this);
         this->components = std::unordered_multimap<const std::type_info*,Component*>();
-        this->parents = std::vector<EntityGroup*>();
+        this->parents = std::vector<Group*>();
         this->refs = std::vector<Entity*>();
         this->name = "NewEntity";
     }
@@ -162,30 +162,30 @@ namespace Pomegranate
         }
     }
 
-    EntityGroup::EntityGroup(const std::string& name)
+    Group::Group(const std::string& name)
     {
         this->entities = std::vector<Entity*>();
         this->systems = std::vector<System*>();
-        this->child_groups = std::vector<EntityGroup*>();
+        this->child_groups = std::vector<Group*>();
         this->name = name;
         groups.emplace(name,this);
-        this->id = EntityGroup::group_count++;
+        this->id = Group::group_count++;
         groups_id.emplace(this->id,this);
     }
 
-    EntityGroup::~EntityGroup()
+    Group::~Group()
     {
         //Remove this group from the groups map
         groups.erase(this->name);
     }
 
-    void EntityGroup::add_entity(Entity* entity)
+    void Group::add_entity(Entity* entity)
     {
         entity->add_to_group(this);
         this->entities.push_back(entity);
     }
 
-    void EntityGroup::remove_entity(Entity* entity)
+    void Group::remove_entity(Entity* entity)
     {
         for (auto & entitie : entities)
         {
@@ -202,12 +202,12 @@ namespace Pomegranate
         }
     }
 
-    void EntityGroup::add_system(System * system)
+    void Group::add_system(System * system)
     {
         this->systems.push_back(system);
     }
 
-    void EntityGroup::remove_system(System * system)
+    void Group::remove_system(System * system)
     {
         for (int i = 0; i < systems.size(); ++i)
         {
@@ -219,7 +219,7 @@ namespace Pomegranate
             }
         }
     }
-    bool EntityGroup::has_system(System * system)
+    bool Group::has_system(System * system)
     {
         for (auto & sys : systems)
         {
@@ -231,17 +231,17 @@ namespace Pomegranate
         return false;
     }
 
-    void EntityGroup::add_group(EntityGroup* entityGroup)
+    void Group::add_group(Group* Group)
     {
-        this->child_groups.push_back(entityGroup);
-        entityGroup->parent = this;
+        this->child_groups.push_back(Group);
+        Group->parent = this;
     }
 
-    void EntityGroup::remove_group(EntityGroup* entityGroup)
+    void Group::remove_group(Group* Group)
     {
         for (int i = 0; i < child_groups.size(); ++i)
         {
-            if(child_groups[i] == entityGroup)
+            if(child_groups[i] == Group)
             {
                 child_groups.erase(child_groups.begin() + i);
                 return;
@@ -249,7 +249,7 @@ namespace Pomegranate
         }
     }
 
-    void EntityGroup::tick()
+    void Group::tick()
     {
         for(auto & system : this->systems)
         {
@@ -273,7 +273,7 @@ namespace Pomegranate
         }
     }
 
-    void EntityGroup::draw(const std::function<bool(Entity*, Entity*)>& sortingFunction)
+    void Group::draw(const std::function<bool(Entity*, Entity*)>& sortingFunction)
     {
         // Sort entities using the provided sorting function
         if(sortingFunction!= nullptr)
@@ -299,33 +299,33 @@ namespace Pomegranate
         }
     }
 
-    EntityGroup* EntityGroup::get_group(const std::string& name)
+    Group* Group::get_group(const std::string& name)
     {
         return groups[name];
     }
-    std::vector<Entity*>* EntityGroup::get_entities()
+    std::vector<Entity*>* Group::get_entities()
     {
         return &this->entities;
     }
-    std::vector<System*>* EntityGroup::get_systems()
+    std::vector<System*>* Group::get_systems()
     {
         return &this->systems;
     }
-    std::vector<EntityGroup*>* EntityGroup::get_child_groups()
+    std::vector<Group*>* Group::get_child_groups()
     {
         return &this->child_groups;
     }
 
-    EntityGroup *EntityGroup::get_parent() {
+    Group *Group::get_parent() {
         return this->parent;
     }
 
-    void Entity::add_to_group(EntityGroup * group)
+    void Entity::add_to_group(Group * group)
     {
         this->parents.push_back(group);
     }
 
-    void Entity::remove_from_group(EntityGroup * group)
+    void Entity::remove_from_group(Group * group)
     {
         for (int i = 0; i < this->parents.size(); ++i)
         {
@@ -337,7 +337,7 @@ namespace Pomegranate
         }
     }
 
-    std::vector<EntityGroup*> Entity::get_parent_groups()
+    std::vector<Group*> Entity::get_parent_groups()
     {
         return this->parents;
     }
