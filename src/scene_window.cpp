@@ -81,15 +81,12 @@ void Window_SceneView::render() {
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_background.x,EditorTheme::scene_view_background.y,EditorTheme::scene_view_background.z, 255);
         SDL_RenderClear(Window::current->get_sdl_renderer());
         //Create camera entity
-        EntityRef camera = Entity::create("_Editor_Camera");
-        camera->add_components<Camera,Transform>();
-        Camera::make_current(camera);
 
         //Lerp zoom to zoom target
         zoom = (zoom_target - zoom) * 0.1f + zoom;
 
-        camera->get_component<Transform>()->pos = this->position;
-        camera->get_component<Camera>()->zoom = zoom;
+        Camera::current_render_position = this->position;
+        Camera::current_render_zoom = this->zoom;
 
         //Axis
         int screen_w = 0;
@@ -106,9 +103,6 @@ void Window_SceneView::render() {
 
         //Render scene
         Editor::current_scene->draw(nullptr);
-
-        //Destroy camera entity
-        camera->force_destroy();
 
         Vec2 mouse_world_pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(screen_w/2,screen_h/2))/zoom+this->position;
         //Draw movement arrows around selected entity
