@@ -9,9 +9,10 @@ namespace Pomegranate
     std::unordered_map<std::string, std::function<System*()>> System::system_types = std::unordered_map<std::string, std::function<System*()>>();
     uint32_t Entity::entity_count = 0;
     uint32_t Group::group_count = 0;
-    std::unordered_map<std::string, GroupRef> Group::groups = std::unordered_map<std::string, GroupRef>();
-    std::unordered_map<uint32_t, GroupRef> Group::groups_id = std::unordered_map<uint32_t, GroupRef>();
+    std::unordered_map<std::string, Group*> Group::groups = std::unordered_map<std::string, Group*>();
+    std::unordered_map<uint32_t, Group*> Group::groups_id = std::unordered_map<uint32_t, Group*>();
     std::vector<Entity*> Entity::destroy_queue = std::vector<Entity*>();
+    std::vector<Group*> Group::destroy_queue = std::vector<Group*>();
     std::unordered_set<EntityRef*> EntityRef::refs = std::unordered_set<EntityRef*>();
     std::unordered_set<GroupRef*> GroupRef::refs = std::unordered_set<GroupRef*>();
 #pragma region Refs
@@ -424,15 +425,24 @@ void GroupRef::destroy(Group *group)
     Group::~Group()
     {
         //Remove this group from the groups map
-        groups.erase(this->name);
-        groups_id.erase(this->id);
+        GroupRef::destroy(this);
         //Remove all entities
         for (auto & entity : this->entities)
         {
             entity->remove_from_group(this);
         }
+        orphan();
         //Delete references
-        GroupRef::destroy(this);
+        groups.erase(this->name);
+        groups_id.erase(this->id);
+    }
+
+    void Group::orphan()
+    {
+        for(auto & group : Group::groups)
+        {
+            group.second->remove_group(this);
+        }
     }
 
     void Group::add_entity(EntityRef entity)
@@ -528,6 +538,7 @@ void GroupRef::destroy(Group *group)
         {
             child_group->tick();
         }
+        Group::apply_destruction_queue();
     }
 
     void Group::draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction)
@@ -554,6 +565,7 @@ void GroupRef::destroy(Group *group)
         {
             group->draw(sortingFunction);
         }
+        Group::apply_destruction_queue();
     }
 
     GroupRef Group::get_group(const std::string& name)
@@ -607,6 +619,25 @@ void GroupRef::destroy(Group *group)
         {
             Group::group_count = id + 1;
         }
+    }
+
+    void Group::force_destroy()
+    {
+        delete this;
+    }
+
+    void Group::destroy()
+    {
+        destroy_queue.push_back(this);
+    }
+
+    void Group::apply_destruction_queue()
+    {
+        for (auto & group : destroy_queue)
+        {
+            group->force_destroy();
+        }
+        destroy_queue.clear();
     }
 
 #pragma endregion

@@ -424,13 +424,18 @@ void unload_all()
 	//Delete entities
 	for (auto& entity : Entity::entities)
 	{
-		delete entity.second;
+        entity.second->destroy();
 	}
-	//Delete groups
-	for (auto& group : Group::groups)
-	{
-		delete group.second.get();
-	}
+
+    //Delete groups
+    for (auto& group : Group::groups)
+    {
+        group.second->destroy();
+    }
+
+    Group::apply_destruction_queue();
+    Entity::apply_destruction_queue();
+
 
 	Window_EntityHierarchy::nodes.clear();
 

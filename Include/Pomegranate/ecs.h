@@ -174,16 +174,21 @@ namespace Pomegranate
         virtual bool has_system(System*);
         virtual void add_group(GroupRef);
         virtual void remove_group(GroupRef);
+        virtual void force_destroy();
+        virtual void destroy();
         virtual void tick();
+        virtual void orphan();
         virtual void draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction);
         virtual std::vector<EntityRef> get_entities();
         virtual std::vector<EntityRef> get_all_entities();
         virtual std::vector<System*>* get_systems();
         virtual std::vector<GroupRef> get_child_groups();
         void set_id(uint32_t id);
-        static std::unordered_map<std::string,GroupRef> groups;
-        static std::unordered_map<uint32_t,GroupRef> groups_id;
+        static std::unordered_map<std::string,Group*> groups;
+        static std::unordered_map<uint32_t,Group*> groups_id;
+        static std::vector<Group*> destroy_queue;
         static GroupRef get_group(const std::string& name);
+        static void apply_destruction_queue();
     };
 
     class AutoGroup : public Group
