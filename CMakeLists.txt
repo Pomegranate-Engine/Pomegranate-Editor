@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.0)
 
 project(Pomegranate_Engine)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 # Set the path to the SDL library directory
-set(SDL_LIBRARY_DIR ${CMAKE_SOURCE_DIR}/Lib/x64)
+set(LIBRARIES_DIR ${CMAKE_SOURCE_DIR}/Lib/x64)
 
 link_directories("${CMAKE_SOURCE_DIR}/bin/")
 
@@ -29,7 +29,32 @@ set(SOURCE_FILES src/main.cpp
         src/inspector_window.cpp
         src/inspector_window.h
         src/resources_window.cpp
-        src/resources_window.h)
+        src/resources_window.h
+        src/menu_bar.cpp
+        src/menu_bar.h
+        src/utils.cpp
+        src/utils.h
+        src/scene.cpp
+        src/scene.h
+        src/theme.cpp
+        src/theme.h
+        src/editor.cpp
+        src/editor.h
+        src/compile_and_run.cpp
+        src/compile_and_run.h
+        src/notifications.cpp
+        src/notifications.h
+        src/hotkey_manager.cpp
+        src/hotkey_manager.h
+        src/lua.cpp
+        src/lua.h
+        src/gl/shader.cpp
+        src/gl/shader.h
+        src/gl/Mesh.cpp
+        src/gl/Mesh.h
+        src/gl/Mesh.cpp
+        src/gl/Mesh.h
+)
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/Include/Imgui)
@@ -67,34 +92,10 @@ set(IMGUI_SOURCES
         ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer3.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
-        src/menu_bar.cpp
-        src/menu_bar.h
-        src/utils.cpp
-        src/utils.h
-        src/scene.cpp
-        src/scene.h
-        src/theme.cpp
-        src/theme.h
-        src/editor.cpp
-        src/editor.h
-        src/compile_and_run.cpp
-        src/compile_and_run.h
-        src/notifications.cpp
-        src/notifications.h
-        src/hotkey_manager.cpp
-        src/hotkey_manager.h
-        src/lua.cpp
-        src/lua.h
-        src/gl/shader.cpp
-        src/gl/shader.h
-        src/gl/Mesh.cpp
-        src/gl/Mesh.h
-        src/gl/Mesh.cpp
-        src/gl/Mesh.h
 )
 
 # Add executable
-add_executable(Pomegranate_Engine ${SOURCE_FILES} ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES})
+add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES})
 
 # Set the path to LuaJIT (Mac)
 set(LUAJIT_LIBRARY ${CMAKE_SOURCE_DIR}/Lib/Arm/libluajit-5.1.dylib)  # Adjust the library name if necessary
@@ -120,14 +121,14 @@ elseif(WIN32)
 
     target_link_libraries(Pomegranate_Engine PRIVATE
             OpenGL::GL
-            ${SDL_LIBRARY_DIR}/SDL3.lib
-            ${SDL_LIBRARY_DIR}/SDL3_ttf.lib
-            ${SDL_LIBRARY_DIR}/SDL3_image.lib
-            ${SDL_LIBRARY_DIR}/SDL3_mixer.lib
-            ${SDL_LIBRARY_DIR}/lua51.lib
+            ${LIBRARIES_DIR}/SDL3.lib
+            ${LIBRARIES_DIR}/SDL3_ttf.lib
+            ${LIBRARIES_DIR}/SDL3_image.lib
+            ${LIBRARIES_DIR}/SDL3_mixer.lib
+            ${LIBRARIES_DIR}/lua51.lib
             OpenMP::OpenMP_CXX
-            ${SDL_LIBRARY_DIR}/glew32.lib
-            ${SDL_LIBRARY_DIR}/glew32s.lib
+            ${LIBRARIES_DIR}/glew32.lib
+            ${LIBRARIES_DIR}/glew32s.lib
     )
 endif()
 
@@ -140,7 +141,7 @@ set_target_properties(Pomegranate_Engine PROPERTIES
 
 
 # Copy SDL DLL files to the output directory
-file(GLOB SDL_DLLS ${SDL_LIBRARY_DIR}/*.dll)
+file(GLOB SDL_DLLS ${LIBRARIES_DIR}/*.dll)
 foreach(DLL ${SDL_DLLS})
     add_custom_command(TARGET Pomegranate_Engine POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
