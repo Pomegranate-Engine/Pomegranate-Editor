@@ -38,7 +38,7 @@ const std::string VERSION = "0.0.1";
 #include"gl/mesh.h"
 #endif
 
-#include "components.cpp"
+#include "Components/components.cpp"
 
 Mat create_transform_matrix(Vec3 position, Vec3 rotation, Vec3 scale)
 {
@@ -163,6 +163,7 @@ int main(int argc, char* argv[])
     register_component(LuaComponent);
     register_component(CubeComponent);
     register_component(Transform3D);
+    register_component(ParticleEmitter);
 
     //Register systems
     register_system(PlayerController);
@@ -173,6 +174,7 @@ int main(int argc, char* argv[])
     register_system(EditorDebug);
     register_system(LuaSystem);
     register_system(Render3D);
+    register_system(ParticleSystem);
 
 
     Editor::current_scene = create_default_scene();

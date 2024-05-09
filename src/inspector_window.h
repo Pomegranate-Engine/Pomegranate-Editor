@@ -6,6 +6,13 @@
 #include <unordered_set>
 #include "lua.h"
 
+struct InspectorHeaderTag
+{
+    std::string name;
+    bool open = true;
+    InspectorHeaderTag(const char* name);
+};
+
 class InspectorWindow : public EditorWindow
 {
 public:

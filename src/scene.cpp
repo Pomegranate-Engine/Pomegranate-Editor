@@ -166,7 +166,7 @@ json save_scene_as_json(GroupRef scene)
         for (auto& [type, component] : components)
         {
             j["entities"][std::to_string(entity->id)]["components"][type->name()] = json::object();
-            std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data = component->component_data;
+            std::map<std::string, std::pair<const std::type_info*, void*>> data = component->component_data;
             //Write component data
             for (auto& [name, data] : data)
             {
@@ -230,7 +230,7 @@ json save_scene_as_json(GroupRef scene)
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["b"] = (*(Color*)data.second).b;
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["a"] = (*(Color*)data.second).a;
                 }
-                else if (data.first == &typeid(Texture*))
+                else if (data.first == &typeid(Texture*) && (*(Texture**)data.second) != nullptr)
                 {
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name] = json::object();
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "texture";
@@ -638,13 +638,21 @@ GroupRef open_scene_from_json(json data)
 
 GroupRef open_scene(const char *path)
 {
-	std::ifstream f(path);
-	json data = json::parse(f);
-	if (f.is_open())
-	{
-        return open_scene_from_json(data);
-	}
-	return nullptr;
+    try {
+        std::ifstream f(path);
+        json data = json::parse(f);
+        if (f.is_open()) {
+            return open_scene_from_json(data);
+        }
+        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Error", "Failed to open scene file: " + std::string(path)});
+        return nullptr;
+    }
+    catch (std::exception& e)
+    {
+        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Error", "Failed to open scene file: " + std::string(path)});
+        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Error", e.what()});
+        return nullptr;
+    }
 }
 
 GroupRef create_default_scene()
