@@ -318,10 +318,6 @@ void Window_SceneView::render() {
             dragging_entity_rotation = false;
             dragging_start_angle = 0;
         }
-        else
-        {
-            print_info("Not entity");
-        }
         SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     }
 

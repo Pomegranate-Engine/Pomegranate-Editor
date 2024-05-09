@@ -714,7 +714,9 @@ void Window_EntityHierarchy::draw_node(Node* n)
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-(float)name.size()*4, node_pos.y+node_size));
     ImGui::Text(name.c_str());
-        for (auto &i: n->linked) {
+    for (auto &i: n->linked)
+    {
+        if(is_node_visible(i)) {
             Vec2 linked_pos = i->pos;
             linked_pos.x -= cam_pos.x;
             linked_pos.y -= cam_pos.y;
@@ -722,11 +724,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
             linked_pos.y /= zoom;
             linked_pos.x += (float) size.x / 2;
             linked_pos.y += (float) size.y / 2;
-
-
             Vec2 mouse = Vec2(ImGui::GetMousePos().x, ImGui::GetMousePos().y);
-
-
             Vec2 point = find_closest_point_on_line(node_pos + Vec2(0, 24), linked_pos + Vec2(0, 24), mouse);
             if (ImGui::IsMouseClicked(1)) {
                 if ((node_pos + Vec2(0, 24)).distance_to(mouse) > 32 &&
@@ -745,13 +743,13 @@ void Window_EntityHierarchy::draw_node(Node* n)
                     }
                 }
             }
-
             //Draw point on line
             //ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImVec2(point.x, point.y), 4, IM_COL32(255, 255, 255, 255));
             ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(node_pos.x, node_pos.y + 24),
                                                          ImVec2(linked_pos.x, linked_pos.y + 24),
                                                          IM_COL32(127, 127, 127, 80), 2);
         }
+    }
 }
 
 void Window_EntityHierarchy::simulate_node(Node *node)
