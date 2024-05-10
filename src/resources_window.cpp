@@ -209,6 +209,8 @@ void ResourcesWindow::render()
                 Texture *texture = ResourceManager::load<Texture>(file.path);
                 ImGui::SetDragDropPayload("resource_texture", &texture, sizeof(Texture **));
                 ImGui::Text(file.path.c_str());
+                ImGui::SameLine();
+                ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
                 ImGui::EndDragDropSource();
             }
             else if(file.type == ResourceType::RESOURCE_TYPE_AUDIO)
@@ -216,6 +218,8 @@ void ResourcesWindow::render()
                 Audio *audio = ResourceManager::load<Audio>(file.path);
                 ImGui::SetDragDropPayload("resource_audio", &audio, sizeof(Audio **));
                 ImGui::Text(file.path.c_str());
+                ImGui::SameLine();
+                ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
                 ImGui::EndDragDropSource();
             }
             else if(file.type == ResourceType::RESOURCE_TYPE_FONT)
@@ -223,12 +227,16 @@ void ResourcesWindow::render()
                 TTFFont *font = ResourceManager::load<TTFFont>(file.path);
                 ImGui::SetDragDropPayload("resource_font", &font, sizeof(TTFFont **));
                 ImGui::Text(file.path.c_str());
+                ImGui::SameLine();
+                ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
                 ImGui::EndDragDropSource();
             }
             else if(file.type == ResourceType::RESOURCE_TYPE_SCENE)
             {
                 ImGui::SetDragDropPayload("resource_scene", file.path.c_str(), file.path.size());
                 ImGui::Text(file.path.c_str());
+                ImGui::SameLine();
+                ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
                 ImGui::EndDragDropSource();
             }
         }
