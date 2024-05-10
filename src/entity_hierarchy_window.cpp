@@ -88,6 +88,7 @@ void Window_EntityHierarchy::render()
         HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_E}, "Create Entity", create_entity});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_G}, "Create Group", create_group});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT, SDL_SCANCODE_S}, "Create System", create_system});
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LSHIFT,SDL_SCANCODE_A}, "Create AutoGroup", create_auto_group});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_BACKSPACE}, "Delete Node", delete_node});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_DELETE}, "Delete Node", delete_node});
         HotkeyManager::add_hotkey({{SDL_SCANCODE_D, SDL_SCANCODE_LSHIFT}, "Duplicate", duplicate});
@@ -410,6 +411,7 @@ void Window_EntityHierarchy::create_entity()
         {
             //Create a new entity
             auto entity = Entity::create("New Entity");
+            entity->add_component<Transform>();
             selected_node->group->add_entity(entity);
             Editor::action();
         }
@@ -427,6 +429,7 @@ void Window_EntityHierarchy::create_entity()
             }
             //Create a new entity and link it to the parents
             auto entity = Entity::create("New Entity");
+            entity->add_component<Transform>();
             for (auto & parent : parents) {
                 parent->add_entity(entity);
             }
