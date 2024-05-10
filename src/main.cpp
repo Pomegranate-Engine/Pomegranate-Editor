@@ -23,6 +23,7 @@ using namespace Pomegranate;
 #include "notifications.h"
 #include "hotkey_manager.h"
 #include "scene.h"
+#include "extension_handler.h"
 
 //Main window
 Window main_window = Window("Pomegranate Editor", 1024, 720);
@@ -52,6 +53,8 @@ Mat create_transform_matrix(Vec3 position, Vec3 rotation, Vec3 scale)
 
 int main(int argc, char* argv[])
 {
+    ExtensionHandler handler;
+    handler.load("engine/extensions/libTestPomegranateExtension.dylib");
     //region init
     pomegranate_init(); //Init
     ImGui::CreateContext(); //Create imgui context

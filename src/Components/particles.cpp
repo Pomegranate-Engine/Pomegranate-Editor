@@ -194,68 +194,63 @@ public:
             auto* emitter = e->get_component<ParticleEmitter>();
             auto* transform = e->get_component<Transform>();
             float d = delta_time * emitter->time_scale;
-            if(emitter->emitting)
+            if(emitter->particles.size() != emitter->max_particles)
             {
-                if(emitter->particles.size() != emitter->max_particles)
+                emitter->particles.clear();
+                for(int i = 0; i < emitter->max_particles; i++)
                 {
-                    emitter->particles.clear();
-                    for(int i = 0; i < emitter->max_particles; i++)
-                    {
-                        emitter->particles.insert({false, Particle()});
-                    }
+                    emitter->particles.insert({false, Particle()});
                 }
-
+            }
+            if(emitter->emitting) {
                 emitter->delta += d * emitter->emission_rate;
                 //Draw particles
                 std::vector<bool> inactive = {false};
-                while(emitter->delta > 1)
-                {
+                while (emitter->delta > 1) {
                     emitter->delta--;
                     Particle p;
                     p.position = transform->pos;
                     p.velocity = emitter->direction;
-
                     //Randomize velocity based on spread (0-2PI)
                     float angle = (rand() % 1000) / 1000.0 * emitter->spread;
                     p.velocity = p.velocity.rotate(angle).rotate(transform->rot).rotate(-emitter->spread / 2.0);
-                    p.velocity = p.velocity * (emitter->min_speed + (rand() % 1000) / 1000.0 * (emitter->max_speed - emitter->min_speed));
-                    p.angular_velocity = emitter->min_angular_speed + (rand() % 1000) / 1000.0 * (emitter->max_angular_speed - emitter->min_angular_speed);
-
+                    p.velocity = p.velocity * (emitter->min_speed +
+                                               (rand() % 1000) / 1000.0 * (emitter->max_speed - emitter->min_speed));
+                    p.angular_velocity = emitter->min_angular_speed + (rand() % 1000) / 1000.0 *
+                                                                      (emitter->max_angular_speed -
+                                                                       emitter->min_angular_speed);
                     p.lifetime = emitter->lifetime;
                     p.size = emitter->min_size + (rand() % 1000) / 1000.0 * (emitter->max_size - emitter->min_size);
-                    p.rotation = emitter->min_rotation + (rand() % 1000) / 1000.0 * (emitter->max_rotation - emitter->min_rotation);
+                    p.rotation = emitter->min_rotation +
+                                 (rand() % 1000) / 1000.0 * (emitter->max_rotation - emitter->min_rotation);
                     p.color = emitter->start_color;
-
-
                     //Find first inactive particle
                     bool found = false;
                     auto i = emitter->particles.find(found);
-                    if(i != emitter->particles.end())
-                    {
+                    if (i != emitter->particles.end()) {
                         //Extract particle and change it to true
                         auto handler = emitter->particles.extract(i);
                         handler.key() = true;
                         handler.mapped() = p;
                         emitter->particles.insert(std::move(handler));
                     }
-
                 }
-                std::vector<std::unordered_multimap<bool,Particle>::iterator> to_remove;
-                for (auto[itr, rangeEnd] = emitter->particles.equal_range(true); itr != rangeEnd; ++itr)
+            }
+            std::vector<std::unordered_multimap<bool,Particle>::iterator> to_remove;
+            for (auto[itr, rangeEnd] = emitter->particles.equal_range(true); itr != rangeEnd; ++itr)
+            {
+                bool should_remove = update_particle(d,emitter, transform,&itr->second, &itr);
+                if(should_remove)
                 {
-                    bool should_remove = update_particle(d,emitter, transform,&itr->second, &itr);
-                    if(should_remove)
-                    {
-                        to_remove.push_back(itr);
-                    }
+                    to_remove.push_back(itr);
                 }
-                for(auto& i : to_remove)
-                {
-                    //Set the key to false
-                    auto handler = emitter->particles.extract(i);
-                    handler.key() = false;
-                    emitter->particles.insert(std::move(handler));
-                }
+            }
+            for(auto& i : to_remove)
+            {
+                //Set the key to false
+                auto handler = emitter->particles.extract(i);
+                handler.key() = false;
+                emitter->particles.insert(std::move(handler));
             }
         }
     }

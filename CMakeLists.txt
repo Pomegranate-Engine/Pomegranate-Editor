@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(Pomegranate_Engine)
+project(Pomegranate)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -54,6 +55,8 @@ set(SOURCE_FILES src/main.cpp
         src/gl/Mesh.h
         src/gl/Mesh.cpp
         src/gl/Mesh.h
+        src/extension_handler.cpp
+        src/extension_handler.h
 )
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)
@@ -97,6 +100,8 @@ set(IMGUI_SOURCES
 # Add executable
 add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES})
 
+add_library(Pomegranate SHARED ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES})
+
 # Set the path to LuaJIT (Mac)
 set(LUAJIT_LIBRARY ${CMAKE_SOURCE_DIR}/Lib/Arm/libluajit-5.1.dylib)  # Adjust the library name if necessary
 
@@ -110,12 +115,31 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_ttf.dylib
             ${LUAJIT_LIBRARY}
     )
+
+    target_link_libraries(Pomegranate PRIVATE
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_image.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_mixer.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_ttf.dylib
+            ${LUAJIT_LIBRARY}
+    )
 elseif(WIN32)
     find_package(OpenMP)
     find_package(OpenGL REQUIRED)
     target_include_directories(Pomegranate_Engine PRIVATE ${OpenGL_INCLUDE_DIRS})
 
     target_link_libraries(Pomegranate_Engine PRIVATE
+            OpenGL::GL
+            ${LIBRARIES_DIR}/SDL3.lib
+            ${LIBRARIES_DIR}/SDL3_ttf.lib
+            ${LIBRARIES_DIR}/SDL3_image.lib
+            ${LIBRARIES_DIR}/SDL3_mixer.lib
+            ${LIBRARIES_DIR}/lua51.lib
+            OpenMP::OpenMP_CXX
+            ${LIBRARIES_DIR}/glew32.lib
+            ${LIBRARIES_DIR}/glew32s.lib
+    )
+    target_link_libraries(Pomegranate PRIVATE
             OpenGL::GL
             ${LIBRARIES_DIR}/SDL3.lib
             ${LIBRARIES_DIR}/SDL3_ttf.lib
