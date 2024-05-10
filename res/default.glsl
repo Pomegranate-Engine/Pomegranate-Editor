@@ -29,8 +29,14 @@ in vec3 Color;
 out vec4 fragColor;
 
 void main() {
-    vec3 color = vec3(1.0,0.0,1.0);
+    vec3 color = vec3(1.0,0.0,0.0);
     vec3 normal = normalize(fragNormal);
-    float intensity = dot(normal, vec3(0.0, 1.0, 0.0)) + 0.2;
-    fragColor = vec4(fragUV.xy,1.0, 1.0);
+    float intensity = dot(normal, vec3(0.0, 1.0, 0.0));
+    if(intensity < 0.0) intensity = 0.0;
+
+    intensity = 0.2 + intensity * 0.8;
+
+    if(intensity > 1.0) intensity = 1.0;
+
+    fragColor = vec4(color * intensity,1.0);
 }

@@ -1,6 +1,8 @@
 #include "extension_handler.h"
 //dylib loading header
+#ifdef __APPLE__
 #include <dlfcn.h>
+#endif
 #include <iostream>
 #include <string>
 
@@ -11,6 +13,7 @@ ExtensionHandler::ExtensionHandler()
 
 void ExtensionHandler::load(const char *path)
 {
+#ifdef __APPLE__
     void* handle = dlopen(path, RTLD_LAZY);
     if (!handle)
     {
@@ -28,6 +31,7 @@ void ExtensionHandler::load(const char *path)
     Extension* extension = new Extension();
     extension->path = path;
     this->extensions.push_back(extension);
+#endif
 }
 
 void ExtensionHandler::unload(const char *path)

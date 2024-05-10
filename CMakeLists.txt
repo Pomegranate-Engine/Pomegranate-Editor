@@ -49,12 +49,6 @@ set(SOURCE_FILES src/main.cpp
         src/hotkey_manager.h
         src/lua.cpp
         src/lua.h
-        src/gl/shader.cpp
-        src/gl/shader.h
-        src/gl/Mesh.cpp
-        src/gl/Mesh.h
-        src/gl/Mesh.cpp
-        src/gl/Mesh.h
         src/extension_handler.cpp
         src/extension_handler.h
 )
@@ -93,6 +87,7 @@ set(IMGUI_SOURCES
         ${IMGUI_DIR}/imgui_demo.cpp
         ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp
         ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer3.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
         ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
 )

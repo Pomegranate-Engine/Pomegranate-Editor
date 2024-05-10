@@ -2,6 +2,13 @@
 #define POMEGRANATE_ENGINE_WINDOW_H
 #include <SDL.h>
 #include "engine.h"
+//OpenGL
+#ifdef WIN32
+#include <glew/glew.h>
+#include <GL/GL.h>
+#include <GL/GLU.h>
+#endif
+
 namespace Pomegranate
 {
     class Window
@@ -24,6 +31,7 @@ namespace Pomegranate
         void set_icon(const char* path);
         [[nodiscard]] SDL_Window* get_sdl_window() const;
         [[nodiscard]] SDL_Renderer* get_sdl_renderer() const;
+        [[nodiscard]] SDL_GLContext get_gl_context() const;
         int open();
         void close();
         void make_current();

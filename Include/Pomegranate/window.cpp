@@ -105,4 +105,8 @@ namespace Pomegranate
         SDL_SetWindowIcon(this->window, icon);
         SDL_DestroySurface(icon);
     }
+
+    SDL_GLContext Window::get_gl_context() const {
+           return SDL_GL_GetCurrentContext();
+    }
 }

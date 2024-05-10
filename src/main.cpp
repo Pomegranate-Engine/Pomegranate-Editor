@@ -8,6 +8,8 @@
 #include<imgui.h>
 #include<backends/imgui_impl_sdl3.h>
 #include<backends/imgui_impl_sdlrenderer3.h>
+#include<backends/imgui_impl_opengl3.h>
+
 using namespace Pomegranate;
 
 //Pomegranate Extensions
@@ -33,13 +35,6 @@ const std::string VERSION = "0.0.1";
 
 #define EDITOR_MODE
 
-#ifdef USE_OPENGL
-#include<glew/glew.h>
-#include<GL/GL.h>
-
-#include"gl/shader.h"
-#include"gl/mesh.h"
-#endif
 
 #include "Components/components.cpp"
 
@@ -59,7 +54,6 @@ int main(int argc, char* argv[])
     handler.load("engine/extensions/libTestPomegranateExtension.dylib");
     //region init
     pomegranate_init(); //Init
-    ImGui::CreateContext(); //Create imgui context
     main_window.open(); //Open window
     main_window.make_current(); //Make window current
     main_window.set_icon("engine/pomegranate.png");
@@ -71,77 +65,6 @@ int main(int argc, char* argv[])
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
     io.ConfigWindowsMoveFromTitleBarOnly = true;
-
-#ifdef USE_OPENGL
-    //OpenGL
-    SDL_GLContext gl_context = SDL_GL_CreateContext(main_window.get_sdl_window());
-    //Set version
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-    glewExperimental = GL_TRUE;
-    glewInit();
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    //Load default shader
-    auto* shader = ResourceManager::load<Shader>("res/default.glsl");
-
-    //Generate perspective and lookat matrices
-    Mat projection = Mat::perspective(90.0f, (float)main_window.get_width() / (float)main_window.get_height(), 0.1f, 100.0f);
-
-
-    //Generate cube mesh
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Vec3> face_normals;
-
-    //vertices
-    vertices.push_back({Vec3(-1.0f, -1.0f, 1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(0.0f, 0.0f), Vec4(1.0f, 0.0f, 0.0f, 1.0f)});
-    vertices.push_back({Vec3(1.0f, -1.0f, 1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(1.0f, 0.0f), Vec4(0.0f, 1.0f, 0.0f, 1.0f)});
-    vertices.push_back({Vec3(1.0f, 1.0f, 1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(1.0f, 1.0f), Vec4(0.0f, 0.0f, 1.0f, 1.0f)});
-    vertices.push_back({Vec3(-1.0f, 1.0f, 1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(0.0f, 1.0f), Vec4(1.0f, 1.0f, 0.0f, 1.0f)});
-    vertices.push_back({Vec3(-1.0f, -1.0f, -1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(0.0f, 0.0f), Vec4(1.0f, 0.0f, 0.0f, 1.0f)});
-    vertices.push_back({Vec3(1.0f, -1.0f, -1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(1.0f, 0.0f), Vec4(0.0f, 1.0f, 0.0f, 1.0f)});
-    vertices.push_back({Vec3(1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(1.0f, 1.0f), Vec4(0.0f, 0.0f, 1.0f, 1.0f)});
-    vertices.push_back({Vec3(-1.0f, 1.0f, -1.0f), Vec3(0.0f, 0.0f, 1.0f), Vec2(0.0f, 1.0f), Vec4(1.0f, 1.0f, 0.0f, 1.0f)});
-
-    //indices
-    indices = {
-            0, 1, 2,
-            2, 3, 0,
-
-            1, 5, 6,
-            6, 2, 1,
-
-            7, 6, 5,
-            5, 4, 7,
-
-            4, 0, 3,
-            3, 7, 4,
-
-            4, 5, 1,
-            1, 0, 4,
-
-            3, 2, 6,
-            6, 7, 3
-    };
-
-    //face normals
-    face_normals = {
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f),
-            Vec3(0.0f, 0.0f, 1.0f)
-    };
-
-    Mesh mesh = Mesh(vertices,indices,face_normals);
-#endif
 
     //Set font
     io.Fonts->AddFontFromFileTTF("engine/zed_font.ttf", 18.0f);
@@ -230,27 +153,6 @@ int main(int argc, char* argv[])
         HotkeyManager::tick();
         windows_manager.update();
         //- - - - - # RENDERING # - - - - -
-
-#ifdef USE_OPENGL
-        glViewport(0,0,main_window.get_width(),main_window.get_height());
-        glClearColor(0.0,0.0,0.0,1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        //draw a triangle
-        //shader->set<Vec4>("color", Vec4(0.0f, 1.0f, 1.0f, 1.0f));
-        //shader->set<Texture*>("tex", ResourceManager::load<Texture>("engine/pomegranate.png"));
-        Mat view = Mat::look_at(Vec3(0.0f,0.0f,1.0f),Vec3(0.0f,0.0f,-10.0f),Vec3(0.0f,1.0f,0.0f));
-        shader->use();
-        shader->set<Mat>("projection", projection);
-        shader->set<Mat>("view", view);
-        shader->set<Mat>("model", create_transform_matrix(Vec3(cos(time)*2,sin(time)*2,-5.0f),Vec3(0.0f,-time,time),Vec3(1.0f,1.0f,1.0f)));
-        //Draw triangle with uvs
-        mesh.draw();
-        SDL_GL_SwapWindow(main_window.get_sdl_window());
-#endif
-
-#ifndef USE_OPENGL
         //Clear SDL renderer
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);
         SDL_RenderClear(Window::current->get_sdl_renderer());
@@ -266,8 +168,6 @@ int main(int argc, char* argv[])
         ImGui::Render();
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());
         SDL_RenderPresent(Window::current->get_sdl_renderer()); //Present
-#endif
-
         //- - - - - # AFTER FRAME # - - - - -
 
         //Calculate delta time
