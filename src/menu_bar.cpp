@@ -101,8 +101,9 @@ void run_scene()
 }
 void force_new_scene()
 {
+    Notify::notify({ResourceManager::load<Texture>("engine/check.png"),EditorTheme::color_palette_green,"New Scene","Creating new scene"});
     unload_all();
-    Editor::current_scene = new EntityGroup("root");
+    Editor::current_scene = create_default_scene();
     Editor::current_scene_path = "";
 }
 void new_scene()
@@ -111,6 +112,7 @@ void new_scene()
     if(!Editor::current_scene_path.empty())
     {
         save();
+        force_new_scene();
     }
     else
     {

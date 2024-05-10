@@ -37,6 +37,8 @@ namespace Pomegranate
     template <typename T> inline bool Entity::has_single_component()
     {
         const std::type_info* type = &typeid(T);
+        if(components.size() == 0)
+            return false;
         return this->components.find(type) != this->components.end();
     }
     template <typename... T> inline bool Entity::has_component()
@@ -85,7 +87,7 @@ namespace Pomegranate
         System::system_types[name] = []() -> System* { return new T(); };
     }
 
-    template<typename... T> AutoGroup* AutoGroup::create(const std::string& name)
+    template<typename... T> GroupRef AutoGroup::create(const std::string& name)
     {
         AutoGroup* group = new AutoGroup(name);
         (group->add_component_type<T>(), ...);

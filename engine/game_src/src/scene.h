@@ -10,9 +10,9 @@
 using namespace Pomegranate;
 using json = nlohmann::json;
 void unload_all();
-json save_scene_as_json(EntityGroup* scene);
-void save_scene(const char* path, EntityGroup* scene);
-EntityGroup* open_scene_from_json(json j);
-EntityGroup* open_scene(const char* path);
+json save_scene_as_json(Group* scene);
+void save_scene(const char* path, Group* scene);
+Group* open_scene_from_json(json j);
+Group* open_scene(const char* path);
 
 #endif //SCENE_H

@@ -1,7 +1,7 @@
 #include "editor.h"
 
 std::vector<json> Editor::history = {};
-EntityGroup* Editor::current_scene = nullptr;
+GroupRef Editor::current_scene = nullptr;
 std::string Editor::current_scene_path = "";
 int Editor::current_scene_index = 0;
 int Editor::max_history = 256;

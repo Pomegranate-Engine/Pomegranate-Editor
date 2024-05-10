@@ -23,7 +23,7 @@ public:
     Vec2 selected_entity_arrow_vert_pos = Vec2(0, 0);
     Vec2 selected_entity_arrow_vert_half = Vec2(0, 0);
     Node* previous_selected_node = nullptr;
-    std::vector<Entity*> entities_selected;
+    std::vector<EntityRef> entities_selected;
     bool dragging_entity = false;
     bool dragging_entity_horizontal = false;
     bool dragging_entity_vertical = false;

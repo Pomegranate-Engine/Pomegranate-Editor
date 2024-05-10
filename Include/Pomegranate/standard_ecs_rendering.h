@@ -65,8 +65,10 @@ namespace Pomegranate
         float zoom = 1.0;
         Camera();
         void init(Pomegranate::Entity *) override;
-        static void make_current(Entity*entity);
-        static Entity* current;
+        static void make_current(EntityRef entity);
+        static EntityRef current;
+        static Vec2 current_render_position;
+        static float current_render_zoom;
     };
 
     class Tilemap : public Component

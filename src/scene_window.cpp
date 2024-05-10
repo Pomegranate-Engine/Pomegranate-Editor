@@ -81,15 +81,12 @@ void Window_SceneView::render() {
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), EditorTheme::scene_view_background.x,EditorTheme::scene_view_background.y,EditorTheme::scene_view_background.z, 255);
         SDL_RenderClear(Window::current->get_sdl_renderer());
         //Create camera entity
-        Entity* camera = new Entity();
-        camera->add_components<Camera,Transform>();
-        Camera::make_current(camera);
 
         //Lerp zoom to zoom target
         zoom = (zoom_target - zoom) * 0.1f + zoom;
 
-        camera->get_component<Transform>()->pos = this->position;
-        camera->get_component<Camera>()->zoom = zoom;
+        Camera::current_render_position = this->position;
+        Camera::current_render_zoom = this->zoom;
 
         //Axis
         int screen_w = 0;
@@ -135,19 +132,19 @@ void Window_SceneView::render() {
             }
             else if(Node::selected->group != nullptr)
             {
-                std::vector<Entity*>* entities = Node::selected->group->get_all_entities();
-                if(entities->size() > 0)
+                std::vector<EntityRef> entities = Node::selected->group->get_all_entities();
+                if(entities.size() > 0)
                 {
-                    if (std::find(entities_selected.begin(), entities_selected.end(), entities->at(0)) ==
+                    if (std::find(entities_selected.begin(), entities_selected.end(), entities.at(0)) ==
                         entities_selected.end()) {
-                        if(entities->at(0)->has_component<Transform>())
+                        if(entities.at(0)->has_component<Transform>())
                         {
-                            selected_entity_arrow_hor_pos = entities->at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_hor_half = entities->at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_vert_pos = entities->at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_vert_half = entities->at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_hor_pos = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_hor_half = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_vert_pos = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_vert_half = entities.at(0)->get_component<Transform>()->pos;
                         }
-                        for (Entity *entity: *entities) {
+                        for (EntityRef entity: entities) {
                             entities_selected.push_back(entity);
                         }
                     }
@@ -169,7 +166,7 @@ void Window_SceneView::render() {
 
         //Get all the transforms
         std::vector<Transform*> transforms;
-        for(Entity* entity : entities_selected)
+        for(EntityRef entity : entities_selected)
         {
             if(entity->has_component<Transform>())
                 transforms.push_back(entity->get_component<Transform>());
@@ -321,13 +318,6 @@ void Window_SceneView::render() {
             dragging_entity_rotation = false;
             dragging_start_angle = 0;
         }
-        else
-        {
-            print_info("Not entity");
-        }
-        //Destroy camera entity
-        camera->force_destroy();
-        Entity::entity_count--;
         SDL_SetRenderTarget(Window::current->get_sdl_renderer(), nullptr);
     }
 
@@ -353,7 +343,7 @@ void Window_SceneView::render() {
         {
             Texture* tex = *(Texture**) payload->Data;
             std::string entity_name = tex->path;
-            Entity *entity = new Entity();
+            EntityRef entity = Entity::create(entity_name);
             entity->add_component<Transform>();
             entity->add_component<Sprite>();
             entity->get_component<Sprite>()->texture = tex;
@@ -366,7 +356,7 @@ void Window_SceneView::render() {
             const char* scene_path = (const char*)payload->Data;
             SceneGroup* group = new SceneGroup("Scene", scene_path);
             group->instantiate();
-            group->name = group->get_child_groups()[0][0]->name;
+            group->name = group->get_child_groups()[0]->name;
             Editor::current_scene->add_group(group);
         }
     }

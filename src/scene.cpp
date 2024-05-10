@@ -8,63 +8,63 @@
 
 #include "entity_hierarchy_window.h"
 
-SceneGroup::SceneGroup(std::string name, std::string path) : EntityGroup(name)
+SceneGroup::SceneGroup(std::string name, std::string path) : Group(name)
 {
     this->path = path;
 }
 
 void SceneGroup::instantiate()
 {
-    EntityGroup* scene = open_scene(path.c_str());
+    GroupRef scene = open_scene(path.c_str());
     add_group(scene);
     print_info("Instantiated scene: " + name);
 }
 
-std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
+std::vector<GroupRef> get_all_groups(GroupRef group)
 {
-	std::vector<EntityGroup*> groups;
+	std::vector<GroupRef> groups;
 	groups.push_back(group);
-	for (auto& child : *group->get_child_groups())
+	for (auto& child : group->get_child_groups())
 	{
 		auto child_groups = get_all_groups(child);
 		groups.insert(groups.end(), child_groups.begin(), child_groups.end());
 	}
 	return groups;
 }
-std::vector<Entity*> get_all_entities(EntityGroup* group)
+std::vector<EntityRef> get_all_entities(GroupRef group)
 {
-	std::vector<Entity*> entities;
-	for (auto& entity : *group->get_entities())
+	std::vector<EntityRef> entities;
+	for (auto& entity : group->get_entities())
 	{
 		entities.push_back(entity);
 	}
-	for (auto& child : *group->get_child_groups())
+	for (auto& child : group->get_child_groups())
 	{
 		auto child_entities = get_all_entities(child);
 		entities.insert(entities.end(), child_entities.begin(), child_entities.end());
 	}
 	return entities;
 }
-std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
+std::vector<std::pair<System*,uint32_t>> get_all_systems(GroupRef group)
 {
 	std::vector<std::pair<System*,uint32_t>> systems;
 	for (auto& system : *group->get_systems())
 	{
 		systems.push_back(std::make_pair(system,group->id));
 	}
-	for (auto& child : *group->get_child_groups())
+	for (auto& child : group->get_child_groups())
 	{
 		auto child_systems = get_all_systems(child);
 		systems.insert(systems.end(), child_systems.begin(), child_systems.end());
 	}
 	return systems;
 }
-std::vector<EntityGroup*> get_all_parents(EntityGroup* group)
+std::vector<GroupRef> get_all_parents(GroupRef group)
 {
     if(group == nullptr)
-        return std::vector<EntityGroup*>();
-    EntityGroup* parent = group->get_parent();
-    std::vector<EntityGroup*> parents;
+        return std::vector<GroupRef>();
+    GroupRef parent = group->get_parent();
+    std::vector<GroupRef> parents;
     if(parent != nullptr)
     {
         parents.push_back(parent);
@@ -74,9 +74,9 @@ std::vector<EntityGroup*> get_all_parents(EntityGroup* group)
     }
     return parents;
 }
-std::vector<EntityGroup*> get_all_parents(Entity* entity)
+std::vector<GroupRef> get_all_parents(EntityRef entity)
 {
-    std::vector<EntityGroup*> parents;
+    std::vector<GroupRef> parents;
     for (auto& parent : entity->get_parent_groups())
     {
         parents.push_back(parent);
@@ -86,7 +86,7 @@ std::vector<EntityGroup*> get_all_parents(Entity* entity)
     }
     return parents;
 }
-json save_scene_as_json(EntityGroup* scene)
+json save_scene_as_json(GroupRef scene)
 {
     json j;
     //Get all groups
@@ -100,7 +100,7 @@ json save_scene_as_json(EntityGroup* scene)
         auto parents = get_all_parents(group);
         for (auto& parent : parents)
         {
-            if(typeid(*parent) == typeid(SceneGroup))
+            if(typeid(*parent.get()) == typeid(SceneGroup))
                 skip = true;
         }
         if(skip)
@@ -111,19 +111,19 @@ json save_scene_as_json(EntityGroup* scene)
 
         j["groups"][std::to_string(group->id)] = json::object();
         j["groups"][std::to_string(group->id)]["name"] = group->name;
-        if(typeid(*group) == typeid(AutoGroup))
+        if(typeid(*group.get()) == typeid(AutoGroup))
         {
             j["groups"][std::to_string(group->id)]["type"] = "auto";
             j["groups"][std::to_string(group->id)]["components"] = json::array();
-            for(auto& component : ((AutoGroup*)group)->component_types)
+            for(auto& component : ((AutoGroup*)group.get())->component_types)
             {
                 j["groups"][std::to_string(group->id)]["components"].push_back(component->name());
             }
         }
-        else if(typeid(*group) == typeid(SceneGroup))
+        else if(typeid(*group.get()) == typeid(SceneGroup))
         {
             j["groups"][std::to_string(group->id)]["type"] = "scene";
-            j["groups"][std::to_string(group->id)]["path"] = ((SceneGroup*)group)->path;
+            j["groups"][std::to_string(group->id)]["path"] = ((SceneGroup*)group.get())->path;
         }
         else
         {
@@ -144,7 +144,7 @@ json save_scene_as_json(EntityGroup* scene)
         bool skip = false;
         for (auto& parent : parents)
         {
-            if(typeid(*parent) == typeid(SceneGroup))
+            if(typeid(*parent.get()) == typeid(SceneGroup))
                 skip = true;
         }
         if(skip)
@@ -166,7 +166,7 @@ json save_scene_as_json(EntityGroup* scene)
         for (auto& [type, component] : components)
         {
             j["entities"][std::to_string(entity->id)]["components"][type->name()] = json::object();
-            std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data = component->component_data;
+            std::map<std::string, std::pair<const std::type_info*, void*>> data = component->component_data;
             //Write component data
             for (auto& [name, data] : data)
             {
@@ -230,7 +230,7 @@ json save_scene_as_json(EntityGroup* scene)
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["b"] = (*(Color*)data.second).b;
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["a"] = (*(Color*)data.second).a;
                 }
-                else if (data.first == &typeid(Texture*))
+                else if (data.first == &typeid(Texture*) && (*(Texture**)data.second) != nullptr)
                 {
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name] = json::object();
                     j["entities"][std::to_string(entity->id)]["components"][type->name()][name]["type"] = "texture";
@@ -380,13 +380,13 @@ json save_scene_as_json(EntityGroup* scene)
     j["systems"] = json::object();
     for (auto& [system, linked] : systems)
     {
-        EntityGroup* group = EntityGroup::groups_id[linked];
+        GroupRef group = Group::groups_id[linked];
         //Make sure it's not a scene group
         bool skip = false;
         auto parents = get_all_parents(group);
         for (auto& parent : parents)
         {
-            if(typeid(*parent) == typeid(SceneGroup))
+            if(typeid(*parent.get()) == typeid(SceneGroup))
                 skip = true;
         }
         if(skip)
@@ -399,7 +399,7 @@ json save_scene_as_json(EntityGroup* scene)
     }
     return j;
 }
-void save_scene(const char* path, EntityGroup* scene)
+void save_scene(const char* path, GroupRef scene)
 {
 	std::ofstream file(path);
 	if (file.is_open())
@@ -424,30 +424,35 @@ void unload_all()
 	//Delete entities
 	for (auto& entity : Entity::entities)
 	{
-		delete entity.second;
+        entity.second->destroy();
 	}
-	//Delete groups
-	for (auto& group : EntityGroup::groups)
-	{
-		delete group.second;
-	}
+
+    //Delete groups
+    for (auto& group : Group::groups)
+    {
+        group.second->destroy();
+    }
+
+    Group::apply_destruction_queue();
+    Entity::apply_destruction_queue();
+
 
 	Window_EntityHierarchy::nodes.clear();
 
 	Entity::entities.clear();
-	EntityGroup::groups_id.clear();
-	EntityGroup::groups.clear();
-	EntityGroup::group_count = 0;
+	Group::groups_id.clear();
+	Group::groups.clear();
+	Group::group_count = 0;
 	Entity::entity_count = 0;
 }
 
-EntityGroup* open_scene_from_json(json data)
+GroupRef open_scene_from_json(json data)
 {
     int id_append_entity = Entity::entity_count;
-    int id_append_group = EntityGroup::group_count;
+    int id_append_group = Group::group_count;
     std::vector<SceneGroup*> scene_groups;
 
-    EntityGroup* root = nullptr;
+    GroupRef root = nullptr;
     //Load groups
     for (auto& [id, group] : data["groups"].items())
     {
@@ -471,7 +476,7 @@ EntityGroup* open_scene_from_json(json data)
         }
         else
         {
-            EntityGroup *g = new EntityGroup(group["name"].get<std::string>());
+            Group *g = new Group(group["name"].get<std::string>());
             g->set_id(std::stoul(id) + id_append_group);
             print_info("Created group: " + g->name);
         }
@@ -481,11 +486,11 @@ EntityGroup* open_scene_from_json(json data)
     {
         //Parse id as uint32_t
         uint32_t d = std::stoul(id) + id_append_group;
-        EntityGroup* g = EntityGroup::groups_id[d];
+        GroupRef g = Group::groups_id[d];
         if (group.contains("parent"))
         {
             uint32_t parent_id = group["parent"].get<uint32_t>();
-            EntityGroup* parent = EntityGroup::groups_id[parent_id];
+            GroupRef parent = Group::groups_id[parent_id];
             parent->add_group(g);
         }
         else
@@ -497,12 +502,12 @@ EntityGroup* open_scene_from_json(json data)
     //Load entities
     for (auto& [id, entity] : data["entities"].items())
     {
-        Entity* e = new Entity();
+        EntityRef e = Entity::create(entity["name"].get<std::string>());
         e->set_id(std::stoul(id) + id_append_entity);
         e->name = entity["name"].get<std::string>();
         for (auto& parent : entity["parents"])
         {
-            EntityGroup::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
+            Group::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
         }
     }
     //Load components
@@ -620,7 +625,7 @@ EntityGroup* open_scene_from_json(json data)
         System* s = System::system_types[type.c_str()]();
         for (auto& linked : system["linked"])
         {
-            EntityGroup::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
+            Group::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
         }
     }
     //Initalize scene groups
@@ -628,19 +633,35 @@ EntityGroup* open_scene_from_json(json data)
     {
         group->instantiate();
     }
-
-    std::unordered_map<uint32_t,EntityGroup*> groups = EntityGroup::groups_id;
-    std::unordered_map<std::string, EntityGroup*> groups_name = EntityGroup::groups;
     return root;
 }
 
-EntityGroup *open_scene(const char *path)
+GroupRef open_scene(const char *path)
 {
-	std::ifstream f(path);
-	json data = json::parse(f);
-	if (f.is_open())
-	{
-        return open_scene_from_json(data);
-	}
-	return nullptr;
+    try {
+        std::ifstream f(path);
+        json data = json::parse(f);
+        if (f.is_open()) {
+            return open_scene_from_json(data);
+        }
+        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Error", "Failed to open scene file: " + std::string(path)});
+        return nullptr;
+    }
+    catch (std::exception& e)
+    {
+        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Error", "Failed to open scene file: " + std::string(path)});
+        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Error", e.what()});
+        return nullptr;
+    }
+}
+
+GroupRef create_default_scene()
+{
+    Group* group = new Group("Main");
+    AutoGroup* render = new AutoGroup("Render");
+    render->add_system(new Render());
+    render->add_component_type<Sprite>();
+    render->add_component_type<Transform>();
+    group->add_group(render);
+    return group;
 }

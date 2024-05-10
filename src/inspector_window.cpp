@@ -2,6 +2,11 @@
 
 int InspectorWindow::element_index = 0;
 
+InspectorHeaderTag::InspectorHeaderTag(const char *name)
+{
+    this->name = name;
+}
+
 InspectorWindow::InspectorWindow()
 {
     this->name = "Inspector";
@@ -36,75 +41,84 @@ void InspectorWindow::render()
                     keys.insert(i->first);
                     if(component_open) {
                         //Display the properties
+                        bool header_open = true;
                         for (auto j = component->component_data.begin(); j != component->component_data.end(); j++) {
                             std::string property_name = std::string(j->first);
                             if (j->second.second != nullptr) {
                                 element_index++;
-                                if (j->second.first->hash_code() == typeid(std::string).hash_code()) {
-                                    auto *value = (std::string *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(float).hash_code()) {
-                                    auto *value = (float *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(int).hash_code()) {
-                                    auto *value = (int *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(bool).hash_code()) {
-                                    auto *value = (bool *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(Vec2).hash_code()) {
-                                    auto *value = (Vec2 *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(Vec3).hash_code()) {
-                                    auto *value = (Vec3 *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(Color).hash_code()) {
-                                    auto *value = (Color *) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                } else if (j->second.first->hash_code() == typeid(Texture *).hash_code()) {
-                                    auto **value = (Texture **) j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                }
-                                else if(j->second.first->hash_code() == typeid(TTFFont*).hash_code())
+                                if(header_open)
                                 {
-                                    auto **value = (TTFFont**)j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                }
-                                else if(j->second.first->hash_code() == typeid(Entity*).hash_code())
-                                {
-                                    auto **value = (Entity**)j->second.second;
-                                    property_field(property_name.c_str(), value);
-                                }
-                                else if(j->second.first->hash_code() == typeid(std::vector<LuaComponentScript*>).hash_code())
-                                {
-                                    auto *value = (std::vector<LuaComponentScript*>*)j->second.second;
-                                    if(ImGui::CollapsingHeader(property_name.c_str()))
-                                    {
-                                        for(int i = 0; i < value->size(); i++)
-                                        {
-                                            //Add imgui tab
-                                            ImGui::Text("    ");
-                                            ImGui::SameLine();
-                                            LuaComponentScript** script = &value->at(i);
-                                            property_field((property_name + " [" + std::to_string(i) + "]").c_str(), script);
-                                            if(ImGui::IsItemDeactivatedAfterEdit())
-                                            {
+                                    if (j->second.first->hash_code() == typeid(std::string).hash_code()) {
+                                        auto *value = (std::string *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(float).hash_code()) {
+                                        auto *value = (float *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(int).hash_code()) {
+                                        auto *value = (int *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(bool).hash_code()) {
+                                        auto *value = (bool *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(Vec2).hash_code()) {
+                                        auto *value = (Vec2 *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(Vec3).hash_code()) {
+                                        auto *value = (Vec3 *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(Color).hash_code()) {
+                                        auto *value = (Color *) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(Texture *).hash_code()) {
+                                        auto **value = (Texture **) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(TTFFont *).hash_code()) {
+                                        auto **value = (TTFFont **) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() == typeid(Entity *).hash_code()) {
+                                        auto **value = (Entity **) j->second.second;
+                                        property_field(property_name.c_str(), value);
+                                    } else if (j->second.first->hash_code() ==
+                                               typeid(std::vector<LuaComponentScript *>).hash_code()) {
+                                        auto *value = (std::vector<LuaComponentScript *> *) j->second.second;
+                                        if (ImGui::CollapsingHeader(property_name.c_str())) {
+                                            for (int i = 0; i < value->size(); i++) {
+                                                //Add imgui tab
+                                                ImGui::Text("    ");
+                                                ImGui::SameLine();
+                                                LuaComponentScript **script = &value->at(i);
+                                                property_field((property_name + " [" + std::to_string(i) + "]").c_str(),
+                                                               script);
+                                                if (ImGui::IsItemDeactivatedAfterEdit()) {
+                                                    Editor::action();
+                                                }
+                                                ImGui::SameLine();
+                                                if (ImGui::Button("X")) {
+                                                    value->erase(value->begin() + i);
+                                                    Editor::action();
+                                                }
+                                            }
+                                            if (ImGui::Button("Add")) {
+                                                value->push_back(nullptr);
                                                 Editor::action();
                                             }
-                                            ImGui::SameLine();
-                                            if(ImGui::Button("X"))
-                                            {
-                                                value->erase(value->begin() + i);
-                                                Editor::action();
-                                            }
-                                        }
-                                        if(ImGui::Button("Add"))
-                                        {
-                                            value->push_back(nullptr);
-                                            Editor::action();
                                         }
                                     }
                                 }
+
+
+
+                                if(j->second.first->hash_code() == typeid(InspectorHeaderTag).hash_code())
+                                {
+                                    if(((InspectorHeaderTag*)j->second.second)->name.empty())
+                                    {
+                                        //End the header
+                                        header_open = true;
+                                    }
+
+                                    header_open = ImGui::CollapsingHeader(((InspectorHeaderTag*)j->second.second)->name.c_str(),((InspectorHeaderTag*)j->second.second)->open);
+                                }
+
                                 if(ImGui::IsItemDeactivatedAfterEdit())
                                 {
                                     Editor::action();
@@ -150,8 +164,8 @@ void InspectorWindow::render()
         }
         else if(Node::selected->group != nullptr)
         {
-            if(typeid(*Node::selected->group.get()).hash_code() == typeid(EntityGroup).hash_code()) {
-                EntityGroup *group = Node::selected->group.get();
+            if(typeid(*Node::selected->group.get()).hash_code() == typeid(Group).hash_code()) {
+                Group *group = Node::selected->group.get();
                 property_field("Name", &group->name);
                 if (ImGui::IsItemDeactivatedAfterEdit()) {
                     Editor::action();
@@ -185,6 +199,13 @@ void InspectorWindow::render()
                         }
                     }
                     ImGui::EndPopup();
+                }
+            }
+            else if(typeid(*Node::selected->group.get()).hash_code() == typeid(SceneGroup).hash_code()) {
+                Group *group = Node::selected->group.get();
+                property_field("Name", &group->name);
+                if (ImGui::IsItemDeactivatedAfterEdit()) {
+                    Editor::action();
                 }
             }
         }

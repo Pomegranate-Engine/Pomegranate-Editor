@@ -6,9 +6,9 @@
 #include <Pomegranate/audio.h>
 #include <Pomegranate/ttf_font.h>
 
-std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
+std::vector<Group*> get_all_groups(Group* group)
 {
-    std::vector<EntityGroup*> groups;
+    std::vector<Group*> groups;
     groups.push_back(group);
     for (auto& child : *group->get_child_groups())
     {
@@ -17,7 +17,7 @@ std::vector<EntityGroup*> get_all_groups(EntityGroup* group)
     }
     return groups;
 }
-std::vector<Entity*> get_all_entities(EntityGroup* group)
+std::vector<Entity*> get_all_entities(Group* group)
 {
     std::vector<Entity*> entities;
     for (auto& entity : *group->get_entities())
@@ -31,7 +31,7 @@ std::vector<Entity*> get_all_entities(EntityGroup* group)
     }
     return entities;
 }
-std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
+std::vector<std::pair<System*,uint32_t>> get_all_systems(Group* group)
 {
     std::vector<std::pair<System*,uint32_t>> systems;
     for (auto& system : *group->get_systems())
@@ -45,7 +45,7 @@ std::vector<std::pair<System*,uint32_t>> get_all_systems(EntityGroup* group)
     }
     return systems;
 }
-json save_scene_as_json(EntityGroup* scene)
+json save_scene_as_json(Group* scene)
 {
     json j;
     //Get all groups
@@ -299,7 +299,7 @@ json save_scene_as_json(EntityGroup* scene)
     }
     return j;
 }
-void save_scene(const char* path, EntityGroup* scene)
+void save_scene(const char* path, Group* scene)
 {
     std::ofstream file(path);
     if (file.is_open())
@@ -318,25 +318,25 @@ void unload_all()
         delete entity.second;
     }
     //Delete groups
-    for (auto& group : EntityGroup::groups)
+    for (auto& group : Group::groups)
     {
         delete group.second;
     }
     Entity::entities.clear();
-    EntityGroup::groups_id.clear();
-    EntityGroup::groups.clear();
-    EntityGroup::group_count = 0;
+    Group::groups_id.clear();
+    Group::groups.clear();
+    Group::group_count = 0;
     Entity::entity_count = 0;
 }
 
-EntityGroup* open_scene_from_json(json data)
+Group* open_scene_from_json(json data)
 {
     int id_append_entity = Entity::entity_count;
-    int id_append_group = EntityGroup::group_count;
+    int id_append_group = Group::group_count;
     //Load groups
     for (auto& [id, group] : data["groups"].items())
     {
-        EntityGroup* g = new EntityGroup(group["name"].get<std::string>());
+        Group* g = new Group(group["name"].get<std::string>());
         print_info("Created group: " + g->name);
     }
     //Link the groups together
@@ -344,11 +344,11 @@ EntityGroup* open_scene_from_json(json data)
     {
         //Parse id as uint32_t
         uint32_t d = std::stoul(id) + id_append_group;
-        EntityGroup* g = EntityGroup::groups_id[d];
+        Group* g = Group::groups_id[d];
         if (group.contains("parent"))
         {
             uint32_t parent_id = group["parent"].get<uint32_t>();
-            EntityGroup* parent = EntityGroup::groups_id[parent_id];
+            Group* parent = Group::groups_id[parent_id];
             parent->add_group(g);
         }
     }
@@ -360,7 +360,7 @@ EntityGroup* open_scene_from_json(json data)
         e->name = entity["name"].get<std::string>();
         for (auto& parent : entity["parents"])
         {
-            EntityGroup::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
+            Group::groups_id[parent.get<uint32_t>() + id_append_group]->add_entity(e);
         }
     }
     //Load components
@@ -478,16 +478,16 @@ EntityGroup* open_scene_from_json(json data)
         System* s = System::system_types[type.c_str()]();
         for (auto& linked : system["linked"])
         {
-            EntityGroup::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
+            Group::groups_id[linked.get<uint32_t>() + id_append_group]->add_system(s);
         }
     }
-    std::unordered_map<uint32_t,EntityGroup*> groups = EntityGroup::groups_id;
-    std::unordered_map<std::string, EntityGroup*> groups_name = EntityGroup::groups;
-    EntityGroup *root = EntityGroup::groups_id[0];
+    std::unordered_map<uint32_t,Group*> groups = Group::groups_id;
+    std::unordered_map<std::string, Group*> groups_name = Group::groups;
+    Group *root = Group::groups_id[0];
     return root;
 }
 
-EntityGroup *open_scene(const char *path)
+Group *open_scene(const char *path)
 {
     std::ifstream f(path);
     json data = json::parse(f);

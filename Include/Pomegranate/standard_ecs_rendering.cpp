@@ -1,7 +1,9 @@
 #include "standard_ecs_rendering.h"
 namespace Pomegranate
 {
-    Entity* Camera::current = nullptr;
+    EntityRef Camera::current = nullptr;
+    Vec2 Camera::current_render_position = Vec2(0, 0);
+    float Camera::current_render_zoom = 1.0;
 
     Sprite::Sprite()
     {
@@ -61,8 +63,13 @@ namespace Pomegranate
         register_component(Camera);
     }
 
-    void Camera::make_current(Entity*entity)
+    void Camera::make_current(EntityRef entity)
     {
+        if(!entity->has_component<Camera>())
+        {
+            print_error("Entity does not have a camera component");
+            return;
+        }
         current = entity;
     }
 
@@ -84,25 +91,28 @@ namespace Pomegranate
     {
         if(Camera::current != nullptr)
         {
-            if(entity->has_component<Transform>())
-            {
-                if (entity->has_component<Sprite>()) {
-                    Render::sprite(entity);
-                }
-                /*if(entity->has_component<DebugCircle>())
-                {
-                    Render::debug_circle(entity);
-                }
-                if(entity->has_component<AnimatedSprite>())
-                {
-                    Render::animated_sprite(entity);
-                }
-                if(entity->has_component<Tilemap>())
-                {
-                    Render::tilemap(entity);
-                }*/
-            }
+            Camera::current_render_position = Camera::current->get_component<Transform>()->pos;
+            Camera::current_render_zoom = Camera::current->get_component<Camera>()->zoom;
         }
+        if(entity->has_component<Transform>())
+        {
+            if (entity->has_component<Sprite>()) {
+                Render::sprite(entity);
+            }
+            /*if(entity->has_component<DebugCircle>())
+            {
+            Render::debug_circle(entity);
+            }
+            if(entity->has_component<AnimatedSprite>())
+            {
+            Render::animated_sprite(entity);
+            }
+            if(entity->has_component<Tilemap>())
+            {
+            Render::tilemap(entity);
+            }*/
+        }
+
     }
 
     void Render::sprite(Entity*e) {
@@ -121,10 +131,10 @@ namespace Pomegranate
         SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
         screen_w /= render_scale_x;
         screen_h /= render_scale_y;
-        r.w = (float)w*t->scale.x*Camera::current->get_component<Camera>()->zoom;
-        r.h = (float)h*t->scale.y*Camera::current->get_component<Camera>()->zoom;
-        r.x = ((t->pos.x+s->offset.x-Camera::current->get_component<Transform>()->pos.x)*Camera::current->get_component<Camera>()->zoom)+screen_w/2-r.w*s->pivot.x;
-        r.y = ((t->pos.y+s->offset.y-Camera::current->get_component<Transform>()->pos.y)*Camera::current->get_component<Camera>()->zoom)+screen_h/2-r.h*s->pivot.y;
+        r.w = (float)w*t->scale.x*Camera::current_render_zoom;
+        r.h = (float)h*t->scale.y*Camera::current_render_zoom;
+        r.x = ((t->pos.x+s->offset.x-Camera::current_render_position.x)*Camera::current_render_zoom)+screen_w/2-r.w*s->pivot.x;
+        r.y = ((t->pos.y+s->offset.y-Camera::current_render_position.y)*Camera::current_render_zoom)+screen_h/2-r.h*s->pivot.y;
         auto* center = new SDL_FPoint();
         center->x = r.w*s->pivot.x;
         center->y = r.h*s->pivot.y;
