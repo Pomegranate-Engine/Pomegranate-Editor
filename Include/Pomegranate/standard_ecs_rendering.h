@@ -38,11 +38,14 @@ namespace Pomegranate
     public:
         Texture* texture;
         Color color;
-        int frame;
+        Vec2 pivot;
+        Vec2 offset;
+        bool flip_horizontal;
+        bool flip_vertical;
+        int frame_x;
+        int frame_y;
         int horizontal_frames;
         int vertical_frames;
-        int x_offset;
-        int y_offset;
         AnimatedSprite();
         void load_texture(const char* path);
     };

@@ -12,8 +12,8 @@ class LuaComponentScript : public Resource
 public:
     std::string script;
     std::string name;
-    sol::state L;
     std::unordered_map<std::string, std::any> component_data;
+    sol::state L;
     LuaComponentScript(std::string path);
     void run_script();
     void set(std::string name, std::any value);

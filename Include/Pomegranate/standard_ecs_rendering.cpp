@@ -36,21 +36,27 @@ namespace Pomegranate
     AnimatedSprite::AnimatedSprite()
     {
         this->texture = ResourceManager::load<Texture>("res/none.png");
-        this->frame = 0;
+        this->color = Color(255, 255, 255, 255);
+        this->pivot = Vec2(0.5, 0.5);
+        this->offset = Vec2(0, 0);
+        this->flip_horizontal = false;
+        this->flip_vertical = false;
         this->horizontal_frames = 1;
         this->vertical_frames = 1;
-        this->x_offset = 0;
-        this->y_offset = 0;
-        this->color = Color(255, 255, 255, 255);
-        register_component(AnimatedSprite);
+        this->frame_x = 0;
+        this->frame_y = 0;
+        register_component(Sprite);
         //TODO: Add texture support to lua
+        push_data<Vec2>("pivot", &this->pivot);
+        push_data<Vec2>("offset", &this->offset);
+        push_data<bool>("flip_horizontal", &this->flip_horizontal);
+        push_data<bool>("flip_vertical", &this->flip_vertical);
         push_data<Color>("color", &this->color);
-        push_data<int>("frame", &this->frame);
+        push_data<Texture*>("texture", &this->texture);
         push_data<int>("horizontal_frames", &this->horizontal_frames);
         push_data<int>("vertical_frames", &this->vertical_frames);
-        push_data<int>("x_offset", &this->x_offset);
-        push_data<int>("y_offset", &this->y_offset);
-        push_data<Color>("color", &this->color);
+        push_data<int>("frame_x", &this->frame_x);
+        push_data<int>("frame_y", &this->frame_y);
     }
 
     void AnimatedSprite::load_texture(const char *path)
@@ -99,13 +105,13 @@ namespace Pomegranate
             if (entity->has_component<Sprite>()) {
                 Render::sprite(entity);
             }
+            if(entity->has_component<AnimatedSprite>())
+            {
+                Render::animated_sprite(entity);
+            }
             /*if(entity->has_component<DebugCircle>())
             {
             Render::debug_circle(entity);
-            }
-            if(entity->has_component<AnimatedSprite>())
-            {
-            Render::animated_sprite(entity);
             }
             if(entity->has_component<Tilemap>())
             {
@@ -118,7 +124,6 @@ namespace Pomegranate
     void Render::sprite(Entity*e) {
         auto t = e->get_component<Transform>();
         auto s = e->get_component<Sprite>();
-        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), s->color.r,s->color.g,s->color.b, s->color.a);
         SDL_FRect r;
         int w = 0;
         int h = 0;
@@ -155,20 +160,41 @@ namespace Pomegranate
     void Render::animated_sprite(Entity*e) {
         auto t = e->get_component<Transform>();
         auto s = e->get_component<AnimatedSprite>();
-        SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), s->color.r,s->color.g,s->color.b, s->color.a);
-        SDL_FRect r = {};
+        SDL_FRect r;
         int w = 0;
         int h = 0;
         SDL_QueryTexture(s->texture->get_sdl_texture(), nullptr, nullptr, &w, &h);
-        SDL_FRect src = {r.w/(float)s->horizontal_frames*(float)s->frame+(float)s->x_offset, r.h/(float)s->vertical_frames*(float)s->frame+(float)s->y_offset, r.w/(float)s->horizontal_frames, r.h/(float)s->vertical_frames};
-        r.w = (float)w*t->scale.x;
-        r.h = (float)h*t->scale.y;
-        r.x = t->pos.x-Camera::current->get_component<Transform>()->pos.x-r.w/2;
-        r.y = t->pos.y-Camera::current->get_component<Transform>()->pos.y-r.h/2;
+        int frame_width = w/s->horizontal_frames;
+        int frame_height = h/s->vertical_frames;
+        int screen_w = 0;
+        int screen_h = 0;
+        float render_scale_x = 1.0;
+        float render_scale_y = 1.0;
+        SDL_GetRenderScale(Window::current->get_sdl_renderer(), &render_scale_x, &render_scale_y);
+        SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &screen_w, &screen_h);
+        screen_w /= render_scale_x;
+        screen_h /= render_scale_y;
+        r.w = (float)frame_width*t->scale.x*Camera::current_render_zoom;
+        r.h = (float)frame_height*t->scale.y*Camera::current_render_zoom;
+        r.x = ((t->pos.x+s->offset.x-Camera::current_render_position.x)*Camera::current_render_zoom)+screen_w/2-r.w*s->pivot.x;
+        r.y = ((t->pos.y+s->offset.y-Camera::current_render_position.y)*Camera::current_render_zoom)+screen_h/2-r.h*s->pivot.y;
         auto* center = new SDL_FPoint();
-        center->x = r.w/2;
-        center->y = r.h/2;
-        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture->get_sdl_texture(), &src, &r, t->rot*180.0/3.14159, center, SDL_FLIP_NONE);
+        center->x = r.w*s->pivot.x;
+        center->y = r.h*s->pivot.y;
+        SDL_SetTextureColorMod(s->texture->get_sdl_texture(), s->color.r, s->color.g, s->color.b);
+        SDL_RendererFlip flip = SDL_FLIP_NONE;
+        if(s->flip_horizontal)
+        {
+            flip = (SDL_RendererFlip)(flip|SDL_FLIP_HORIZONTAL);
+        }
+        if(s->flip_vertical)
+        {
+            flip = (SDL_RendererFlip)(flip|SDL_FLIP_VERTICAL);
+        }
+        SDL_FRect src = {(float)(frame_width*s->frame_x),(float)(frame_height*s->frame_y),(float)frame_width,(float)frame_height};
+
+        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture->get_sdl_texture(), &src, &r, t->rot*180.0/3.14159, center, flip);
+
     }
 
     void Render::debug_circle(Entity* entity)

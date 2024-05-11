@@ -239,6 +239,14 @@ void ResourcesWindow::render()
                 ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
                 ImGui::EndDragDropSource();
             }
+            else if(file.type == ResourceType::RESOURCE_TYPE_LUA_SCRIPT)
+            {
+                ImGui::SetDragDropPayload("resource_lua_script", file.path.c_str(), file.path.size());
+                ImGui::Text(file.path.c_str());
+                ImGui::SameLine();
+                ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
+                ImGui::EndDragDropSource();
+            }
         }
         ImGui::PopID();
         i++;
@@ -342,7 +350,7 @@ void ResourcesWindow::load_resources()
 
             add_resource_file({
                                       file.first,
-                                      ResourceType::RESOURCE_TYPE_TEXTURE,
+                                      ResourceType::RESOURCE_TYPE_LUA_SCRIPT,
                                       read_meta(file.second),
                                       ResourceManager::load<Texture>("engine/system.png")
                               });

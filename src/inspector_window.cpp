@@ -78,8 +78,7 @@ void InspectorWindow::render()
                                     } else if (j->second.first->hash_code() == typeid(Entity *).hash_code()) {
                                         auto **value = (Entity **) j->second.second;
                                         property_field(property_name.c_str(), value);
-                                    } else if (j->second.first->hash_code() ==
-                                               typeid(std::vector<LuaComponentScript *>).hash_code()) {
+                                    } else if (j->second.first->hash_code() == typeid(std::vector<LuaComponentScript *>).hash_code()) {
                                         auto *value = (std::vector<LuaComponentScript *> *) j->second.second;
                                         if (ImGui::CollapsingHeader(property_name.c_str())) {
                                             for (int i = 0; i < value->size(); i++) {
@@ -92,7 +91,6 @@ void InspectorWindow::render()
                                                 if (ImGui::IsItemDeactivatedAfterEdit()) {
                                                     Editor::action();
                                                 }
-                                                ImGui::SameLine();
                                                 if (ImGui::Button("X")) {
                                                     value->erase(value->begin() + i);
                                                     Editor::action();
@@ -359,6 +357,20 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
     //Create button to open file dialog and be drop target
     ImGui::SameLine();
     bool open = ImGui::CollapsingHeader(*value==nullptr?"None":(*value)->name.c_str());
+    //Drop target
+    if(ImGui::BeginDragDropTarget())
+    {
+        const ImGuiPayload* pay = ImGui::GetDragDropPayload();
+        print_info(pay->DataType);
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_script"))
+        {
+            LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
+            lua->run_script();
+            *value = lua;
+            print_info("Texture Dropped");
+        }
+        ImGui::EndDragDropTarget();
+    }
     if(open)
     {
         //Display component properties
@@ -432,18 +444,6 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
                 }
             }
         }
-    }
-    //Drop target
-    if(ImGui::BeginDragDropTarget())
-    {
-        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_script"))
-        {
-            LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
-            lua->run_script();
-            *value = lua;
-            print_info("Texture Dropped");
-        }
-        ImGui::EndDragDropTarget();
     }
 }
 

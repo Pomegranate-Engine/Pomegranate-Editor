@@ -9,12 +9,13 @@ LuaComponentScript::LuaComponentScript(std::string path)
 void LuaComponentScript::run_script()
 {
     L = sol::state();
-    L.open_libraries(sol::lib::base, sol::lib::package, sol::lib::table, sol::lib::string, sol::lib::math, sol::lib::os, sol::lib::io);
-    luaopen_pomegranate(&L);
+    sol::state* sol_L = &L;
+    sol_L->open_libraries();
+    luaopen_pomegranate(sol_L);
 
     try
     {
-        L.safe_script_file(path);
+        sol_L->safe_script_file(path);
     }
     catch(sol::error e)
     {
