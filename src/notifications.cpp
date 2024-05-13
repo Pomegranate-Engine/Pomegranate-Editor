@@ -14,7 +14,7 @@ Notification::Notification(Texture *icon, Vec3 color, const std::string& title, 
     this->id = NotificationCount++;
 }
 
-float lerp(float a, float b, float t)
+float linear_interpolate(float a, float b, float t)
 {
     return (b-a)*t+a;
 }
@@ -59,7 +59,7 @@ void Notify::render(float dt)
                 Vec2 b = Vec2(0, h / scale_y - ((notifications.size() - i) * 72.0f) - 8.0f);
 
                 ImGui::SetWindowPos(
-                        ImVec2(lerp(w / scale_x - 8,w / scale_x - ImGui::GetWindowSize().x - 8,0.0),a.lerp(b,10.0f*dt).y),
+                        ImVec2(linear_interpolate(w / scale_x - 8, w / scale_x - ImGui::GetWindowSize().x - 8, 0.0), a.lerp(b, 10.0f * dt).y),
                         ImGuiCond_Always);
             }
             else
@@ -74,14 +74,14 @@ void Notify::render(float dt)
                         t = 1;
                     }
                     ImGui::SetWindowPos(
-                            ImVec2(lerp(a.x, w / scale_x - ImGui::GetWindowSize().x - 8, t), a.lerp(b, 10 * dt).y),
+                            ImVec2(linear_interpolate(a.x, w / scale_x - ImGui::GetWindowSize().x - 8, t), a.lerp(b, 10 * dt).y),
                             ImGuiCond_Always);
                 }
                 else
                 {
                     t = (t-(notifications[i].lifetime-1));
                     ImGui::SetWindowPos(
-                            ImVec2(lerp(a.x,w / scale_x - 8, t), a.lerp(b, 10 * dt).y),
+                            ImVec2(linear_interpolate(a.x, w / scale_x - 8, t), a.lerp(b, 10 * dt).y),
                             ImGuiCond_Always);
                 }
             }

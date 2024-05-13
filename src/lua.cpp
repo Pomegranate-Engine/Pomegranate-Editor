@@ -114,7 +114,7 @@ int luaopen_pomegranate(sol::state *L)
                           "dot", &Vec2::dot,
                           "cross", &Vec2::cross,
                           "rotate", &Vec2::rotate,
-                          "lerp", &Vec2::lerp
+                          "linear_interpolate", &Vec2::lerp
     );
 
     L->new_usertype<Vec3>("Vec3", sol::constructors<Vec3(float, float, float),Vec3()>(),
@@ -128,7 +128,7 @@ int luaopen_pomegranate(sol::state *L)
                           "dot", &Vec3::dot,
                           "cross", &Vec3::cross,
                           "rotate", &Vec3::rotate,
-                          "lerp", &Vec3::lerp
+                          "linear_interpolate", &Vec3::lerp
     );
 
     L->new_usertype<Color>("Color", sol::constructors<Color(float, float, float, float),Color()>(),
