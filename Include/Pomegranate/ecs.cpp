@@ -518,6 +518,14 @@ void GroupRef::destroy(Group *group)
 
     void Group::tick()
     {
+        for(auto & e : this->entities)
+        {
+            if(e == nullptr)
+            {
+                //Remove null entities
+                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), e), this->entities.end());
+            }
+        }
         for(auto & system : this->systems)
         {
             if(system->active)
@@ -543,6 +551,14 @@ void GroupRef::destroy(Group *group)
 
     void Group::draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction)
     {
+        for(auto & e : this->entities)
+        {
+            if(e == nullptr)
+            {
+                //Remove null entities
+                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), e), this->entities.end());
+            }
+        }
         // Sort entities using the provided sorting function
         if(sortingFunction!= nullptr)
             std::sort(this->entities.begin(), this->entities.end(), sortingFunction);
