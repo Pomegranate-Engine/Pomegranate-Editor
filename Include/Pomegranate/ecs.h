@@ -68,6 +68,27 @@ namespace Pomegranate
         static void destroy(Group* group);
     };
 
+    class SystemRef
+    {
+private:
+        /* data */
+        System* system;
+        static std::unordered_set<SystemRef*> refs;
+public:
+        SystemRef();
+        SystemRef(System* system);
+        ~SystemRef();
+        System* operator->();
+        System* operator=(System* system);
+        System* operator=(const SystemRef& system);
+        bool operator==(System* system);
+        bool operator!=(System* system);
+        bool operator==(const SystemRef& system);
+        bool operator!=(const SystemRef& system);
+        System* get();
+        static void destroy(System* system);
+    };
+
     class Component
     {
     private:
@@ -90,7 +111,7 @@ namespace Pomegranate
     {
     private:
         /* data */
-        static std::vector<System*> global_systems;
+        static std::vector<SystemRef> global_systems;
     public:
         bool active = true;
         System();
@@ -157,7 +178,7 @@ namespace Pomegranate
 
     public:
         std::vector<EntityRef> entities;
-        std::vector<System*> systems;
+        std::vector<SystemRef> systems;
         std::vector<GroupRef> child_groups;
         GroupRef parent = nullptr;
         static uint32_t group_count;
@@ -169,9 +190,9 @@ namespace Pomegranate
         GroupRef get_parent();
         virtual void add_entity(EntityRef);
         virtual void remove_entity(EntityRef);
-        virtual void add_system(System*);
-        virtual void remove_system(System*);
-        virtual bool has_system(System*);
+        virtual void add_system(SystemRef);
+        virtual void remove_system(SystemRef);
+        virtual bool has_system(SystemRef);
         virtual void add_group(GroupRef);
         virtual void remove_group(GroupRef);
         virtual void force_destroy();
@@ -181,7 +202,7 @@ namespace Pomegranate
         virtual void draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction);
         virtual std::vector<EntityRef> get_entities();
         virtual std::vector<EntityRef> get_all_entities();
-        virtual std::vector<System*>* get_systems();
+        virtual std::vector<SystemRef> get_systems();
         virtual std::vector<GroupRef> get_child_groups();
         void set_id(uint32_t id);
         static std::unordered_map<std::string,Group*> groups;

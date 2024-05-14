@@ -45,10 +45,10 @@ std::vector<EntityRef> get_all_entities(GroupRef group)
 	}
 	return entities;
 }
-std::vector<std::pair<System*,uint32_t>> get_all_systems(GroupRef group)
+std::vector<std::pair<SystemRef,uint32_t>> get_all_systems(GroupRef group)
 {
-	std::vector<std::pair<System*,uint32_t>> systems;
-	for (auto& system : *group->get_systems())
+	std::vector<std::pair<SystemRef,uint32_t>> systems;
+	for (auto& system : group->get_systems())
 	{
 		systems.push_back(std::make_pair(system,group->id));
 	}
@@ -393,9 +393,9 @@ json save_scene_as_json(GroupRef scene)
         {
             continue;
         }
-        j["systems"][typeid(*system).name()] = json::object();
-        j["systems"][typeid(*system).name()]["linked"] = json::array();
-        j["systems"][typeid(*system).name()]["linked"].push_back(linked);
+        j["systems"][typeid(*system.get()).name()] = json::object();
+        j["systems"][typeid(*system.get()).name()]["linked"] = json::array();
+        j["systems"][typeid(*system.get()).name()]["linked"].push_back(linked);
     }
     return j;
 }
