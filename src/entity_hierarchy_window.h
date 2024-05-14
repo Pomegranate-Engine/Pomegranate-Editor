@@ -30,13 +30,13 @@ public:
     Texture* texture;
     EntityRef entity;
     GroupRef group;
-    std::unique_ptr<System> system;
+    SystemRef system;
 
     std::vector<Node*> children;
     bool open;
     Node(EntityRef entity);
     Node(GroupRef group);
-    Node(System* system);
+    Node(SystemRef system);
 };
 
 class Window_EntityHierarchy : public EditorWindow

@@ -639,7 +639,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     }
     if(n->system != nullptr)
     {
-        name = scuffy_demangle(typeid(*n->system).name());
+        name = scuffy_demangle(typeid(*n->system.get()).name());
     }
 
     std::string name1 = name;
@@ -687,7 +687,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     if(InputManager::get_mouse_button(SDL_BUTTON_MIDDLE))
     {
         print_info("Middle clicked!");
-        std::string name = std::string("##") + (n->entity != nullptr ? n->entity->name : n->group != nullptr ? n->group->name : n->system != nullptr ? scuffy_demangle(typeid(*n->system).name()) : "");
+        std::string name = std::string("##") + (n->entity != nullptr ? n->entity->name : n->group != nullptr ? n->group->name : n->system != nullptr ? scuffy_demangle(typeid(*n->system.get()).name()) : "");
         ImGui::InvisibleButton(name.c_str(), ImVec2(node_size * 2, node_size * 2));
         ImGui::ButtonBehavior(ImRect(ImGui::GetItemRectMin(),ImGui::GetItemRectMax()), ImGui::GetItemID(), NULL, NULL, ImGuiButtonFlags_MouseButtonMiddle);
 
@@ -801,7 +801,7 @@ void Window_EntityHierarchy::build_graph(GroupRef group, Node* parent)
 {
     std::vector<EntityRef> entities = group->get_entities();
     std::vector<GroupRef> groups = group->get_child_groups();
-    std::vector<System*> systems = *group->get_systems();
+    std::vector<SystemRef> systems = group->get_systems();
     bool group_exists = false;
     Node* group_node;
     for (auto & node : nodes) {
@@ -903,7 +903,7 @@ void Window_EntityHierarchy::build_graph(GroupRef group, Node* parent)
         bool exists = false;
         Node* node = nullptr;
         for (auto & j : nodes) {
-            if(j->system.get() == system)
+            if(j->system == system)
             {
                 exists = true;
                 node = j;
@@ -1141,7 +1141,7 @@ Node::Node(EntityRef entity)
     this->group = nullptr;
     this->open = true;
 }
-Node::Node(Pomegranate::System *system)
+Node::Node(Pomegranate::SystemRef system)
 {
     this->pos = Vec2((float)Window_EntityHierarchy::nodes.size(),0);
     this->velocity = Vec2(0, 0);
@@ -1149,7 +1149,7 @@ Node::Node(Pomegranate::System *system)
     this->color = Color((int)EditorTheme::scene_hierarchy_system.x,(int)EditorTheme::scene_hierarchy_system.y,(int)EditorTheme::scene_hierarchy_system.z,255);
     this->texture = ResourceManager::load<Texture>("engine/system.png");
     this->entity = nullptr;
-    this->system = std::unique_ptr<System>(system);
+    this->system = system;
     this->group = nullptr;
     this->open = true;
 }

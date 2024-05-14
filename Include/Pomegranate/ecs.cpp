@@ -3,7 +3,7 @@
 namespace Pomegranate
 {
     //Globals
-    std::vector<System*> System::global_systems = std::vector<System*>();
+    std::vector<SystemRef> System::global_systems = std::vector<SystemRef>();
     std::unordered_map<uint32_t ,Entity*> Entity::entities = std::unordered_map<uint32_t,Entity*>();
     std::unordered_map<std::string, std::function<Component*()>> Component::component_types = std::unordered_map<std::string, std::function<Component*()>>();
     std::unordered_map<std::string, std::function<System*()>> System::system_types = std::unordered_map<std::string, std::function<System*()>>();
@@ -15,6 +15,7 @@ namespace Pomegranate
     std::vector<Group*> Group::destroy_queue = std::vector<Group*>();
     std::unordered_set<EntityRef*> EntityRef::refs = std::unordered_set<EntityRef*>();
     std::unordered_set<GroupRef*> GroupRef::refs = std::unordered_set<GroupRef*>();
+    std::unordered_set<SystemRef*> SystemRef::refs = std::unordered_set<SystemRef*>();
 #pragma region Refs
 
 #pragma region EntityRef
@@ -153,6 +154,82 @@ void GroupRef::destroy(Group *group)
 }
 
 #pragma endregion
+
+#pragma region SystemRef
+
+SystemRef::SystemRef()
+{
+    this->system = nullptr;
+    SystemRef::refs.insert(this);
+}
+
+SystemRef::SystemRef(System *system)
+{
+    this->system = system;
+    SystemRef::refs.insert(this);
+}
+
+SystemRef::~SystemRef()
+{
+    SystemRef::refs.erase(this);
+}
+
+System *SystemRef::operator->()
+{
+    return this->system;
+}
+
+System *SystemRef::operator=(System *system)
+{
+    this->system = system;
+    return this->system;
+}
+
+System *SystemRef::operator=(const SystemRef &system)
+{
+    this->system = system.system;
+    return this->system;
+}
+
+bool SystemRef::operator==(System *system)
+{
+    return this->system == system;
+}
+
+bool SystemRef::operator==(const SystemRef &system)
+{
+    return this->system == system.system;
+}
+
+bool SystemRef::operator!=(System *system)
+{
+    return this->system != system;
+}
+
+bool SystemRef::operator!=(const SystemRef &system)
+{
+    return this->system != system.system;
+}
+
+System* SystemRef::get()
+{
+    return this->system;
+}
+
+void SystemRef::destroy(System *system)
+{
+    //Find all references to this entity and nullify them
+    for (auto & ref : SystemRef::refs)
+    {
+        if(ref->system == system)
+        {
+            ref->system = nullptr;
+        }
+    }
+}
+
+#pragma endregion
+
 #pragma endregion
 
 #pragma region Entity
@@ -414,7 +491,7 @@ void GroupRef::destroy(Group *group)
     Group::Group(const std::string& name)
     {
         this->entities = std::vector<EntityRef>();
-        this->systems = std::vector<System*>();
+        this->systems = std::vector<SystemRef>();
         this->child_groups = std::vector<GroupRef>();
         this->name = name;
         groups.emplace(name,this);
@@ -469,24 +546,23 @@ void GroupRef::destroy(Group *group)
         }
     }
 
-    void Group::add_system(System * system)
+    void Group::add_system(SystemRef system)
     {
         this->systems.push_back(system);
     }
 
-    void Group::remove_system(System * system)
+    void Group::remove_system(SystemRef system)
     {
         for (int i = 0; i < systems.size(); ++i)
         {
             if(systems[i] == system)
             {
-                delete system;
                 systems.erase(systems.begin() + i);
                 return;
             }
         }
     }
-    bool Group::has_system(System * system)
+    bool Group::has_system(SystemRef system)
     {
         for (auto & sys : systems)
         {
@@ -518,6 +594,14 @@ void GroupRef::destroy(Group *group)
 
     void Group::tick()
     {
+        for(auto & e : this->entities)
+        {
+            if(e == nullptr)
+            {
+                //Remove null entities
+                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), e), this->entities.end());
+            }
+        }
         for(auto & system : this->systems)
         {
             if(system->active)
@@ -543,6 +627,14 @@ void GroupRef::destroy(Group *group)
 
     void Group::draw(const std::function<bool(EntityRef, EntityRef)>& sortingFunction)
     {
+        for(auto & e : this->entities)
+        {
+            if(e == nullptr)
+            {
+                //Remove null entities
+                this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), e), this->entities.end());
+            }
+        }
         // Sort entities using the provided sorting function
         if(sortingFunction!= nullptr)
             std::sort(this->entities.begin(), this->entities.end(), sortingFunction);
@@ -576,9 +668,9 @@ void GroupRef::destroy(Group *group)
     {
         return this->entities;
     }
-    std::vector<System*>* Group::get_systems()
+    std::vector<SystemRef> Group::get_systems()
     {
-        return &this->systems;
+        return this->systems;
     }
     std::vector<GroupRef> Group::get_child_groups()
     {
