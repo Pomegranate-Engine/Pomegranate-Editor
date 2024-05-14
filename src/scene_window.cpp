@@ -102,7 +102,7 @@ void Window_SceneView::render() {
 
 
         //Render scene
-        Editor::current_scene->draw(nullptr);
+        Editor::current_scene->draw(render_default_sort);
 
         Vec2 mouse_world_pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(screen_w/2,screen_h/2))/zoom+this->position;
         //Draw movement arrows around selected entity
@@ -327,9 +327,11 @@ void Window_SceneView::render() {
             !dragging_entity_horizontal && !dragging_entity_vertical && !dragging_entity_rotation) {
             this->position -= InputManager::mouse_delta / zoom;
         }
-        if (InputManager::get_mouse_scrolled()) {
-            this->zoom_target += (InputManager::mouse_scroll.y * 0.1) * zoom_target;
-        }
+
+    }
+
+    if (ImRect(ImGui::GetWindowPos(), ImVec2(ImGui::GetWindowPos().x + ImGui::GetWindowWidth(), ImGui::GetWindowPos().y + ImGui::GetWindowHeight())).Contains(ImGui::GetMousePos()) && InputManager::get_mouse_scrolled()) {
+        this->zoom_target += (InputManager::mouse_scroll.y * 0.1) * zoom_target;
     }
     if(zoom_target < 0.01)
     {

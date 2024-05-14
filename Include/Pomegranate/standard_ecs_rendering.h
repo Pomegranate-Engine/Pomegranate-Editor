@@ -11,6 +11,12 @@
 
 namespace Pomegranate
 {
+    static bool render_default_sort(EntityRef a, EntityRef b)
+    {
+        Transform* a_transform = a->get_component<Transform>();
+        Transform* b_transform = b->get_component<Transform>();
+        return a_transform->z_index < b_transform->z_index;
+    }
     class DebugCircle : public Component
     {
     public:
