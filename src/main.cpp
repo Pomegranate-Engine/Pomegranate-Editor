@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     //Set font
-    io.Fonts->AddFontFromFileTTF("engine/zed_font.ttf", 18.0f);
+    io.Fonts->AddFontFromFileTTF("./engine/zed_font.ttf", 18.0f);
 
     EditorTheme::load("engine/theme.json");
 
@@ -151,6 +151,7 @@ int main(int argc, char* argv[])
         }
         HotkeyManager::tick();
         windows_manager.update();
+        LiveShare::update();
         //- - - - - # RENDERING # - - - - -
         //Clear SDL renderer
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), 0, 0, 0, 255);

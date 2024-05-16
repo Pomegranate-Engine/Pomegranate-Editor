@@ -54,6 +54,8 @@ set(SOURCE_FILES src/main.cpp
         src/extension_handler.h
         src/live_share.cpp
         src/live_share.h
+        src/LiveShare/live_share_shared_data.cpp
+        src/LiveShare/live_share_shared_data.h
 )
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)
@@ -97,6 +99,7 @@ set(IMGUI_SOURCES
 
 set(LIVE_SHARE_SERVER_SOURCES
         src/LiveShare/server.cpp
+        src/LiveShare/live_share_shared_data.cpp
 )
 # Add executable
 add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES})
@@ -127,6 +130,10 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_mixer.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_ttf.dylib
             ${LUAJIT_LIBRARY}
+    )
+
+    target_link_libraries(Pomegranate_LiveShareServer PRIVATE
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libenet.dylib
     )
 elseif(WIN32)
     find_package(OpenMP)

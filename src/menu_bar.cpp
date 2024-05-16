@@ -168,11 +168,11 @@ void draw_menu_bar()
     {
         if(ImGui::MenuItem("Begin Sharing"))
         {
-            LiveShare::live_share_start_server();
+            LiveShare::start_server();
         }
         if(ImGui::MenuItem("Stop Sharing"))
         {
-            LiveShare::live_share_stop_server();
+            LiveShare::stop_server();
         }
         ImGui::EndMenu();
     }

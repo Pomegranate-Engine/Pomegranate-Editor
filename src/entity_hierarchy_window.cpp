@@ -414,6 +414,7 @@ void Window_EntityHierarchy::create_entity()
             entity->add_component<Transform>();
             selected_node->group->add_entity(entity);
             Editor::action();
+            LiveShare::send_new_entity(entity);
         }
         else
         {
@@ -434,6 +435,7 @@ void Window_EntityHierarchy::create_entity()
                 parent->add_entity(entity);
             }
             Editor::action();
+            LiveShare::send_new_entity(entity);
         }
     }
 }
