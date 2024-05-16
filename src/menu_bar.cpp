@@ -164,6 +164,18 @@ void draw_menu_bar()
         }
         ImGui::EndMenu();
     }
+    if(ImGui::BeginMenu("Share"))
+    {
+        if(ImGui::MenuItem("Begin Sharing"))
+        {
+            LiveShare::live_share_start_server();
+        }
+        if(ImGui::MenuItem("Stop Sharing"))
+        {
+            LiveShare::live_share_stop_server();
+        }
+        ImGui::EndMenu();
+    }
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Play").x - ImGui::GetStyle().WindowPadding.x - ImGui::GetStyle().WindowPadding.y);
     if (ImGui::MenuItem("Play","F5")) {
         // Run scene

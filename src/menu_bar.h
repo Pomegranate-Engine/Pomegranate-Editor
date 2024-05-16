@@ -17,6 +17,7 @@
 #include <future>
 #include "notifications.h"
 #include "hotkey_manager.h"
+#include "live_share.h"
 
 using json = nlohmann::json;
 using namespace Pomegranate;

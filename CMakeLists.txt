@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 
 project(Pomegranate_Engine)
 project(Pomegranate)
+project(Pomegranate_LiveShareServer)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -51,6 +52,8 @@ set(SOURCE_FILES src/main.cpp
         src/lua.h
         src/extension_handler.cpp
         src/extension_handler.h
+        src/live_share.cpp
+        src/live_share.h
 )
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)
@@ -92,10 +95,15 @@ set(IMGUI_SOURCES
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
 )
 
+set(LIVE_SHARE_SERVER_SOURCES
+        src/LiveShare/server.cpp
+)
 # Add executable
 add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES})
 
 add_library(Pomegranate SHARED ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES})
+
+add_executable(Pomegranate_LiveShareServer ${LIVE_SHARE_SERVER_SOURCES})
 
 # Set the path to LuaJIT (Mac)
 set(LUAJIT_LIBRARY ${CMAKE_SOURCE_DIR}/Lib/Arm/libluajit-5.1.dylib)  # Adjust the library name if necessary
@@ -120,11 +128,9 @@ if(APPLE)
     )
 elseif(WIN32)
     find_package(OpenMP)
-    find_package(OpenGL REQUIRED)
     target_include_directories(Pomegranate_Engine PRIVATE ${OpenGL_INCLUDE_DIRS})
 
     target_link_libraries(Pomegranate_Engine PRIVATE
-            OpenGL::GL
             ${LIBRARIES_DIR}/SDL3.lib
             ${LIBRARIES_DIR}/SDL3_ttf.lib
             ${LIBRARIES_DIR}/SDL3_image.lib
@@ -133,22 +139,33 @@ elseif(WIN32)
             OpenMP::OpenMP_CXX
             ${LIBRARIES_DIR}/glew32.lib
             ${LIBRARIES_DIR}/glew32s.lib
+            ${LIBRARIES_DIR}/enet64.lib
+            ws2_32.lib
+            winmm.lib
     )
     target_link_libraries(Pomegranate PRIVATE
-            OpenGL::GL
             ${LIBRARIES_DIR}/SDL3.lib
             ${LIBRARIES_DIR}/SDL3_ttf.lib
             ${LIBRARIES_DIR}/SDL3_image.lib
             ${LIBRARIES_DIR}/SDL3_mixer.lib
             ${LIBRARIES_DIR}/lua51.lib
             OpenMP::OpenMP_CXX
-            ${LIBRARIES_DIR}/glew32.lib
-            ${LIBRARIES_DIR}/glew32s.lib
     )
+    target_link_libraries(Pomegranate_LiveShareServer PRIVATE
+            ${LIBRARIES_DIR}/enet64.lib
+            ws2_32.lib
+            winmm.lib
+    )
+
 endif()
 
 # Set the output directory for the executable
 set_target_properties(Pomegranate_Engine PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
+)
+set_target_properties(Pomegranate_LiveShareServer PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
         ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib
