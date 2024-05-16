@@ -9,6 +9,7 @@
 #include<backends/imgui_impl_sdl3.h>
 #include<backends/imgui_impl_sdlrenderer3.h>
 #include<backends/imgui_impl_opengl3.h>
+#include<enet/enet.h>
 
 using namespace Pomegranate;
 
@@ -50,8 +51,6 @@ Mat create_transform_matrix(Vec3 position, Vec3 rotation, Vec3 scale)
 
 int main(int argc, char* argv[])
 {
-    ExtensionHandler handler;
-    handler.load("engine/extensions/libTestPomegranateExtension.dylib");
     //region init
     pomegranate_init(); //Init
     main_window.open(); //Open window
