@@ -394,8 +394,10 @@ Vec2 find_closest_point_on_line(Vec2 start, Vec2 end, Vec2 point)
     float t = (pointVec.x * lineVec.x + pointVec.y * lineVec.y) / (lineVec.x * lineVec.x + lineVec.y * lineVec.y);
 
     // Clamp t to be within the range [0, 1] to ensure the closest point is on the line segment
-    t = std::max(0.0f, std::min(1.0f, t));
-
+    if(t < 0)
+        t = 0;
+    else if(t > 1)
+        t = 1;
     // Calculate the closest point on the line segment
     Vec2 closestPoint(start.x + t * lineVec.x, start.y + t * lineVec.y);
 
@@ -1098,7 +1100,7 @@ void Window_EntityHierarchy::move(Vec2 dir)
 
         // Find the node with the minimum distance
         Node* closest_node = nullptr;
-        float min_distance = std::numeric_limits<float>::max();
+        float min_distance = INFINITY;
         for (Node* node : nodes_in_direction) {
             Vec2 diff = {node->pos.x - selected_node->pos.x, node->pos.y - selected_node->pos.y};
             float distance = std::sqrt(diff.x * diff.x + diff.y * diff.y);

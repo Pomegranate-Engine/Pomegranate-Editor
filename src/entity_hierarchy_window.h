@@ -17,6 +17,7 @@
 #include "scene.h"
 #include<memory>
 #include "theme.h"
+#include <algorithm>
 
 using namespace Pomegranate;
 class Node

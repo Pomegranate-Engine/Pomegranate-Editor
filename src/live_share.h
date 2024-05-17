@@ -4,10 +4,6 @@
 #include"LiveShare/live_share_shared_data.h"
 #include"notifications.h"
 
-#ifdef __WIN32__
-#include<Windows.h>
-#endif
-
 class LiveShare
 {
 public:

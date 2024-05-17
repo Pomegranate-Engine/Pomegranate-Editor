@@ -149,8 +149,8 @@ elseif(WIN32)
             ${LIBRARIES_DIR}/glew32.lib
             ${LIBRARIES_DIR}/glew32s.lib
             ${LIBRARIES_DIR}/enet64.lib
-            ws2_32.lib
             winmm.lib
+            ws2_32.lib
     )
     target_link_libraries(Pomegranate PRIVATE
             ${LIBRARIES_DIR}/SDL3.lib
@@ -159,11 +159,13 @@ elseif(WIN32)
             ${LIBRARIES_DIR}/SDL3_mixer.lib
             ${LIBRARIES_DIR}/lua51.lib
             OpenMP::OpenMP_CXX
+            winmm.lib
+            ws2_32.lib
     )
     target_link_libraries(Pomegranate_LiveShareServer PRIVATE
             ${LIBRARIES_DIR}/enet64.lib
-            ws2_32.lib
             winmm.lib
+            ws2_32.lib
     )
 
 endif()
