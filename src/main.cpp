@@ -71,7 +71,6 @@ int main(int argc, char* argv[])
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     //Set font
-    io.Fonts->AddFontDefault();
     io.Fonts->AddFontFromFileTTF("engine/zed_font.ttf", 18.0f);
     io.Fonts->Build();
 
