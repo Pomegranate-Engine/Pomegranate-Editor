@@ -166,10 +166,13 @@ void Window_SceneView::render() {
 
         //Get all the transforms
         std::vector<Transform*> transforms;
+        std::vector<EntityRef> entities_with_transform;
         for(EntityRef entity : entities_selected)
         {
-            if(entity->has_component<Transform>())
+            if(entity->has_component<Transform>()) {
                 transforms.push_back(entity->get_component<Transform>());
+                entities_with_transform.push_back(entity);
+            }
         }
 
         Vec2 pos = Vec2();
@@ -310,6 +313,12 @@ void Window_SceneView::render() {
         {
             if(dragging_entity || dragging_entity_horizontal || dragging_entity_vertical || dragging_entity_rotation)
             {
+                //Send change to server
+                for(EntityRef entity : entities_with_transform)
+                {
+                    LiveShare::send_change_property(entity, typeid(Transform).name(), "pos", typeid(Vec2).hash_code(), &entity->get_component<Transform>()->pos);
+                    LiveShare::send_change_property(entity, typeid(Transform).name(), "rot", typeid(Vec2).hash_code(), &entity->get_component<Transform>()->rot);
+                }
                 Editor::action();
             }
             dragging_entity = false;

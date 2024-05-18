@@ -119,6 +119,7 @@ void InspectorWindow::render()
 
                                 if(ImGui::IsItemDeactivatedAfterEdit())
                                 {
+                                    LiveShare::send_change_property(entity, name, property_name, j->second.first->hash_code(), j->second.second);
                                     Editor::action();
                                 }
                             }
@@ -150,9 +151,14 @@ void InspectorWindow::render()
             {
                 for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
                     if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
-                        if(entity->add_component(i->first.c_str()) == nullptr)
+                        Component* component = entity->add_component(i->first.c_str());
+                        if(component == nullptr)
                         {
                             Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),EditorTheme::color_palette_red,"Component already exists!","Component " + scuffy_demangle(i->first.c_str()) + " already exists on this entity. Not added!"});
+                        }
+                        else
+                        {
+                            LiveShare::send_add_component(entity, i->first);
                         }
                         Editor::action();
                     }

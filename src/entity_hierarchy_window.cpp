@@ -417,6 +417,7 @@ void Window_EntityHierarchy::create_entity()
             selected_node->group->add_entity(entity);
             Editor::action();
             LiveShare::send_new_entity(entity);
+            LiveShare::send_add_component(entity, typeid(Transform).name());
         }
         else
         {
@@ -438,6 +439,7 @@ void Window_EntityHierarchy::create_entity()
             }
             Editor::action();
             LiveShare::send_new_entity(entity);
+            LiveShare::send_add_component(entity, typeid(Transform).name());
         }
     }
 }
@@ -452,6 +454,7 @@ void Window_EntityHierarchy::create_group()
             //Create a new group
             auto *group = new Group("New Group");
             selected_node->group->add_group(group);
+            LiveShare::send_create_group(group);
             Editor::action();
         }
         else
@@ -471,6 +474,7 @@ void Window_EntityHierarchy::create_group()
             for (auto & parent : parents) {
                 parent->add_group(group);
             }
+            LiveShare::send_create_group(group);
             Editor::action();
         }
     }
@@ -971,6 +975,7 @@ void Window_EntityHierarchy::delete_node()
         //Delete the entity/group/system from the scene remove the node and all linked nodes
         if(selected_node->entity != nullptr)
         {
+            LiveShare::send_delete_entity(selected_node->entity);
             selected_node->entity->force_destroy();
             Editor::action();
         }
@@ -981,7 +986,9 @@ void Window_EntityHierarchy::delete_node()
             if(parent != nullptr)
             {
                 Group* group = selected_node->group.get();
+                LiveShare::send_delete_group(group);
                 parent->remove_group(group);
+                group->destroy();
                 Editor::action();
             }
         }

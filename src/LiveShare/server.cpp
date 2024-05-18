@@ -35,7 +35,11 @@ int main()
     }
 
     std::cout << "Starting event listener" << std::endl;
-    while(true)
+
+    bool running = true;
+    int users_connected = 0;
+
+    while(running)
     {
         ENetEvent event;
         if(enet_host_service(server, &event, 16))
@@ -52,6 +56,17 @@ int main()
                     std::cout << "Sending verification packet: " << (int)message[1] << std::endl;
                     send(LIVE_SHARE_PACKET_TYPE_VERIFY_USER,message);
                     user_count++;
+                    users_connected++;
+                    break;
+                }
+                case ENET_EVENT_TYPE_DISCONNECT:
+                {
+                    std::cout << "User disconnected!" << std::endl;
+                    users_connected--;
+                    if(users_connected == 0)
+                    {
+                        running = false;
+                    }
                     break;
                 }
                 case ENET_EVENT_TYPE_RECEIVE:
@@ -68,6 +83,7 @@ int main()
         }
     }
 
+    std::cout << "No more users, Shutting down server..." << std::endl;
     enet_host_destroy(server);
 
     return 0;

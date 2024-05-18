@@ -42,7 +42,7 @@ namespace Pomegranate
         make_current();
         bool HIGH_DPI = false;
 #if defined(__APPLE__) //TODO: Implement better solution for HIGH_DPI
-        HIGH_DPI = true;
+        HIGH_DPI = false;
 #endif
         int flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_OPENGL;
         if(HIGH_DPI)

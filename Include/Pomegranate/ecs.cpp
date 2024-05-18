@@ -602,20 +602,31 @@ void SystemRef::destroy(System *system)
                 this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), e), this->entities.end());
             }
         }
+        for(auto & g : this->child_groups)
+        {
+            if(g == nullptr)
+            {
+                //Remove null entities
+                this->child_groups.erase(std::remove(this->child_groups.begin(), this->child_groups.end(), g), this->child_groups.end());
+            }
+        }
         for(auto & system : this->systems)
         {
             if(system->active)
             {
                 system->pre_tick();
                 Entity::apply_destruction_queue();
+                Group::apply_destruction_queue();
 
                 for (auto &entitie: this->entities)
                 {
                     system->tick(entitie.get());
                 }
                 Entity::apply_destruction_queue();
+                Group::apply_destruction_queue();
                 system->post_tick();
                 Entity::apply_destruction_queue();
+                Group::apply_destruction_queue();
             }
         }
         for(auto & child_group : this->child_groups)
@@ -635,6 +646,14 @@ void SystemRef::destroy(System *system)
                 this->entities.erase(std::remove(this->entities.begin(), this->entities.end(), e), this->entities.end());
             }
         }
+        for(auto & g : this->child_groups)
+        {
+            if(g == nullptr)
+            {
+                //Remove null entities
+                this->child_groups.erase(std::remove(this->child_groups.begin(), this->child_groups.end(), g), this->child_groups.end());
+            }
+        }
         // Sort entities using the provided sorting function
         if(sortingFunction!= nullptr)
             std::sort(this->entities.begin(), this->entities.end(), sortingFunction);
@@ -644,13 +663,16 @@ void SystemRef::destroy(System *system)
             {
                 system->pre_draw();
                 Entity::apply_destruction_queue();
+                Group::apply_destruction_queue();
                 for (auto &entity: this->entities)
                 {
                     system->draw(entity.get());
                 }
                 Entity::apply_destruction_queue();
+                Group::apply_destruction_queue();
                 system->post_draw();
                 Entity::apply_destruction_queue();
+                Group::apply_destruction_queue();
             }
         }
         for(auto & group : this->child_groups)
@@ -753,6 +775,8 @@ void SystemRef::destroy(System *system)
         std::vector<EntityRef> enties = std::vector<EntityRef>();
         for (auto & entity : Entity::entities)
         {
+            if(entity.second == nullptr)
+                continue;
             bool has_all = true;
             for (auto & component : this->component_types)
             {

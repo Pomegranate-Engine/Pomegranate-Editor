@@ -6,6 +6,35 @@ ENetAddress LiveShare::address;
 ENetHost* LiveShare::client;
 ENetPeer* LiveShare::peer;
 
+const size_t INT_HASH = typeid(int).hash_code();
+const size_t FLOAT_HASH = typeid(float).hash_code();
+const size_t STRING_HASH = typeid(std::string).hash_code();
+const size_t BOOL_HASH = typeid(bool).hash_code();
+const size_t COLOR_HASH = typeid(Color).hash_code();
+const size_t VEC2_HASH = typeid(Vec2).hash_code();
+const size_t VEC3_HASH = typeid(Vec3).hash_code();
+const size_t VEC4_HASH = typeid(Vec4).hash_code();
+
+std::vector<std::string> split(std::string str, char delimiter)
+{
+    std::vector<std::string> parts;
+    std::string part;
+    for (char c : str)
+    {
+        if (c == delimiter)
+        {
+            parts.push_back(part);
+            part = "";
+        }
+        else
+        {
+            part += c;
+        }
+    }
+    parts.push_back(part);
+    return parts;
+}
+
 void LiveShare::start_server()
 {
     std::cout << "Initializing client..." << std::endl;
@@ -35,6 +64,10 @@ void LiveShare::start_server()
 }
 void LiveShare::stop_server()
 {
+    if(!live_sharing)
+    {
+        return;
+    }
     enet_peer_disconnect(peer,0);
     enet_host_destroy(client);
     enet_deinitialize();
@@ -66,11 +99,154 @@ void LiveShare::update()
                                 break;
                             }
 
-                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
-                            std::cout << "Creating entity with ID: " << id << std::endl;
+                            int id = read_int_from_bytes(event.packet->data + 2);
+                            int group = read_int_from_bytes(event.packet->data + 6);
+                            std::cout << "Creating entity with ID: " << id << " as child of Group: " << group << std::endl;
                             EntityRef entity = Entity::create("New Entity");
-                            entity->id = id;
+                            entity->set_id(id);
                             entity->name = "Entity " + std::to_string(id);
+                            Group::groups_id[group]->add_entity(entity);
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_ADD_COMPONENT: {
+                            std::cout << "Recieved add component packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+                            EntityRef entity = EntityRef(Entity::entities[id]);
+                            if(entity == nullptr)
+                            {
+                                std::cout << "Entity not found" << std::endl;
+                                break;
+                            }
+                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::vector<std::string> parts = split(message, '/');
+                            std::string component = parts[0];
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " adding component: " << component << std::endl;
+                            entity->add_component(component.c_str());
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_DELETE_ENTITY: {
+                            std::cout << "Recieved delete entity packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+                            EntityRef entity = EntityRef(Entity::entities[id]);
+                            if(entity == nullptr)
+                            {
+                                std::cout << "Entity not found" << std::endl;
+                                break;
+                            }
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor deleting entity: " << id << std::endl;
+                            entity->force_destroy();
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_CHANGE_PROPERTY: {
+                            std::cout << "Recieved change property packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            std::string data = std::string((char *) event.packet->data, event.packet->dataLength);
+                            int id = read_int_from_bytes((unsigned char *) event.packet->data + 2);
+                            EntityRef entity = EntityRef(Entity::entities[id]);
+                            if(entity == nullptr)
+                            {
+                                std::cout << "Entity not found" << std::endl;
+                                break;
+                            }
+                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::vector<std::string> parts = split(message, '/');
+                            std::string component = parts[0];
+                            Component* comp = entity->get_component(component.c_str());
+                            std::string property = parts[1];
+                            size_t type = read_size_t_from_bytes((unsigned char*)parts[2].c_str());
+                            char* value = (char*)parts[3].c_str();
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " changing: " << component << "/" << property << " to: " << message << std::endl;
+
+                            if(type == INT_HASH)
+                            {
+                                int v = read_int_from_bytes((unsigned char*)value);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == FLOAT_HASH)
+                            {
+                                float v = read_float_from_bytes((unsigned char*)value);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == STRING_HASH)
+                            {
+                                std::string v = std::string(value);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == BOOL_HASH)
+                            {
+                                bool v = (bool)value[0];
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == COLOR_HASH)
+                            {
+                                Color v;
+                                v.r = read_int_from_bytes((unsigned char*)value);
+                                v.g = read_int_from_bytes((unsigned char*)value + 4);
+                                v.b = read_int_from_bytes((unsigned char*)value + 8);
+                                v.a = read_int_from_bytes((unsigned char*)value + 12);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == VEC2_HASH)
+                            {
+                                Vec2 v;
+                                v.x = read_float_from_bytes((unsigned char*)value);
+                                v.y = read_float_from_bytes((unsigned char*)value + 4);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == VEC3_HASH)
+                            {
+                                Vec3 v;
+                                v.x = read_float_from_bytes((unsigned char*)value);
+                                v.y = read_float_from_bytes((unsigned char*)value + 4);
+                                v.z = read_float_from_bytes((unsigned char*)value + 8);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == VEC4_HASH)
+                            {
+                                Vec4 v;
+                                v.x = read_float_from_bytes((unsigned char*)value);
+                                v.y = read_float_from_bytes((unsigned char*)value + 4);
+                                v.z = read_float_from_bytes((unsigned char*)value + 8);
+                                v.w = read_float_from_bytes((unsigned char*)value + 12);
+                                comp->set(property.c_str(),v);
+                            }
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_CREATE_GROUP:
+                        {
+                            std::cout << "Recieved create group packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes(event.packet->data + 2);
+                            int parent_group = read_int_from_bytes(event.packet->data + 6);
+                            std::cout << "Creating group with ID: " << id << std::endl;
+                            GroupRef group = new Group("New Group");
+                            group->set_id(id);
+                            Group::groups_id[parent_group]->add_group(group);
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_DELETE_GROUP:
+                        {
+                            std::cout << "Recieved delete group packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes(event.packet->data + 2);
+                            Group::groups_id[id]->force_destroy();
                             break;
                         }
                         case LIVE_SHARE_PACKET_TYPE_VERIFY_USER:
@@ -110,5 +286,96 @@ void LiveShare::send(LiveSharePacketType type,std::string message)
 void LiveShare::send_new_entity(EntityRef entity)
 {
     char* id = reinterpret_cast<char*>(&entity->id);
-    send(LIVE_SHARE_PACKET_TYPE_CREATE_ENTITY,std::string(id));
+    char* group_id = reinterpret_cast<char*>(&entity->get_parent_groups()[0]->id);
+    send(LIVE_SHARE_PACKET_TYPE_CREATE_ENTITY,std::string(id,4) + std::string(group_id,4));
+}
+
+void LiveShare::send_change_property(EntityRef entity, std::string component, std::string property, size_t type, void* value)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    char* t = static_cast<char*>(static_cast<void*>(&type));
+
+    std::string message;
+    message += std::string(id,sizeof(int));
+    message += component + "/" + property + "/";
+    message += std::string(t,sizeof(size_t)) + "/";
+
+    if(type == INT_HASH)
+    {
+        int* v = static_cast<int*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(v)),sizeof(int));
+    }
+    else if(type == FLOAT_HASH)
+    {
+        float* v = static_cast<float*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(v)),sizeof(float));
+    }
+    else if(type == STRING_HASH)
+    {
+        std::string* v = static_cast<std::string*>(value);
+        message += *v;
+    }
+    else if(type == BOOL_HASH)
+    {
+        bool* v = static_cast<bool*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(v)),sizeof(bool));
+    }
+    else if(type == COLOR_HASH)
+    {
+        Color* v = static_cast<Color*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->r)),sizeof(int));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->g)),sizeof(int));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->b)),sizeof(int));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->a)),sizeof(int));
+    }
+    else if(type == VEC2_HASH)
+    {
+        Vec2* v = static_cast<Vec2*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->x)),sizeof(float));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->y)),sizeof(float));
+    }
+    else if(type == VEC3_HASH)
+    {
+        Vec3* v = static_cast<Vec3*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->x)),sizeof(float));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->y)),sizeof(float));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->z)),sizeof(float));
+    }
+    else if(type == VEC4_HASH)
+    {
+        Vec4* v = static_cast<Vec4*>(value);
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->x)),sizeof(float));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->y)),sizeof(float));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->z)),sizeof(float));
+        message += std::string(static_cast<char*>(static_cast<void*>(&v->w)),sizeof(float));
+    }
+    send(LIVE_SHARE_PACKET_TYPE_CHANGE_PROPERTY,message);
+}
+
+void LiveShare::send_add_component(EntityRef entity, std::string component)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    std::string message;
+    message += std::string(id,sizeof(int));
+    message += component;
+    send(LIVE_SHARE_PACKET_TYPE_ADD_COMPONENT,message);
+}
+
+void LiveShare::send_delete_entity(EntityRef entity)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    send(LIVE_SHARE_PACKET_TYPE_DELETE_ENTITY,std::string(id));
+}
+
+void LiveShare::send_create_group(GroupRef entity)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    char* parent_id = static_cast<char*>(static_cast<void*>(&entity->get_parent()->id));
+    send(LIVE_SHARE_PACKET_TYPE_CREATE_GROUP,std::string(id,4) + std::string(parent_id,4));
+}
+
+void LiveShare::send_delete_group(GroupRef entity)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    send(LIVE_SHARE_PACKET_TYPE_DELETE_GROUP,std::string(id));
 }

@@ -51,6 +51,11 @@ Mat create_transform_matrix(Vec3 position, Vec3 rotation, Vec3 scale)
 
 int main(int argc, char* argv[])
 {
+    print_info("Pomegranate Editor - Version: " + VERSION);
+    //Print working directory
+    char cwd[1024];
+    getcwd(cwd, sizeof(cwd));
+    print_info("Working directory: " + std::string(cwd));
     //region init
     pomegranate_init(); //Init
     main_window.open(); //Open window
@@ -66,7 +71,9 @@ int main(int argc, char* argv[])
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     //Set font
-    io.Fonts->AddFontFromFileTTF("./engine/zed_font.ttf", 18.0f);
+    io.Fonts->AddFontDefault();
+    io.Fonts->AddFontFromFileTTF("engine/zed_font.ttf", 18.0f);
+    io.Fonts->Build();
 
     EditorTheme::load("engine/theme.json");
 
@@ -179,5 +186,6 @@ int main(int argc, char* argv[])
     }
     main_window.close();
     pomegranate_quit(); //Cleanup
+    LiveShare::stop_server();
     return 0;
 }
