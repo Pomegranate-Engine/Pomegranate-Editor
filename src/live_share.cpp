@@ -360,6 +360,10 @@ void LiveShare::update()
                             char file_path_length = event.packet->data[3];
                             //Get file path
                             std::string file = std::string((char*)event.packet->data + 4,file_path_length);
+                            //Replace \ with / on m*c
+#ifdef __APPLE__
+                            std::replace(file.begin(),file.end(),'\\','/');
+#endif
                             //Get bytes
                             std::vector<char> bytes(event.packet->data + 4 + file_path_length,event.packet->data + event.packet->dataLength);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor sending resource: " << file << std::endl;
