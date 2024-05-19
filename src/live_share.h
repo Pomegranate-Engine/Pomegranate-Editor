@@ -24,6 +24,7 @@ public:
     static void send_delete_entity(EntityRef entity);
     static void send_create_group(GroupRef group);
     static void send_delete_group(GroupRef group);
+    static void send_entity_full(EntityRef entity);
 };
 
 #endif //POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_H

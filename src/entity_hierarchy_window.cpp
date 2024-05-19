@@ -1069,6 +1069,8 @@ void Window_EntityHierarchy::duplicate()
             for (auto & group : groups) {
                 group->add_entity(entity);
             }
+
+            LiveShare::send_entity_full(entity);
             Editor::action();
         }
     }

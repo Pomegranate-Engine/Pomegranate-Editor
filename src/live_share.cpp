@@ -486,3 +486,17 @@ void LiveShare::send_delete_group(GroupRef entity)
     char* id = static_cast<char*>(static_cast<void*>(&entity->id));
     send(LIVE_SHARE_PACKET_TYPE_DELETE_GROUP,std::string(id));
 }
+
+void LiveShare::send_entity_full(Pomegranate::EntityRef entity)
+{
+    send_new_entity(entity);
+    auto components = entity->get_components();
+    for (auto& component : components)
+    {
+        send_add_component(entity, component.first->name());
+        for (auto& property : component.second->component_data)
+        {
+            send_change_property(entity, component.first->name(), property.first, property.second.first->hash_code(), property.second.second);
+        }
+    }
+}
