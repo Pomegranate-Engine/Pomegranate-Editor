@@ -299,9 +299,7 @@ void LiveShare::update()
                             }
                             std::string file = std::string((char*)event.packet->data + 2,event.packet->dataLength - 2);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor checking if resource exists: " << file << std::endl;
-#ifdef __APPLE__
-                            file = file.replace(file.begin(),file.end(),"\\","/");
-#endif
+                            std::replace(file.begin(),file.end(),'\\','/');
                             if(ResourceManager::exists(file))
                             {
 
@@ -333,9 +331,7 @@ void LiveShare::update()
                                                 EditorTheme::color_palette_red, "Live Share", "User: " + std::to_string((int)event.packet->data[1]) + " editor requested resource that does not exist, sending file"});
                                 //Send the resource
                                 std::string file = std::string((char*)event.packet->data + 3,event.packet->dataLength - 3);
-#ifdef __APPLE__
-                                file = file.replace(file.begin(),file.end(),"\\","/");
-#endif
+                                std::replace(file.begin(),file.end(),'\\','/');
                                 std::cout << "User: " << (int)event.packet->data[1] << " editor requesting resource: " << file << std::endl;
                                 //Load bytes from file
                                 std::ifstream file_stream(file,std::ios::binary);
@@ -367,9 +363,7 @@ void LiveShare::update()
                             //Get file path
                             std::string file = std::string((char*)event.packet->data + 4,file_path_length);
                             //Replace \ with / on m*c
-#ifdef __APPLE__
-                            file = file.replace(file.begin(),file.end(),"\\","/");
-#endif
+                            std::replace(file.begin(),file.end(),'\\','/');
                             //Get bytes
                             std::vector<char> bytes(event.packet->data + 4 + file_path_length,event.packet->data + event.packet->dataLength);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor sending resource: " << file << std::endl;
@@ -592,5 +586,6 @@ void LiveShare::send_entity_full(Pomegranate::EntityRef entity)
 
 void LiveShare::send_query_file(std::string file)
 {
+    std::replace(file.begin(),file.end(),'\\','/');
     send(LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS, file);
 }
