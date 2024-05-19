@@ -250,7 +250,7 @@ void SystemRef::destroy(System *system)
     {
         for (auto c : components)
         {
-            if (std::string(c.first->name()) == std::string(name))
+            if (std::string(scuffy_demangle(c.first->name())) == std::string(name))
             {
                 return c.second;
             }
