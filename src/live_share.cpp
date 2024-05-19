@@ -307,7 +307,7 @@ void LiveShare::update()
                             {
                                 std::string message;
                                 //Add original sender
-                                message += (char)user_id;
+                                message += (char)from;
                                 //Add file
                                 message += file;
                                 send(LIVE_SHARE_PACKET_TYPE_RESOURCE_DOES_NOT_EXIST,message);
