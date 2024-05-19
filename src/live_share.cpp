@@ -1,4 +1,5 @@
 #include "live_share.h"
+#include "ip_address.h"
 bool LiveShare::is_verified;
 char LiveShare::user_id = 0;
 bool LiveShare::live_sharing;
@@ -48,7 +49,7 @@ void LiveShare::start_server()
 
     client = enet_host_create(nullptr,1,2,0,0);
 
-    enet_address_set_host(&address,"localhost");
+    enet_address_set_host(&address,ip_address);
     address.port = 1234;
 
     peer = enet_host_connect(client,&address,2,0);

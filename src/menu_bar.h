@@ -1,5 +1,6 @@
 #ifndef POMEGRANATE_ENGINE_MENU_BAR_H
 #define POMEGRANATE_ENGINE_MENU_BAR_H
+#include "live_share.h"
 #include "imgui.h"
 #include "Pomegranate/pomegranate.h"
 #include "Pomegranate/ecs.h"
@@ -17,7 +18,6 @@
 #include <future>
 #include "notifications.h"
 #include "hotkey_manager.h"
-#include "live_share.h"
 
 using json = nlohmann::json;
 using namespace Pomegranate;

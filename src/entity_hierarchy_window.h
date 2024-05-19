@@ -1,8 +1,8 @@
 #ifndef POMEGRANATE_LIBRARY_ENTITY_HIERARCHY_WINDOW_H
 #define POMEGRANATE_LIBRARY_ENTITY_HIERARCHY_WINDOW_H
+#include "live_share.h"
 #include "editor_window.h"
 #include "Imgui/imgui.h"
-#include "live_share.h"
 //stdlib imgui
 #include "Imgui/misc/cpp/imgui_stdlib.h"
 #include "Pomegranate/pomegranate.h"
@@ -12,7 +12,7 @@
 #include "hotkey_manager.h"
 #include "notifications.h"
 
-#include"utils.h"
+#include"Pomegranate/utils.h"
 #include <cstdlib>
 #include "scene.h"
 #include<memory>

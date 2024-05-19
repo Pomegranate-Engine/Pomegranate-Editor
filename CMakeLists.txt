@@ -34,8 +34,8 @@ set(SOURCE_FILES src/main.cpp
         src/resources_window.h
         src/menu_bar.cpp
         src/menu_bar.h
-        src/utils.cpp
-        src/utils.h
+        Include/Pomegranate/utils.cpp
+        Include/Pomegranate/utils.h
         src/scene.cpp
         src/scene.h
         src/theme.cpp

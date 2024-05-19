@@ -1,3 +1,4 @@
+#include<enet/enet.h>
 #include <SDL.h>
 #include <SDL_image.h>
 #include <Pomegranate/pomegranate.h>
@@ -9,7 +10,6 @@
 #include<backends/imgui_impl_sdl3.h>
 #include<backends/imgui_impl_sdlrenderer3.h>
 #include<backends/imgui_impl_opengl3.h>
-#include<enet/enet.h>
 
 using namespace Pomegranate;
 
@@ -52,10 +52,6 @@ Mat create_transform_matrix(Vec3 position, Vec3 rotation, Vec3 scale)
 int main(int argc, char* argv[])
 {
     print_info("Pomegranate Editor - Version: " + VERSION);
-    //Print working directory
-    char cwd[1024];
-    getcwd(cwd, sizeof(cwd));
-    print_info("Working directory: " + std::string(cwd));
     //region init
     pomegranate_init(); //Init
     main_window.open(); //Open window

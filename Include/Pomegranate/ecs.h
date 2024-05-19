@@ -18,6 +18,7 @@
 #include "texture.h"
 #include "audio.h"
 #include "ttf_font.h"
+#include "utils.h"
 
 namespace Pomegranate
 {
@@ -104,7 +105,7 @@ public:
         template<typename T> void set(const char* name, T value);
 
     };
-#define register_component(T) Component::register_component_with_name<T>(typeid(T).name())
+#define register_component(T) Component::register_component_with_name<T>(scuffy_demangle(typeid(T).name()))
 
 
     class System
@@ -130,7 +131,7 @@ public:
         static std::unordered_map<std::string, std::function<System*()>> system_types;
         template<typename T> static void register_system_with_name(std::string name);
     };
-#define register_system(T) System::register_system_with_name<T>(typeid(T).name())
+#define register_system(T) System::register_system_with_name<T>(scuffy_demangle(typeid(T).name()))
 
     class Entity
     {

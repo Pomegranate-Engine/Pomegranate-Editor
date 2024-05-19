@@ -1,17 +1,16 @@
-#include<iostream>
-#include"live_share_shared_data.h"
-#include"enet/enet.h"
+#include <iostream>
+#include "live_share_shared_data.h"
+#include "enet/enet.h"
 
 ENetAddress address;
 ENetHost* server;
 
-
-void send(LiveSharePacketType type,std::string message)
+void send(LiveSharePacketType type, std::string message)
 {
-    //Insert the type at the beginning
-    message.insert(0,1,type);
-    ENetPacket* packet = enet_packet_create(message.c_str(),message.length(),ENET_PACKET_FLAG_RELIABLE);
-    enet_host_broadcast(server,0,packet);
+    // Insert the type at the beginning
+    message.insert(0, 1, type);
+    ENetPacket* packet = enet_packet_create(message.c_str(), message.length(), ENET_PACKET_FLAG_RELIABLE);
+    enet_host_broadcast(server, 0, packet);
 }
 
 int main()
@@ -27,34 +26,35 @@ int main()
 
     address.host = ENET_HOST_ANY;
     address.port = 1234;
-    server = enet_host_create(&address, 32, 2,0,0);
-    if(server == nullptr)
+    server = enet_host_create(&address, 32, 2, 0, 0);
+    if (server == nullptr)
     {
         std::cerr << "Failed to create ENet Server" << std::endl;
         return -1;
     }
 
+    std::cout << "Server initialized and listening on port " << address.port << std::endl;
     std::cout << "Starting event listener" << std::endl;
 
     bool running = true;
     int users_connected = 0;
 
-    while(running)
+    while (running)
     {
         ENetEvent event;
-        if(enet_host_service(server, &event, 16))
+        if (enet_host_service(server, &event, 16))
         {
             std::cout << "Something happened!" << std::endl;
-            switch(event.type)
+            switch (event.type)
             {
                 case ENET_EVENT_TYPE_CONNECT:
                 {
                     std::cout << "User connected!" << std::endl;
-                    //Send verifcation packet
+                    // Send verification packet
                     std::string message;
                     message += user_count;
-                    std::cout << "Sending verification packet: " << (int)message[1] << std::endl;
-                    send(LIVE_SHARE_PACKET_TYPE_VERIFY_USER,message);
+                    std::cout << "Sending verification packet: " << (int)message[0] << std::endl;
+                    send(LIVE_SHARE_PACKET_TYPE_VERIFY_USER, message);
                     user_count++;
                     users_connected++;
                     break;
@@ -63,7 +63,7 @@ int main()
                 {
                     std::cout << "User disconnected!" << std::endl;
                     users_connected--;
-                    if(users_connected == 0)
+                    if (users_connected == 0)
                     {
                         running = false;
                     }
@@ -74,7 +74,7 @@ int main()
                     std::cout << "Packet received" << std::endl;
                     LiveSharePacketType type = (LiveSharePacketType)event.packet->data[0];
 
-                    //Broadcast the message to all clients
+                    // Broadcast the message to all clients
                     ENetPacket* packet = enet_packet_create(event.packet->data, event.packet->dataLength, ENET_PACKET_FLAG_RELIABLE);
                     enet_host_broadcast(server, 0, packet);
                     break;
@@ -85,6 +85,7 @@ int main()
 
     std::cout << "No more users, Shutting down server..." << std::endl;
     enet_host_destroy(server);
+    enet_deinitialize();
 
     return 0;
 }
