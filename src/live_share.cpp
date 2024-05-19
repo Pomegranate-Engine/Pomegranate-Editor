@@ -15,7 +15,7 @@ const size_t COLOR_HASH = typeid(Color).hash_code();
 const size_t VEC2_HASH = typeid(Vec2).hash_code();
 const size_t VEC3_HASH = typeid(Vec3).hash_code();
 const size_t VEC4_HASH = typeid(Vec4).hash_code();
-const size_t TEXTURE_HASH = typeid(Texture**).hash_code();
+const size_t TEXTURE_HASH = typeid(Texture*).hash_code();
 const size_t SIZE_T_HASH = typeid(size_t).hash_code();
 const size_t CHAR_HASH = typeid(char).hash_code();
 
