@@ -238,7 +238,6 @@ void LiveShare::update()
                             else if(type == LIVE_SHARE_DATA_TYPE_TEXTURE)
                             {
                                 //Load texture
-                                std::cout << "Loading texture: " << value << std::endl;
                                 Texture* v = ResourceManager::load<Texture>(value);
                                 comp->set(property.c_str(),v);
                             }
