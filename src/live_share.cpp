@@ -332,7 +332,7 @@ void LiveShare::send_change_property(EntityRef entity, std::string component, st
 
     std::string message;
     message += std::string(id,sizeof(int));
-    message += component + "/" + property + "/";
+    message += scuffy_demangle(component.c_str()) + "/" + property + "/";
     message += ty;
     message += "/";
 
