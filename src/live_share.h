@@ -20,6 +20,7 @@ public:
     static void send_new_entity(EntityRef entity);
     static void send_change_property(EntityRef entity, std::string component, std::string property, size_t type, void* value);
     static void send_add_component(EntityRef entity, std::string component);
+    static void send_delete_component(EntityRef entity, std::string component);
     static void send_delete_entity(EntityRef entity);
     static void send_create_group(GroupRef group);
     static void send_delete_group(GroupRef group);

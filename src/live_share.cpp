@@ -132,6 +132,27 @@ void LiveShare::update()
                             entity->add_component(component.c_str());
                             break;
                         }
+                        case LIVE_SHARE_PACKET_TYPE_DELETE_COMPONENT:
+                        {
+                            std::cout << "Recieved delete component packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+                            EntityRef entity = EntityRef(Entity::entities[id]);
+                            if(entity == nullptr)
+                            {
+                                std::cout << "Entity not found" << std::endl;
+                                break;
+                            }
+                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::vector<std::string> parts = split(message, '/');
+                            std::string component = parts[0];
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " deleting component: " << component << std::endl;
+                            entity->remove_component(entity->get_component(component.c_str()));
+                            break;
+                        }
                         case LIVE_SHARE_PACKET_TYPE_DELETE_ENTITY: {
                             std::cout << "Recieved delete entity packet" << std::endl;
                             char from = event.packet->data[1];
@@ -436,6 +457,15 @@ void LiveShare::send_add_component(EntityRef entity, std::string component)
     message += std::string(id,sizeof(int));
     message += scuffy_demangle(component.c_str());
     send(LIVE_SHARE_PACKET_TYPE_ADD_COMPONENT,message);
+}
+
+void LiveShare::send_delete_component(EntityRef entity, std::string component)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    std::string message;
+    message += std::string(id,sizeof(int));
+    message += scuffy_demangle(component.c_str());
+    send(LIVE_SHARE_PACKET_TYPE_DELETE_COMPONENT,message);
 }
 
 void LiveShare::send_delete_entity(EntityRef entity)
