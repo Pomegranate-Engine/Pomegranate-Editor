@@ -14,6 +14,22 @@ enum LiveSharePacketType
     LIVE_SHARE_PACKET_TYPE_DELETE_GROUP = 7,
 };
 
+enum LiveShareDataType
+{
+    LIVE_SHARE_DATA_TYPE_NONE = 0,
+    LIVE_SHARE_DATA_TYPE_INT = 1,
+    LIVE_SHARE_DATA_TYPE_FLOAT = 2,
+    LIVE_SHARE_DATA_TYPE_STRING = 3,
+    LIVE_SHARE_DATA_TYPE_BOOL = 4,
+    LIVE_SHARE_DATA_TYPE_SIZE_T = 5,
+    LIVE_SHARE_DATA_TYPE_CHAR = 6,
+    LIVE_SHARE_DATA_TYPE_COLOR = 7,
+    LIVE_SHARE_DATA_TYPE_VEC2 = 8,
+    LIVE_SHARE_DATA_TYPE_VEC3 = 9,
+    LIVE_SHARE_DATA_TYPE_VEC4 = 10,
+
+};
+
 int read_int_from_bytes(unsigned char* bytes);
 float read_float_from_bytes(unsigned char* bytes);
 size_t read_size_t_from_bytes(unsigned char* bytes);

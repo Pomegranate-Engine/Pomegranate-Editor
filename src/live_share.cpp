@@ -165,31 +165,31 @@ void LiveShare::update()
                             std::string component = parts[0];
                             Component* comp = entity->get_component(component.c_str());
                             std::string property = parts[1];
-                            size_t type = read_size_t_from_bytes((unsigned char*)parts[2].c_str());
+                            LiveShareDataType type = (LiveShareDataType)parts[2][0];
                             char* value = (char*)parts[3].c_str();
                             std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " changing: " << component << "/" << property << " to: " << message << std::endl;
 
-                            if(type == INT_HASH)
+                            if(type == LIVE_SHARE_DATA_TYPE_INT)
                             {
                                 int v = read_int_from_bytes((unsigned char*)value);
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == FLOAT_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_FLOAT)
                             {
                                 float v = read_float_from_bytes((unsigned char*)value);
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == STRING_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_STRING)
                             {
                                 std::string v = std::string(value);
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == BOOL_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_BOOL)
                             {
                                 bool v = (bool)value[0];
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == COLOR_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_COLOR)
                             {
                                 Color v;
                                 v.r = read_int_from_bytes((unsigned char*)value);
@@ -198,14 +198,14 @@ void LiveShare::update()
                                 v.a = read_int_from_bytes((unsigned char*)value + 12);
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == VEC2_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_VEC2)
                             {
                                 Vec2 v;
                                 v.x = read_float_from_bytes((unsigned char*)value);
                                 v.y = read_float_from_bytes((unsigned char*)value + 4);
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == VEC3_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_VEC3)
                             {
                                 Vec3 v;
                                 v.x = read_float_from_bytes((unsigned char*)value);
@@ -213,7 +213,7 @@ void LiveShare::update()
                                 v.z = read_float_from_bytes((unsigned char*)value + 8);
                                 comp->set(property.c_str(),v);
                             }
-                            else if(type == VEC4_HASH)
+                            else if(type == LIVE_SHARE_DATA_TYPE_VEC4)
                             {
                                 Vec4 v;
                                 v.x = read_float_from_bytes((unsigned char*)value);
@@ -294,12 +294,47 @@ void LiveShare::send_new_entity(EntityRef entity)
 void LiveShare::send_change_property(EntityRef entity, std::string component, std::string property, size_t type, void* value)
 {
     char* id = static_cast<char*>(static_cast<void*>(&entity->id));
-    char* t = static_cast<char*>(static_cast<void*>(&type));
+
+    LiveShareDataType t = LIVE_SHARE_DATA_TYPE_NONE;
+    if(type == INT_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_INT;
+    }
+    else if(type == FLOAT_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_FLOAT;
+    }
+    else if(type == STRING_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_STRING;
+    }
+    else if(type == BOOL_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_BOOL;
+    }
+    else if(type == COLOR_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_COLOR;
+    }
+    else if(type == VEC2_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_VEC2;
+    }
+    else if(type == VEC3_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_VEC3;
+    }
+    else if(type == VEC4_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_VEC4;
+    }
+    char ty = (char)t;
 
     std::string message;
     message += std::string(id,sizeof(int));
     message += component + "/" + property + "/";
-    message += std::string(t,sizeof(size_t)) + "/";
+    message += ty;
+    message += "/";
 
     if(type == INT_HASH)
     {
