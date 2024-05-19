@@ -16,6 +16,8 @@ const size_t VEC2_HASH = typeid(Vec2).hash_code();
 const size_t VEC3_HASH = typeid(Vec3).hash_code();
 const size_t VEC4_HASH = typeid(Vec4).hash_code();
 const size_t TEXTURE_HASH = typeid(Texture*).hash_code();
+const size_t SIZE_T_HASH = typeid(size_t).hash_code();
+const size_t CHAR_HASH = typeid(char).hash_code();
 
 std::vector<std::string> split(std::string str, char delimiter)
 {
@@ -344,6 +346,18 @@ void LiveShare::send_change_property(EntityRef entity, std::string component, st
     else if(type == VEC4_HASH)
     {
         t = LIVE_SHARE_DATA_TYPE_VEC4;
+    }
+    else if(type == TEXTURE_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_TEXTURE;
+    }
+    else if(type == SIZE_T_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_SIZE_T;
+    }
+    else if(type == CHAR_HASH)
+    {
+        t = LIVE_SHARE_DATA_TYPE_CHAR;
     }
     char ty = (char)t;
 
