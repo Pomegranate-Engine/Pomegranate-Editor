@@ -49,6 +49,7 @@ Color ResourceFile::get_color()
 
 void ResourcesWindow::add_resource_file(ResourceFile file)
 {
+    LiveShare::send_query_file(file.path);
     //First ensure that the file does not already exist
     for (auto i = resource_files.begin(); i != resource_files.end(); i++)
     {
@@ -58,7 +59,6 @@ void ResourcesWindow::add_resource_file(ResourceFile file)
         }
     }
     resource_files.push_back(file);
-    LiveShare::send_query_file(file.path);
 }
 
 ResourcesWindow::ResourcesWindow()
