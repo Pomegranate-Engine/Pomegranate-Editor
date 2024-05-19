@@ -373,13 +373,13 @@ void SystemRef::destroy(System *system)
         auto entity = Entity::create(this->name);
         for (auto & component : this->components)
         {
-            if(entity->get_component(component.first->name()) == nullptr)
+            if(entity->get_component(scuffy_demangle(component.first->name()).c_str()) == nullptr)
             {
-                entity->add_component(component.first->name());
+                entity->add_component(scuffy_demangle(component.first->name()).c_str());
             }
             //Set data
-            auto* my = this->get_component(component.first->name());
-            auto* c = entity->get_component(component.first->name());
+            auto* my = this->get_component(scuffy_demangle(component.first->name()).c_str());
+            auto* c = entity->get_component(scuffy_demangle(component.first->name()).c_str());
             for (auto& [type,data] : c->component_data)
             {
                 std::memcpy(data.second, my->component_data[type].second, sizeof(data.first));

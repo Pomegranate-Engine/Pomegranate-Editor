@@ -1057,8 +1057,16 @@ void Window_EntityHierarchy::duplicate()
             for (auto & node : nodes) {
                 if(node->group != nullptr)
                 {
-                    if(std::find(node->group->get_entities().begin(),
-                                 node->group->get_entities().end(),selected_node->entity.get()) != node->group->get_entities().end())
+                    bool has = false;
+                    for(auto & ent : node->group->get_entities())
+                    {
+                        if(ent == selected_node->entity)
+                        {
+                            has = true;
+                            break;
+                        }
+                    }
+                    if(has)
                     {
                         groups.push_back(node->group.get());
                     }
