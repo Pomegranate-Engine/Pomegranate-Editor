@@ -1,6 +1,7 @@
 #include "inspector_window.h"
 
 int InspectorWindow::element_index = 0;
+bool InspectorWindow::something_dropped = false;
 
 InspectorHeaderTag::InspectorHeaderTag(const char *name)
 {
@@ -43,6 +44,7 @@ void InspectorWindow::render()
                         //Display the properties
                         bool header_open = true;
                         for (auto j = component->component_data.begin(); j != component->component_data.end(); j++) {
+                            something_dropped = false;
                             std::string property_name = std::string(j->first);
                             if (j->second.second != nullptr) {
                                 element_index++;
@@ -117,7 +119,7 @@ void InspectorWindow::render()
                                     header_open = ImGui::CollapsingHeader(((InspectorHeaderTag*)j->second.second)->name.c_str(),((InspectorHeaderTag*)j->second.second)->open);
                                 }
 
-                                if(ImGui::IsItemDeactivatedAfterEdit())
+                                if(ImGui::IsItemDeactivatedAfterEdit() || something_dropped)
                                 {
                                     LiveShare::send_change_property(entity, name, property_name, j->second.first->hash_code(), j->second.second);
                                     Editor::action();
@@ -291,6 +293,7 @@ void InspectorWindow::property_field(const char *name, Texture **value)
     {
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_texture"))
         {
+            InspectorWindow::something_dropped = true;
             Texture* texture = *(Texture**)payload->Data;
             *value = texture;
             print_info("Texture Dropped");
@@ -315,6 +318,7 @@ void InspectorWindow::property_field(const char *name, TTFFont **value)
     {
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_texture"))
         {
+            InspectorWindow::something_dropped = true;
             TTFFont* ttf = *(TTFFont**)payload->Data;
             *value = ttf;
             print_info("Texture Dropped");
@@ -348,6 +352,7 @@ void InspectorWindow::property_field(const char *name, Entity **value)
     {
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity"))
         {
+            InspectorWindow::something_dropped = true;
             Entity* entity = *(Entity**)payload->Data;
             *value = entity;
             print_info("Entity Dropped");
@@ -370,6 +375,7 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
         print_info(pay->DataType);
         if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_script"))
         {
+            InspectorWindow::something_dropped = true;
             LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
             lua->run_script();
             *value = lua;
