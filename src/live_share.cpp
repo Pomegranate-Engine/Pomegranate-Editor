@@ -325,6 +325,7 @@ void LiveShare::update()
                             char original_sender = event.packet->data[2];
                             if(original_sender == user_id)
                             {
+                                print_info("I was the original sender");
                                 Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),
                                                 EditorTheme::color_palette_red, "Live Share", "User: " + std::to_string((int)event.packet->data[1]) + " editor requested resource that does not exist, sending file"});
                                 //Send the resource
