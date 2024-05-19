@@ -137,7 +137,7 @@ void InspectorWindow::render()
                     if (ImGui::MenuItem("Remove Component")) {
                         //Remove the component
                         print_info("Removing Component");
-                        LiveShare::send_delete_component(entity, typeid(right_clicked_component).name());
+                        LiveShare::send_delete_component(entity, typeid(*right_clicked_component).name());
                         entity->remove_component(right_clicked_component);
                     }
                     ImGui::EndPopup();
