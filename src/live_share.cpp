@@ -299,6 +299,9 @@ void LiveShare::update()
                             }
                             std::string file = std::string((char*)event.packet->data + 2,event.packet->dataLength - 2);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor checking if resource exists: " << file << std::endl;
+#ifdef __APPLE__
+                            file = file.replace(file.begin(),file.end(),"\\","/");
+#endif
                             if(ResourceManager::exists(file))
                             {
 
@@ -330,6 +333,9 @@ void LiveShare::update()
                                                 EditorTheme::color_palette_red, "Live Share", "User: " + std::to_string((int)event.packet->data[1]) + " editor requested resource that does not exist, sending file"});
                                 //Send the resource
                                 std::string file = std::string((char*)event.packet->data + 3,event.packet->dataLength - 3);
+#ifdef __APPLE__
+                                file = file.replace(file.begin(),file.end(),"\\","/");
+#endif
                                 std::cout << "User: " << (int)event.packet->data[1] << " editor requesting resource: " << file << std::endl;
                                 //Load bytes from file
                                 std::ifstream file_stream(file,std::ios::binary);
