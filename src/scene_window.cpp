@@ -361,6 +361,13 @@ void Window_SceneView::render() {
             entity->get_component<Transform>()->pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(size.x/2,size.y/2))/zoom+this->position;
 
             Editor::current_scene->add_entity(entity);
+
+            LiveShare::send_new_entity(entity);
+            LiveShare::send_add_component(entity, typeid(Transform).name());
+            LiveShare::send_add_component(entity, typeid(Sprite).name());
+            LiveShare::send_change_property(entity, typeid(Sprite).name(), "texture", typeid(Texture*).hash_code(), &entity->get_component<Sprite>()->texture);
+            LiveShare::send_change_property(entity, typeid(Transform).name(), "pos", typeid(Vec2).hash_code(), &entity->get_component<Transform>()->pos);
+            Editor::action();
         }
         else if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_scene"))
         {
