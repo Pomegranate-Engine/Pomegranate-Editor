@@ -27,7 +27,7 @@ enum LiveShareDataType
     LIVE_SHARE_DATA_TYPE_VEC2 = 8,
     LIVE_SHARE_DATA_TYPE_VEC3 = 9,
     LIVE_SHARE_DATA_TYPE_VEC4 = 10,
-
+    LIVE_SHARE_DATA_TYPE_TEXTURE = 11,
 };
 
 int read_int_from_bytes(unsigned char* bytes);

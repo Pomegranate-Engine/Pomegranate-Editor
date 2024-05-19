@@ -15,6 +15,7 @@ const size_t COLOR_HASH = typeid(Color).hash_code();
 const size_t VEC2_HASH = typeid(Vec2).hash_code();
 const size_t VEC3_HASH = typeid(Vec3).hash_code();
 const size_t VEC4_HASH = typeid(Vec4).hash_code();
+const size_t TEXTURE_HASH = typeid(Texture*).hash_code();
 
 std::vector<std::string> split(std::string str, char delimiter)
 {
@@ -222,6 +223,22 @@ void LiveShare::update()
                                 v.w = read_float_from_bytes((unsigned char*)value + 12);
                                 comp->set(property.c_str(),v);
                             }
+                            else if(type == LIVE_SHARE_DATA_TYPE_SIZE_T)
+                            {
+                                size_t v = read_size_t_from_bytes((unsigned char*)value);
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == LIVE_SHARE_DATA_TYPE_CHAR)
+                            {
+                                char v = value[0];
+                                comp->set(property.c_str(),v);
+                            }
+                            else if(type == LIVE_SHARE_DATA_TYPE_TEXTURE)
+                            {
+                                //Load texture
+                                Texture* v = ResourceManager::load<Texture>(value);
+                                comp->set(property.c_str(),v);
+                            }
                             break;
                         }
                         case LIVE_SHARE_PACKET_TYPE_CREATE_GROUP:
@@ -384,6 +401,12 @@ void LiveShare::send_change_property(EntityRef entity, std::string component, st
         message += std::string(static_cast<char*>(static_cast<void*>(&v->y)),sizeof(float));
         message += std::string(static_cast<char*>(static_cast<void*>(&v->z)),sizeof(float));
         message += std::string(static_cast<char*>(static_cast<void*>(&v->w)),sizeof(float));
+    }
+    else if(type == TEXTURE_HASH)
+    {
+        //Send resource path
+        Texture** v = static_cast<Texture**>(value);
+        message += (*v)->path;
     }
     send(LIVE_SHARE_PACKET_TYPE_CHANGE_PROPERTY,message);
 }
