@@ -164,7 +164,7 @@ void LiveShare::update()
                                 break;
                             }
                             std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
-                            std::vector<std::string> parts = split(message, '/');
+                            std::vector<std::string> parts = split(message, (char)255);
                             std::string component = parts[0];
                             Component* comp = entity->get_component(component.c_str());
                             std::string property = parts[1];
@@ -238,6 +238,7 @@ void LiveShare::update()
                             else if(type == LIVE_SHARE_DATA_TYPE_TEXTURE)
                             {
                                 //Load texture
+                                std::cout << "Loading texture: " << value << std::endl;
                                 Texture* v = ResourceManager::load<Texture>(value);
                                 comp->set(property.c_str(),v);
                             }
@@ -363,9 +364,13 @@ void LiveShare::send_change_property(EntityRef entity, std::string component, st
 
     std::string message;
     message += std::string(id,sizeof(int));
-    message += scuffy_demangle(component.c_str()) + "/" + property + "/";
+
+    message += scuffy_demangle(component.c_str());
+    message += (char)255;
+    message += property;
+    message += (char)255;
     message += ty;
-    message += "/";
+    message += (char)255;
 
     if(type == INT_HASH)
     {
