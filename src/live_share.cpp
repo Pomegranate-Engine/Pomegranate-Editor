@@ -362,7 +362,7 @@ void LiveShare::update()
                             std::string file = std::string((char*)event.packet->data + 4,file_path_length);
                             //Replace \ with / on m*c
 #ifdef __APPLE__
-                            std::replace(file.begin(),file.end(),'\\','/');
+                            file = file.replace(file.begin(),file.end(),"\\","/");
 #endif
                             //Get bytes
                             std::vector<char> bytes(event.packet->data + 4 + file_path_length,event.packet->data + event.packet->dataLength);
