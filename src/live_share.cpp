@@ -393,7 +393,7 @@ void LiveShare::send_add_component(EntityRef entity, std::string component)
     char* id = static_cast<char*>(static_cast<void*>(&entity->id));
     std::string message;
     message += std::string(id,sizeof(int));
-    message += component;
+    message += scuffy_demangle(component.c_str());
     send(LIVE_SHARE_PACKET_TYPE_ADD_COMPONENT,message);
 }
 
