@@ -7,6 +7,7 @@
 #include "Pomegranate/audio.h"
 #include "lua.h"
 #include "theme.h"
+#include "live_share.h"
 
 //Include file/directory stuff
 #include <filesystem>

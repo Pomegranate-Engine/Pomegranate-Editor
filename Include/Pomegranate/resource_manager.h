@@ -4,6 +4,7 @@
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
 #include <map>
+#include <filesystem>
 #include "vec_math.h"
 #include "window.h"
 namespace Pomegranate
@@ -21,6 +22,7 @@ namespace Pomegranate
         static std::map<std::string,void*> resources;
         template<typename T> static T* load(const std::string& path);
         template<typename T> static void unload(const std::string& path); //Unsafe
+        static bool exists(const std::string& path);
     };
 }
 

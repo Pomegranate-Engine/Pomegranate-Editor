@@ -290,6 +290,88 @@ void LiveShare::update()
                             Group::groups_id[id]->force_destroy();
                             break;
                         }
+                        case LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS:
+                        {
+                            std::cout << "Recieved resource exists packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            std::string file = std::string((char*)event.packet->data + 2,event.packet->dataLength - 2);
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor checking if resource exists: " << file << std::endl;
+                            if(ResourceManager::exists(file))
+                            {
+
+                            }
+                            else
+                            {
+                                std::string message;
+                                //Add original sender
+                                message += (char)user_id;
+                                //Add file
+                                message += file;
+                                send(LIVE_SHARE_PACKET_TYPE_RESOURCE_DOES_NOT_EXIST,message);
+                            }
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_RESOURCE_DOES_NOT_EXIST:
+                        {
+                            std::cout << "Recieved resource does not exist packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            //Get original sender
+                            char original_sender = event.packet->data[2];
+                            if(original_sender == user_id)
+                            {
+                                Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),
+                                                EditorTheme::color_palette_red, "Live Share", "User: " + std::to_string((int)event.packet->data[1]) + " editor requested resource that does not exist, sending file"});
+                                //Send the resource
+                                std::string file = std::string((char*)event.packet->data + 3,event.packet->dataLength - 3);
+                                std::cout << "User: " << (int)event.packet->data[1] << " editor requesting resource: " << file << std::endl;
+                                //Load bytes from file
+                                std::ifstream file_stream(file,std::ios::binary);
+                                std::vector<char> bytes((std::istreambuf_iterator<char>(file_stream)),std::istreambuf_iterator<char>());
+                                std::string message;
+                                //Add original sender
+                                message += (char)user_id;
+                                //Add file path length
+                                message += (char)file.length();
+                                //Add file
+                                message += file;
+                                //Add bytes
+                                message += std::string(bytes.begin(),bytes.end());
+                                send(LIVE_SHARE_PACKET_TYPE_RESOURCE,message);
+                                break;
+                            }
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_RESOURCE:
+                        {
+                            std::cout << "Recieved resource packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            //Get original sender
+                            char original_sender = event.packet->data[2];
+                            if(original_sender == user_id)
+                            {
+                                //Get file path length
+                                char file_path_length = event.packet->data[3];
+                                //Get file path
+                                std::string file = std::string((char*)event.packet->data + 4,file_path_length);
+                                //Get bytes
+                                std::vector<char> bytes(event.packet->data + 4 + file_path_length,event.packet->data + event.packet->dataLength);
+                                std::cout << "User: " << (int)event.packet->data[1] << " editor sending resource: " << file << std::endl;
+                                //Write bytes to file
+                                std::ofstream file_stream(file,std::ios::binary);
+                                file_stream.write(bytes.data(),bytes.size());
+                                break;
+                            }
+                            break;
+                        }
                         case LIVE_SHARE_PACKET_TYPE_VERIFY_USER:
                         {
                             if(!is_verified) {
@@ -499,4 +581,9 @@ void LiveShare::send_entity_full(Pomegranate::EntityRef entity)
             send_change_property(entity, component.first->name(), property.first, property.second.first->hash_code(), property.second.second);
         }
     }
+}
+
+void LiveShare::send_query_file(std::string file)
+{
+    send(LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS, file);
 }

@@ -58,6 +58,7 @@ void ResourcesWindow::add_resource_file(ResourceFile file)
         }
     }
     resource_files.push_back(file);
+    LiveShare::send_query_file(file.path);
 }
 
 ResourcesWindow::ResourcesWindow()
