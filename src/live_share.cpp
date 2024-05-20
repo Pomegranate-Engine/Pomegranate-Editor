@@ -115,9 +115,9 @@ void LiveShare::update()
                     if(verified_password)
                     {
                         //Decrypt message into the
-                        std::string decrypted = decrypt_message(std::string((char*)event.packet->data, event.packet->dataLength), join_password);
+                        /*std::string decrypted = decrypt_message(std::string((char*)event.packet->data, event.packet->dataLength), join_password);
                         std::cout << "Decrypted message: " << decrypted << std::endl;
-                        event.packet->data = (unsigned char*)decrypted.c_str();
+                        event.packet->data = (unsigned char*)decrypted.c_str();*/
                     }
                     std::cout << "Packet received: " << (int)event.packet->data[0] << std::endl;
                     LiveSharePacketType type = (LiveSharePacketType) event.packet->data[0];
