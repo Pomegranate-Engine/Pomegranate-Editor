@@ -101,12 +101,17 @@ set(LIVE_SHARE_SERVER_SOURCES
         src/LiveShare/server.cpp
         src/LiveShare/live_share_shared_data.cpp
 )
+
+set(MINE_SOURCES
+    Include/mine/mine.cc
+    Include/mine/mine.h
+)
 # Add executable
-add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES})
+add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES} ${MINE_SOURCES})
 
 add_library(Pomegranate SHARED ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES})
 
-add_executable(Pomegranate_LiveShareServer ${LIVE_SHARE_SERVER_SOURCES})
+add_executable(Pomegranate_LiveShareServer ${LIVE_SHARE_SERVER_SOURCES} ${MINE_SOURCES})
 
 # Set the path to LuaJIT (Mac)
 set(LUAJIT_LIBRARY ${CMAKE_SOURCE_DIR}/Lib/Arm/libluajit-5.1.dylib)  # Adjust the library name if necessary

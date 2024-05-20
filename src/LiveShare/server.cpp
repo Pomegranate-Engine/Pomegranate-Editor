@@ -88,7 +88,6 @@ int main()
                             std::cout << "Password correct!" << std::endl;
                             //Send confirmation packet
                             std::string message;
-                            message += (char)LIVE_SHARE_PACKET_TYPE_PASSWORD_CORRECT;
                             message += (char)sender;
                             send(LIVE_SHARE_PACKET_TYPE_PASSWORD_CORRECT, message);
                         }
@@ -102,9 +101,9 @@ int main()
                     }
 
                     //Encrypt the message
-                    std::string decrypted = std::string((char*)event.packet->data + 1);
+                    std::string decrypted = std::string((char*)event.packet->data);
                     std::string encrypted = encrypt_message(decrypted, passkey);
-
+                    std::cout << "Decrypted: " << decrypted << " Encrypted: " << encrypted << std::endl;
                     // Broadcast the message to all clients
                     ENetPacket* packet = enet_packet_create(encrypted.c_str(), encrypted.length(), ENET_PACKET_FLAG_RELIABLE);
                     // Broadcast to all clients not in the blacklist

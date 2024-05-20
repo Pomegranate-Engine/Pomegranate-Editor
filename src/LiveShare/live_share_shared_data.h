@@ -1,7 +1,7 @@
 #ifndef POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_SHARED_DATA_H
 #define POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_SHARED_DATA_H
 #include<typeinfo>
-#include<plusaes/plusaes.hpp>
+#include<mine/mine.h>
 
 enum LiveSharePacketType
 {

@@ -4,7 +4,7 @@ char LiveShare::user_id = 0;
 bool LiveShare::live_sharing;
 bool LiveShare::verified_password = false;
 std::string LiveShare::join_address;
-std::string LiveShare::join_password;
+std::string LiveShare::join_password = "";
 ENetAddress LiveShare::address;
 ENetHost* LiveShare::client;
 ENetPeer* LiveShare::peer;
@@ -112,11 +112,12 @@ void LiveShare::update()
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
                     //Decrypt message
-                    char* data = std::string((char *) event.packet->data, event.packet->dataLength).c_str();
                     if(verified_password)
                     {
-                        std::string decrypted = decrypt_message(
-                                std::string((char *) event.packet->data, event.packet->dataLength), join_password);
+                        //Decrypt message into the
+                        std::string decrypted = decrypt_message(std::string((char*)event.packet->data, event.packet->dataLength), join_password);
+                        std::cout << "Decrypted message: " << decrypted << std::endl;
+                        event.packet->data = (unsigned char*)decrypted.c_str();
                     }
                     std::cout << "Packet received: " << (int)event.packet->data[0] << std::endl;
                     LiveSharePacketType type = (LiveSharePacketType) event.packet->data[0];
