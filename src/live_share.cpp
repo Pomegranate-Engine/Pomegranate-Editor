@@ -1,8 +1,10 @@
 #include "live_share.h"
-#include "ip_address.h"
 bool LiveShare::is_verified;
 char LiveShare::user_id = 0;
 bool LiveShare::live_sharing;
+bool LiveShare::verified_password = false;
+std::string LiveShare::join_address;
+std::string LiveShare::join_password;
 ENetAddress LiveShare::address;
 ENetHost* LiveShare::client;
 ENetPeer* LiveShare::peer;
@@ -41,6 +43,16 @@ std::vector<std::string> split(std::string str, char delimiter)
 
 void LiveShare::start_server()
 {
+
+}
+
+void LiveShare::stop_server()
+{
+
+}
+
+void LiveShare::join_server()
+{
     std::cout << "Initializing client..." << std::endl;
     //Initialize ENet
 
@@ -52,7 +64,7 @@ void LiveShare::start_server()
 
     client = enet_host_create(nullptr,1,2,0,0);
 
-    enet_address_set_host(&address,ip_address);
+    enet_address_set_host(&address,LiveShare::join_address.c_str());
     address.port = 1234;
 
     peer = enet_host_connect(client,&address,2,0);
@@ -66,7 +78,8 @@ void LiveShare::start_server()
         live_sharing = true;
     }
 }
-void LiveShare::stop_server()
+
+void LiveShare::leave_server()
 {
     if(!live_sharing)
     {
@@ -90,12 +103,29 @@ void LiveShare::update()
             switch (event.type) {
                 case ENET_EVENT_TYPE_CONNECT: {
                     std::cout << "User connected!" << std::endl;
+                    //Send password packet
+                    std::string message;
+                    message += join_password;
+                    std::cout << "Sending password packet: " << message << std::endl;
+                    send(LIVE_SHARE_PACKET_TYPE_PASSWORD, message);
                     break;
                 }
                 case ENET_EVENT_TYPE_RECEIVE: {
+                    //Decrypt message
+                    char* data = std::string((char *) event.packet->data, event.packet->dataLength).c_str();
+                    if(verified_password)
+                    {
+                        std::string decrypted = decrypt_message(
+                                std::string((char *) event.packet->data, event.packet->dataLength), join_password);
+                    }
                     std::cout << "Packet received: " << (int)event.packet->data[0] << std::endl;
                     LiveSharePacketType type = (LiveSharePacketType) event.packet->data[0];
                     switch (type) {
+                        case LIVE_SHARE_PACKET_TYPE_PASSWORD_CORRECT: {
+                            std::cout << "Recieved password correct packet" << std::endl;
+                            verified_password = true;
+                            break;
+                        }
                         case LIVE_SHARE_PACKET_TYPE_CREATE_ENTITY: {
                             std::cout << "Recieved create entity packet" << std::endl;
                             char from = event.packet->data[1];

@@ -1,9 +1,11 @@
 #include <iostream>
 #include "live_share_shared_data.h"
 #include "enet/enet.h"
+#include <vector>
 
 ENetAddress address;
 ENetHost* server;
+
 
 void send(LiveSharePacketType type, std::string message)
 {
@@ -15,6 +17,7 @@ void send(LiveSharePacketType type, std::string message)
 
 int main()
 {
+    std::string passkey = "passwordpassword";
     char user_count = 1;
 
     std::cout << "Initializing server..." << std::endl;
@@ -73,9 +76,38 @@ int main()
                 {
                     std::cout << "Packet received" << std::endl;
                     LiveSharePacketType type = (LiveSharePacketType)event.packet->data[0];
+                    //Get sender
+                    int sender = (int)event.packet->data[1];
+
+                    if(type == LIVE_SHARE_PACKET_TYPE_PASSWORD)
+                    {
+                        std::string password = std::string((char*)event.packet->data + 2, event.packet->dataLength - 2);
+                        std::cout << "Password received: " << password << std::endl;
+                        if(password == passkey)
+                        {
+                            std::cout << "Password correct!" << std::endl;
+                            //Send confirmation packet
+                            std::string message;
+                            message += (char)LIVE_SHARE_PACKET_TYPE_PASSWORD_CORRECT;
+                            message += (char)sender;
+                            send(LIVE_SHARE_PACKET_TYPE_PASSWORD_CORRECT, message);
+                        }
+                        else
+                        {
+                            std::cout << "Password incorrect!" << std::endl;
+                            //Disconnect the user
+                            enet_peer_disconnect(event.peer, 0);
+                        }
+                        break;
+                    }
+
+                    //Encrypt the message
+                    std::string decrypted = std::string((char*)event.packet->data + 1);
+                    std::string encrypted = encrypt_message(decrypted, passkey);
 
                     // Broadcast the message to all clients
-                    ENetPacket* packet = enet_packet_create(event.packet->data, event.packet->dataLength, ENET_PACKET_FLAG_RELIABLE);
+                    ENetPacket* packet = enet_packet_create(encrypted.c_str(), encrypted.length(), ENET_PACKET_FLAG_RELIABLE);
+                    // Broadcast to all clients not in the blacklist
                     enet_host_broadcast(server, 0, packet);
                     break;
                 }

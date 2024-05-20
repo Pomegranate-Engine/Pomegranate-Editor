@@ -3,6 +3,7 @@
 #include<enet/enet.h>
 #include"LiveShare/live_share_shared_data.h"
 #include"notifications.h"
+#include<plusaes/plusaes.hpp>
 
 class LiveShare
 {
@@ -10,11 +11,16 @@ public:
     static bool is_verified;
     static char user_id;
     static bool live_sharing;
+    static bool verified_password;
+    static std::string join_address;
+    static std::string join_password;
     static ENetAddress address;
     static ENetHost* client;
     static ENetPeer* peer;
     static void start_server();
     static void stop_server();
+    static void join_server();
+    static void leave_server();
     static void update();
     static void send(LiveSharePacketType type, std::string message);
     static void send_new_entity(EntityRef entity);

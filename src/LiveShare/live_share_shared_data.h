@@ -1,6 +1,7 @@
 #ifndef POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_SHARED_DATA_H
 #define POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_SHARED_DATA_H
 #include<typeinfo>
+#include<plusaes/plusaes.hpp>
 
 enum LiveSharePacketType
 {
@@ -16,6 +17,8 @@ enum LiveSharePacketType
     LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS = 9,
     LIVE_SHARE_PACKET_TYPE_RESOURCE_DOES_NOT_EXIST = 10,
     LIVE_SHARE_PACKET_TYPE_RESOURCE = 11,
+    LIVE_SHARE_PACKET_TYPE_PASSWORD = 12,
+    LIVE_SHARE_PACKET_TYPE_PASSWORD_CORRECT = 13,
 };
 
 enum LiveShareDataType
@@ -41,5 +44,7 @@ size_t read_size_t_from_bytes(unsigned char* bytes);
 char* write_int_to_bytes(int value);
 char* write_float_to_bytes(float value);
 
+std::string encrypt_message(const std::string& message, const std::string& key);
+std::string decrypt_message(const std::string& encryptedMessage, const std::string& key);
 
 #endif

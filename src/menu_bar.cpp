@@ -3,6 +3,7 @@ ImGui::FileBrowser openingDialog;
 ImGui::FileBrowser savingDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_EnterNewFilename);
 std::function<void()> save_current_callback;
 bool save_scene_modal = false;
+bool join_server_modal = false;
 void undo();
 void redo();
 void save();
@@ -174,6 +175,18 @@ void draw_menu_bar()
         {
             LiveShare::stop_server();
         }
+        if(ImGui::MenuItem("Join LiveShare"))
+        {
+            //Open full screen dialog
+            LiveShare::stop_server();
+            LiveShare::join_address = "";
+
+            join_server_modal = true;
+        }
+        if(ImGui::MenuItem("Leave LiveShare"))
+        {
+            LiveShare::leave_server();
+        }
         ImGui::EndMenu();
     }
     ImGui::SetCursorPosX(ImGui::GetWindowWidth() - ImGui::CalcTextSize("Play").x - ImGui::GetStyle().WindowPadding.x - ImGui::GetStyle().WindowPadding.y);
@@ -228,6 +241,29 @@ void draw_menu_bar()
             save_current_callback();
             ImGui::CloseCurrentPopup();
             save_scene_modal = false;
+        }
+        ImGui::EndPopup();
+    }
+
+    if(join_server_modal)
+    {
+        ImGui::OpenPopup("Join");
+    }
+
+    if(ImGui::BeginPopupModal("Join",&join_server_modal))
+    {
+        ImGui::Text("Enter address to join");
+        static char address[256];
+        ImGui::InputText("Address",address,256);
+        static char password[256];
+        ImGui::InputText("Password",password,256);
+        if(ImGui::Button("Join"))
+        {
+            LiveShare::join_address = address;
+            LiveShare::join_password = password;
+            LiveShare::join_server();
+            ImGui::CloseCurrentPopup();
+            join_server_modal = false;
         }
         ImGui::EndPopup();
     }
