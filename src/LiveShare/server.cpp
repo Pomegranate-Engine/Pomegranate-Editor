@@ -100,12 +100,9 @@ int main()
                         break;
                     }
 
-                    //Encrypt the message
-                    std::string decrypted = std::string((char*)event.packet->data);
-                    std::string encrypted = encrypt_message(decrypted, passkey);
-                    std::cout << "Decrypted: " << decrypted << " Encrypted: " << encrypted << std::endl;
+
                     // Broadcast the message to all clients
-                    ENetPacket* packet = enet_packet_create(encrypted.c_str(), encrypted.length(), ENET_PACKET_FLAG_RELIABLE);
+                       ENetPacket* packet = enet_packet_create(event.packet->data, event.packet->dataLength, ENET_PACKET_FLAG_RELIABLE);
                     // Broadcast to all clients not in the blacklist
                     enet_host_broadcast(server, 0, packet);
                     break;
