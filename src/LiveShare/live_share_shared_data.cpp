@@ -31,26 +31,22 @@ char* write_float_to_bytes(float value)
     return bytes;
 }
 
-std::string encrypt_message(const std::string& message, const std::string& key)
-{
-    //Use a vignere cipher to encrypt the message
-    std::string encryptedMessage = message;
-    if(!key.empty()) {
-        for (int i = 0; i < message.length(); i++) {
-            encryptedMessage[i] = message[i] ^ key[i % key.length()];
-        }
+unsigned char* encrypt_message(const unsigned char* message, size_t length, const std::string& key) {
+    if (key.empty()) return nullptr;
+
+    unsigned char* encryptedMessage = new unsigned char[length];
+    for (size_t i = 0; i < length; ++i) {
+        encryptedMessage[i] = message[i] ^ key[i % key.length()];
     }
     return encryptedMessage;
 }
 
-std::string decrypt_message(const std::string& message, const std::string& key) {
-    //Use a vignere cipher to decrypt the message
-    std::string decryptedMessage = message;
-    if(!key.empty())
-    {
-        for (int i = 0; i < message.length(); i++) {
-            decryptedMessage[i] = (char) message[i] ^ key[i % key.length()];
-        }
+unsigned char* decrypt_message(const unsigned char* message, size_t length, const std::string& key) {
+    if (key.empty()) return nullptr;
+
+    unsigned char* decryptedMessage = new unsigned char[length];
+    for (size_t i = 0; i < length; ++i) {
+        decryptedMessage[i] = message[i] ^ key[i % key.length()];
     }
     return decryptedMessage;
 }

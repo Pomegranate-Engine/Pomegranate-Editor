@@ -44,7 +44,7 @@ size_t read_size_t_from_bytes(unsigned char* bytes);
 char* write_int_to_bytes(int value);
 char* write_float_to_bytes(float value);
 
-std::string encrypt_message(const std::string& message, const std::string& key);
-std::string decrypt_message(const std::string& encryptedMessage, const std::string& key);
+unsigned char* encrypt_message(const unsigned char* message, size_t length, const std::string& key);
+unsigned char* decrypt_message(const unsigned char* message, size_t length, const std::string& key);
 
 #endif

@@ -1,9 +1,59 @@
 #include "live_share.h"
+
+int start_process(const std::string& app_path, const std::vector<std::string>& args)
+{
+#ifdef _WIN32
+    std::string command = "\"" + app_path + "\"";
+    for (const auto& arg : args) {
+        command += " " + arg;
+    }
+
+    STARTUPINFO si = { sizeof(STARTUPINFO) };
+    PROCESS_INFORMATION pi;
+
+    if (!CreateProcess(NULL, &command[0], NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        std::cerr << "CreateProcess failed: " << GetLastError() << std::endl;
+        return 1;
+    }
+
+    // Close process and thread handles immediately to not pause the current application
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    return 0;
+#else
+    pid_t pid = fork();
+
+    if (pid == -1) {
+        std::cerr << "Fork failed" << std::endl;
+        return 1;
+    } else if (pid == 0) {
+        // Child process
+        std::vector<const char*> c_args;
+        c_args.push_back(app_path.c_str());
+        for (const auto& arg : args) {
+            c_args.push_back(arg.c_str());
+        }
+        c_args.push_back(nullptr);
+
+        execv(app_path.c_str(), const_cast<char* const*>(c_args.data()));
+
+        // If execv returns, it must have failed
+        std::cerr << "Execv failed" << std::endl;
+        return 1;
+    } else {
+        // Parent process does not wait for the child process
+        return 0;
+    }
+#endif
+}
+
 bool LiveShare::is_verified;
 char LiveShare::user_id = 0;
 bool LiveShare::live_sharing;
 bool LiveShare::verified_password = false;
 std::string LiveShare::join_address;
+std::string LiveShare::join_port;
 std::string LiveShare::join_password = "";
 ENetAddress LiveShare::address;
 ENetHost* LiveShare::client;
@@ -43,7 +93,17 @@ std::vector<std::string> split(std::string str, char delimiter)
 
 void LiveShare::start_server()
 {
-
+    std::cout << "Starting server..." << std::endl;
+    //Start server
+    std::vector<std::string> args;
+    args.push_back(join_port);
+    args.push_back(join_password);
+    start_process("/Users/ravi/CLionProjects/PomegranateEditor/bin/Pomegranate_LiveShareServer", args);
+    //Give the server time to start
+    SDL_Delay(1000);
+    join_address = "localhost";
+    //Join server
+    join_server();
 }
 
 void LiveShare::stop_server()
@@ -65,7 +125,7 @@ void LiveShare::join_server()
     client = enet_host_create(nullptr,1,2,0,0);
 
     enet_address_set_host(&address,LiveShare::join_address.c_str());
-    address.port = 1234;
+    address.port = join_port.empty() ? 1234 : std::stoi(join_port);
 
     peer = enet_host_connect(client,&address,2,0);
     if(peer == nullptr)
@@ -115,9 +175,7 @@ void LiveShare::update()
                     if(verified_password)
                     {
                         //Decrypt message into the
-                        /*std::string decrypted = decrypt_message(std::string((char*)event.packet->data, event.packet->dataLength), join_password);
-                        std::cout << "Decrypted message: " << decrypted << std::endl;
-                        event.packet->data = (unsigned char*)decrypted.c_str();*/
+                        event.packet->data = decrypt_message(event.packet->data,event.packet->dataLength,join_password);
                     }
                     std::cout << "Packet received: " << (int)event.packet->data[0] << std::endl;
                     LiveSharePacketType type = (LiveSharePacketType) event.packet->data[0];

@@ -4,6 +4,7 @@ ImGui::FileBrowser savingDialog = ImGui::FileBrowser(ImGuiFileBrowserFlags_Enter
 std::function<void()> save_current_callback;
 bool save_scene_modal = false;
 bool join_server_modal = false;
+bool start_server_modal = false;
 void undo();
 void redo();
 void save();
@@ -169,7 +170,7 @@ void draw_menu_bar()
     {
         if(ImGui::MenuItem("Begin Sharing"))
         {
-            LiveShare::start_server();
+            start_server_modal = true;
         }
         if(ImGui::MenuItem("Stop Sharing"))
         {
@@ -252,18 +253,100 @@ void draw_menu_bar()
 
     if(ImGui::BeginPopupModal("Join",&join_server_modal))
     {
-        ImGui::Text("Enter address to join");
         static char address[256];
         ImGui::InputText("Address",address,256);
+        //Add tooltip
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Address to join, should be an IP address or domain name provided by the server host");
+            ImGui::EndTooltip();
+        }
+        static char port[256];
+        ImGui::InputText("Port",port,256);
+        //Add tooltip
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Port to join, should be the port the server is listening on. Should be provided by the server host");
+            ImGui::EndTooltip();
+        }
         static char password[256];
         ImGui::InputText("Password",password,256);
+        //Add tooltip
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Password to join the server, should be provided by the server host");
+            ImGui::EndTooltip();
+        }
         if(ImGui::Button("Join"))
         {
             LiveShare::join_address = address;
+            LiveShare::join_port = port;
             LiveShare::join_password = password;
             LiveShare::join_server();
             ImGui::CloseCurrentPopup();
             join_server_modal = false;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+            join_server_modal = false;
+        }
+        ImGui::EndPopup();
+    }
+
+    if(start_server_modal)
+    {
+        ImGui::OpenPopup("Start");
+    }
+
+    if(ImGui::BeginPopupModal("Start",&start_server_modal))
+    {
+        ImGui::Text("Server will be hosted from your IP address!");
+        static char port[256];
+        ImGui::InputText("Port",port,256);
+        //Add tooltip
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Port to listen on, will need to be forwarded on your router if you want to share with people outside your network");
+            ImGui::EndTooltip();
+        }
+        static char password[256];
+        ImGui::InputText("Password",password,256);
+        //Add tooltip
+        ImGui::SameLine();
+        ImGui::TextDisabled("(?)");
+        if(ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Password to join the server, leave blank for no password");
+            ImGui::EndTooltip();
+        }
+        if(ImGui::Button("Start"))
+        {
+            LiveShare::join_port = port;
+            LiveShare::join_password = password;
+            LiveShare::start_server();
+            ImGui::CloseCurrentPopup();
+            start_server_modal = false;
+        }
+        ImGui::SameLine();
+        if(ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+            start_server_modal = false;
         }
         ImGui::EndPopup();
     }

@@ -15,9 +15,15 @@ void send(LiveSharePacketType type, std::string message)
     enet_host_broadcast(server, 0, packet);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
-    std::string passkey = "";
+    if (argc < 3)
+    {
+        std::cerr << "Usage: " << argv[0] << " <port> <passkey>" << std::endl;
+        return 1;
+    }
+    std::string port = argv[1];
+    std::string passkey = argv[2];
     char user_count = 1;
 
     std::cout << "Initializing server..." << std::endl;
@@ -28,7 +34,7 @@ int main()
     }
 
     address.host = ENET_HOST_ANY;
-    address.port = 1234;
+    address.port = std::stoi(port);
     server = enet_host_create(&address, 32, 2, 0, 0);
     if (server == nullptr)
     {
@@ -100,9 +106,12 @@ int main()
                         break;
                     }
 
-
+                    event.packet->data = encrypt_message(event.packet->data,event.packet->dataLength,passkey);
+                    unsigned char* d = decrypt_message(event.packet->data, event.packet->dataLength, passkey);
+                    std::string decrypted = std::string((char*)d, event.packet->dataLength);
+                    std::cout << "Decrypted message: " << decrypted << std::endl;
                     // Broadcast the message to all clients
-                       ENetPacket* packet = enet_packet_create(event.packet->data, event.packet->dataLength, ENET_PACKET_FLAG_RELIABLE);
+                    ENetPacket* packet = enet_packet_create(event.packet->data, event.packet->dataLength, ENET_PACKET_FLAG_RELIABLE);
                     // Broadcast to all clients not in the blacklist
                     enet_host_broadcast(server, 0, packet);
                     break;
