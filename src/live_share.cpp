@@ -98,7 +98,7 @@ void LiveShare::start_server()
     std::vector<std::string> args;
     args.push_back(join_port);
     args.push_back(join_password);
-    start_process("/Users/ravi/CLionProjects/PomegranateEditor/bin/Pomegranate_LiveShareServer", args);
+    start_process("Pomegranate_LiveShareServer", args);
     //Give the server time to start
     SDL_Delay(1000);
     join_address = "localhost";
