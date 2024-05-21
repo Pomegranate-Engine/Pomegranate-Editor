@@ -51,12 +51,14 @@ Mat create_transform_matrix(Vec3 position, Vec3 rotation, Vec3 scale)
 
 int main(int argc, char* argv[])
 {
-    print_info("Pomegranate Editor - Version: " + VERSION);
+    std::string working_directory = SDL_GetBasePath();
+    //Set std::filesystem working directory
+    std::filesystem::current_path(working_directory);
     //region init
     pomegranate_init(); //Init
     main_window.open(); //Open window
     main_window.make_current(); //Make window current
-    main_window.set_icon("engine/pomegranate.png");
+    main_window.set_icon((working_directory + "engine/pomegranate.png").c_str());
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
@@ -67,7 +69,7 @@ int main(int argc, char* argv[])
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     //Set font
-    io.Fonts->AddFontFromFileTTF("engine/zed_font.ttf", 18.0f);
+    io.Fonts->AddFontFromFileTTF((working_directory + std::string("engine/zed_font.ttf")).c_str(), 18.0f);
     io.Fonts->Build();
 
     EditorTheme::load("engine/theme.json");

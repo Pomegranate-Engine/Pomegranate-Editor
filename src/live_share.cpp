@@ -125,7 +125,7 @@ void LiveShare::join_server()
     client = enet_host_create(nullptr,1,2,0,0);
 
     enet_address_set_host(&address,LiveShare::join_address.c_str());
-    address.port = join_port.empty() ? 1234 : std::stoi(join_port);
+    address.port = std::stoi(join_port);
 
     peer = enet_host_connect(client,&address,2,0);
     if(peer == nullptr)
