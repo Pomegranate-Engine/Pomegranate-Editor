@@ -17,7 +17,7 @@ void send(LiveSharePacketType type, std::string message)
 
 int main()
 {
-    std::string passkey = "passwordpassword";
+    std::string passkey = "";
     char user_count = 1;
 
     std::cout << "Initializing server..." << std::endl;

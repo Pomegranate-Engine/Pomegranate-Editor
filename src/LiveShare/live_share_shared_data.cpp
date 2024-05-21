@@ -35,9 +35,10 @@ std::string encrypt_message(const std::string& message, const std::string& key)
 {
     //Use a vignere cipher to encrypt the message
     std::string encryptedMessage = message;
-    for (int i = 0; i < message.length(); i++)
-    {
-        encryptedMessage[i] = message[i] ^ key[i % key.length()];
+    if(!key.empty()) {
+        for (int i = 0; i < message.length(); i++) {
+            encryptedMessage[i] = message[i] ^ key[i % key.length()];
+        }
     }
     return encryptedMessage;
 }
@@ -45,9 +46,11 @@ std::string encrypt_message(const std::string& message, const std::string& key)
 std::string decrypt_message(const std::string& message, const std::string& key) {
     //Use a vignere cipher to decrypt the message
     std::string decryptedMessage = message;
-    for (int i = 0; i < message.length(); i++)
+    if(!key.empty())
     {
-        decryptedMessage[i] = (char)message[i] ^ key[i % key.length()];
+        for (int i = 0; i < message.length(); i++) {
+            decryptedMessage[i] = (char) message[i] ^ key[i % key.length()];
+        }
     }
     return decryptedMessage;
 }
