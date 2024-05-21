@@ -23,6 +23,12 @@ void InspectorWindow::render()
         {
             Entity *entity = Node::selected->entity.get();
             property_field("Name", &entity->name);
+            if(ImGui::IsItemDeactivatedAfterEdit() || something_dropped)
+            {
+                LiveShare::send_change_entity_name(entity, entity->name);
+                Editor::action();
+            }
+
             std::unordered_multimap<const std::type_info*,Component*> components = entity->get_components();
             element_index = 0;
             std::unordered_set<const std::type_info*> keys;

@@ -353,6 +353,25 @@ void LiveShare::update()
                             }
                             break;
                         }
+                        case LIVE_SHARE_PACKET_TYPE_CHANGE_ENTITY_NAME:
+                        {
+                            std::cout << "Recieved change entity name packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+                            EntityRef entity = EntityRef(Entity::entities[id]);
+                            if(entity == nullptr)
+                            {
+                                std::cout << "Entity not found" << std::endl;
+                                break;
+                            }
+                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " changing name to: " << message << std::endl;
+                            entity->name = message;
+                            break;
+                        }
                         case LIVE_SHARE_PACKET_TYPE_CREATE_GROUP:
                         {
                             std::cout << "Recieved create group packet" << std::endl;
@@ -677,4 +696,13 @@ void LiveShare::send_query_file(std::string file)
 {
     std::replace(file.begin(),file.end(),'\\','/');
     send(LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS, file);
+}
+
+void LiveShare::send_change_entity_name(Pomegranate::EntityRef entity, std::string name)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&entity->id));
+    std::string message;
+    message += std::string(id,sizeof(int));
+    message += name;
+    send(LIVE_SHARE_PACKET_TYPE_CHANGE_ENTITY_NAME,message);
 }

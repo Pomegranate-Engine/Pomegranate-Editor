@@ -41,6 +41,7 @@ public:
     static void send_delete_group(GroupRef group);
     static void send_entity_full(EntityRef entity);
     static void send_query_file(std::string file);
+    static void send_change_entity_name(EntityRef entity, std::string name);
 };
 
 #endif //POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_H
