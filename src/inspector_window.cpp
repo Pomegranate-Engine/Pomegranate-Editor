@@ -2,6 +2,7 @@
 
 int InspectorWindow::element_index = 0;
 bool InspectorWindow::something_dropped = false;
+std::string InspectorWindow::component_search_buffer = "";
 
 InspectorHeaderTag::InspectorHeaderTag(const char *name)
 {
@@ -152,18 +153,25 @@ void InspectorWindow::render()
             }
             if(ImGui::BeginPopup("Add Component"))
             {
-                for (auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
-                    if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
-                        Component* component = entity->add_component(i->first.c_str());
-                        if(component == nullptr)
-                        {
-                            Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),EditorTheme::color_palette_red,"Component already exists!","Component " + scuffy_demangle(i->first.c_str()) + " already exists on this entity. Not added!"});
+                ImGui::InputText("Search", &component_search_buffer, ImGuiInputTextFlags_None);
+                for(auto i = Component::component_types.begin(); i != Component::component_types.end(); i++) {
+                    std::string lower_case_name = scuffy_demangle(i->first.c_str());
+                    std::transform(lower_case_name.begin(), lower_case_name.end(), lower_case_name.begin(), ::tolower);
+                    std::string lower_case_search = component_search_buffer;
+                    std::transform(lower_case_search.begin(), lower_case_search.end(), lower_case_search.begin(), ::tolower);
+                    if (lower_case_name.find(lower_case_search) != std::string::npos) {
+                        if (ImGui::MenuItem(scuffy_demangle(i->first.c_str()).c_str())) {
+                            Component *component = entity->add_component(i->first.c_str());
+                            if (component == nullptr) {
+                                Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),
+                                                EditorTheme::color_palette_red, "Component already exists!",
+                                                "Component " + scuffy_demangle(i->first.c_str()) +
+                                                " already exists on this entity. Not added!"});
+                            } else {
+                                LiveShare::send_add_component(entity, i->first);
+                            }
+                            Editor::action();
                         }
-                        else
-                        {
-                            LiveShare::send_add_component(entity, i->first);
-                        }
-                        Editor::action();
                     }
                 }
                 ImGui::EndPopup();

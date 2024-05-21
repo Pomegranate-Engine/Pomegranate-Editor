@@ -18,6 +18,7 @@ class InspectorWindow : public EditorWindow
 public:
     static int element_index;
     static bool something_dropped;
+    static std::string component_search_buffer;
     Component* right_clicked_component = nullptr;
     static void property_field(const char* name, std::string* value);
     static void property_field(const char* name, float* value);
