@@ -114,14 +114,14 @@ void Window_SceneView::render() {
             }
             if(Node::selected->entity != nullptr)
             {
-                if(Node::selected->entity->get_component<Transform>())
+                if(Node::selected->entity->transform)
                 {
                     if(std::find(entities_selected.begin(), entities_selected.end(),Node::selected->entity.get()) == entities_selected.end())
                     {
-                        selected_entity_arrow_hor_pos = Node::selected->entity->get_component<Transform>()->pos;
-                        selected_entity_arrow_hor_half = Node::selected->entity->get_component<Transform>()->pos;
-                        selected_entity_arrow_vert_pos = Node::selected->entity->get_component<Transform>()->pos;
-                        selected_entity_arrow_vert_half = Node::selected->entity->get_component<Transform>()->pos;
+                        selected_entity_arrow_hor_pos = Node::selected->entity->transform->pos;
+                        selected_entity_arrow_hor_half = Node::selected->entity->transform->pos;
+                        selected_entity_arrow_vert_pos = Node::selected->entity->transform->pos;
+                        selected_entity_arrow_vert_half = Node::selected->entity->transform->pos;
                         entities_selected.push_back(Node::selected->entity.get());
                     }
                 }
@@ -139,10 +139,10 @@ void Window_SceneView::render() {
                         entities_selected.end()) {
                         if(entities.at(0)->has_component<Transform>())
                         {
-                            selected_entity_arrow_hor_pos = entities.at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_hor_half = entities.at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_vert_pos = entities.at(0)->get_component<Transform>()->pos;
-                            selected_entity_arrow_vert_half = entities.at(0)->get_component<Transform>()->pos;
+                            selected_entity_arrow_hor_pos = entities.at(0)->transform->pos;
+                            selected_entity_arrow_hor_half = entities.at(0)->transform->pos;
+                            selected_entity_arrow_vert_pos = entities.at(0)->transform->pos;
+                            selected_entity_arrow_vert_half = entities.at(0)->transform->pos;
                         }
                         for (EntityRef entity: entities) {
                             entities_selected.push_back(entity);
@@ -170,7 +170,7 @@ void Window_SceneView::render() {
         for(EntityRef entity : entities_selected)
         {
             if(entity->has_component<Transform>()) {
-                transforms.push_back(entity->get_component<Transform>());
+                transforms.push_back(entity->transform);
                 entities_with_transform.push_back(entity);
             }
         }
@@ -316,8 +316,8 @@ void Window_SceneView::render() {
                 //Send change to server
                 for(EntityRef entity : entities_with_transform)
                 {
-                    LiveShare::send_change_property(entity, typeid(Transform).name(), "pos", typeid(Vec2).hash_code(), &entity->get_component<Transform>()->pos);
-                    LiveShare::send_change_property(entity, typeid(Transform).name(), "rot", typeid(Vec2).hash_code(), &entity->get_component<Transform>()->rot);
+                    LiveShare::send_change_property(entity, typeid(Transform).name(), "pos", typeid(Vec2).hash_code(), &entity->transform->pos);
+                    LiveShare::send_change_property(entity, typeid(Transform).name(), "rot", typeid(Vec2).hash_code(), &entity->transform->rot);
                 }
                 Editor::action();
             }
@@ -358,7 +358,7 @@ void Window_SceneView::render() {
             entity->add_component<Transform>();
             entity->add_component<Sprite>();
             entity->get_component<Sprite>()->texture = tex;
-            entity->get_component<Transform>()->pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(size.x/2,size.y/2))/zoom+this->position;
+            entity->transform->pos = ((InputManager::get_mouse_position()-Vec2(ImGui::GetWindowPos().x,ImGui::GetWindowPos().y))-Vec2(size.x/2,size.y/2))/zoom+this->position;
 
             Editor::current_scene->add_entity(entity);
 
@@ -366,7 +366,7 @@ void Window_SceneView::render() {
             LiveShare::send_add_component(entity, typeid(Transform).name());
             LiveShare::send_add_component(entity, typeid(Sprite).name());
             LiveShare::send_change_property(entity, typeid(Sprite).name(), "texture", typeid(Texture*).hash_code(), &entity->get_component<Sprite>()->texture);
-            LiveShare::send_change_property(entity, typeid(Transform).name(), "pos", typeid(Vec2).hash_code(), &entity->get_component<Transform>()->pos);
+            LiveShare::send_change_property(entity, typeid(Transform).name(), "pos", typeid(Vec2).hash_code(), &entity->transform->pos);
             Editor::action();
         }
         else if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_scene"))

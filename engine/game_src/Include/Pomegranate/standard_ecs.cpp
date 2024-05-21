@@ -18,7 +18,7 @@ namespace Pomegranate
     {
         if(a->has_component<Transform>() && b->has_component<Transform>())
         {
-            return a->get_component<Transform>()->z_index < b->get_component<Transform>()->z_index;
+            return a->transform->z_index < b->transform->z_index;
         }
         else
         {
@@ -59,19 +59,19 @@ namespace Pomegranate
         {
             if (entity->has_component<PositionLink>())
             {
-                auto *t = entity->get_component<Transform>();
+                auto *t = entity->transform;
                 auto *l = entity->get_component<PositionLink>();
                 t->pos = l->link->pos + l->offset;
             }
             if (entity->has_component<RotationLink>())
             {
-                auto *t = entity->get_component<Transform>();
+                auto *t = entity->transform;
                 auto *l = entity->get_component<RotationLink>();
                 t->rot = l->link->rot + l->offset;
             }
             if (entity->has_component<ScaleLink>())
             {
-                auto *t = entity->get_component<Transform>();
+                auto *t = entity->transform;
                 auto *l = entity->get_component<ScaleLink>();
                 t->scale = l->link->scale + l->offset;
             }

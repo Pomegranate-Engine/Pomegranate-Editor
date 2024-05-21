@@ -232,6 +232,31 @@ void SystemRef::destroy(System *system)
 
 #pragma endregion
 
+    Transform::Transform()
+    {
+        this->pos = Vec2(0.0, 0.0);
+        this->scale = Vec2(1.0, 1.0);
+        this->rot = 0.0;
+        this->z_index = 0;
+        push_data<Vec2>("pos", &this->pos);
+        push_data<Vec2>("scale", &this->scale);
+        push_data<float>("rot",  &this->rot);
+        push_data<int>("z_index",  &this->z_index);
+        register_component(Transform);
+    }
+
+    bool Transform::draw_sort(Entity* a, Entity* b)
+    {
+        if(a->has_component<Transform>() && b->has_component<Transform>())
+        {
+            return a->transform->z_index < b->transform->z_index;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 #pragma region Entity
     Entity::Entity()
     {
@@ -240,6 +265,7 @@ void SystemRef::destroy(System *system)
         this->components = std::unordered_multimap<const std::type_info*,Component*>();
         this->parents = std::vector<GroupRef>();
         this->name = "New Entity";
+        this->transform = nullptr;
     }
 
     uint32_t Entity::get_id() const
@@ -248,6 +274,10 @@ void SystemRef::destroy(System *system)
     }
     Component* Entity::get_component(const char* name)
     {
+        if(name == scuffy_demangle(typeid(Transform).name()))
+        {
+            return this->transform;
+        }
         for (auto c : components)
         {
             if (std::string(scuffy_demangle(c.first->name())) == std::string(name))
@@ -271,11 +301,21 @@ void SystemRef::destroy(System *system)
         component->init(this);
         std::pair<const std::type_info*, Component *> pair(&typeid(*component), component);
         this->components.insert(pair);
+
+        if(typeid(*component) == typeid(Transform))
+        {
+            this->transform = dynamic_cast<Transform*>(component);
+        }
+
         return component;
     }
 
     bool Entity::has_component(const char * name)
     {
+        if(name == scuffy_demangle(typeid(Transform).name()))
+        {
+            return this->transform != nullptr;
+        }
         for (auto c : components)
         {
             if (std::string(c.first->name()) == std::string(name))
@@ -307,6 +347,11 @@ void SystemRef::destroy(System *system)
         {
             if (c.second == component)
             {
+                if(c.first == &typeid(Transform))
+                {
+                    this->transform = nullptr;
+                }
+
                 delete c.second;
                 components.erase(c.first);
                 print_info("Component Removed");

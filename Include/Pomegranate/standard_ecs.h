@@ -9,17 +9,6 @@
 #include <map>
 namespace Pomegranate
 {
-    class Transform : public Component
-    {
-    public:
-        Vec2 pos;
-        Vec2 scale;
-        float rot;
-        int z_index;
-        Transform();
-        static bool draw_sort(Entity* a, Entity* b);
-    };
-
     class PositionLink : public Component
     {
     public:

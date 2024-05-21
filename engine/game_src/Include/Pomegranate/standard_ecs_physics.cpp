@@ -45,7 +45,7 @@ namespace Pomegranate
     void PhysicsObject::init(Entity * e)
     {
         e->require_component<Transform>();
-        this->old_pos = e->get_component<Transform>()->pos;
+        this->old_pos = e->transform->pos;
         PhysicsObject::objects.push_back(e);
     }
 
@@ -58,7 +58,7 @@ namespace Pomegranate
     {
         if(entity->has_component<PhysicsObject>() && entity->get_component<PhysicsObject>()->body_type == PHYSICS_BODY_TYPE_RIGID)
         {
-            auto *t = entity->get_component<Transform>();
+            auto *t = entity->transform;
             auto *p = entity->get_component<PhysicsObject>();
             auto *c = entity->get_component<CollisionShape>();
 
@@ -118,7 +118,7 @@ namespace Pomegranate
 
     void RigidBody::solve_collisions(Entity *entity)
     {
-        auto *t = entity->get_component<Transform>();
+        auto *t = entity->transform;
         auto *p = entity->get_component<PhysicsObject>();
         auto *c = entity->get_component<CollisionShape>();
 #pragma omp parallel for
@@ -133,8 +133,8 @@ namespace Pomegranate
                 if (other_c->shape_type == COLLISION_SHAPE_TYPE_CIRCLE && c->shape_type == COLLISION_SHAPE_TYPE_CIRCLE)
                 {
                     float our_radius = c->radius * (abs(t->scale.x + t->scale.y) * 0.5f);
-                    float other_radius = other_c->radius * (abs(other->get_component<Transform>()->scale.x +
-                                                                other->get_component<Transform>()->scale.y) * 0.5f);
+                    float other_radius = other_c->radius * (abs(other->transform->scale.x +
+                                                                other->transform->scale.y) * 0.5f);
                     Vec2 collision_axis = p->cur_pos - other_p->cur_pos;
                     float dist = collision_axis.length();
 

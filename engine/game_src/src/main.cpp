@@ -39,7 +39,7 @@ class PlayerController : public System
         if(e->has_component<LuaComponent>())
         {
             auto* player = e->get_component<LuaComponent>()->get_component("PlayerComponent");
-            auto* transform = e->get_component<Transform>();
+            auto* transform = e->transform;
             Vec2 v = player->get<Vec2>("velocity");
             if (InputManager::get_key(SDL_SCANCODE_W)) {
                 v.y -= 1*player->get<double>("speed");
@@ -84,12 +84,12 @@ public:
         if(e->has_component<CameraFollow>())
         {
             auto* camera_follow = e->get_component<CameraFollow>();
-            auto* transform = e->get_component<Transform>();
+            auto* transform = e->transform;
             if(camera_follow->target)
             {
                 if(camera_follow->target->has_component<Transform>())
                 {
-                    auto* target_transform = camera_follow->target->get_component<Transform>();
+                    auto* target_transform = camera_follow->target->transform;
                     transform->pos = transform->pos + (target_transform->pos - transform->pos) * camera_follow->speed * delta_time;
                 }
             }

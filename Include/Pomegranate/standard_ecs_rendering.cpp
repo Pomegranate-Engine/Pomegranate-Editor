@@ -97,7 +97,7 @@ namespace Pomegranate
     {
         if(Camera::current != nullptr)
         {
-            Camera::current_render_position = Camera::current->get_component<Transform>()->pos;
+            Camera::current_render_position = Camera::current->transform->pos;
             Camera::current_render_zoom = Camera::current->get_component<Camera>()->zoom;
         }
         if(entity->has_component<Transform>())
@@ -122,7 +122,7 @@ namespace Pomegranate
     }
 
     void Render::sprite(Entity*e) {
-        auto t = e->get_component<Transform>();
+        auto t = e->transform;
         auto s = e->get_component<Sprite>();
         SDL_FRect r;
         int w = 0;
@@ -158,7 +158,7 @@ namespace Pomegranate
     }
 
     void Render::animated_sprite(Entity*e) {
-        auto t = e->get_component<Transform>();
+        auto t = e->transform;
         auto s = e->get_component<AnimatedSprite>();
         SDL_FRect r;
         int w = 0;
@@ -199,7 +199,7 @@ namespace Pomegranate
 
     void Render::debug_circle(Entity* entity)
     {
-        auto* t = entity->get_component<Transform>();
+        auto* t = entity->transform;
         auto* dc = entity->get_component<DebugCircle>();
 
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), dc->color.r,dc->color.g,dc->color.b, dc->color.a);
@@ -212,10 +212,10 @@ namespace Pomegranate
             float angle2 = ((float)i + 1.0f) * angleStep;
 
             // Calculate the coordinates of the two points on the circle
-            float x1 = t->pos.x-Camera::current->get_component<Transform>()->pos.x + (dc->radius * cosf(angle1));
-            float y1 = t->pos.y-Camera::current->get_component<Transform>()->pos.y + (dc->radius * sinf(angle1));
-            float x2 = t->pos.x-Camera::current->get_component<Transform>()->pos.x + (dc->radius * cosf(angle2));
-            float y2 = t->pos.y-Camera::current->get_component<Transform>()->pos.y + (dc->radius * sinf(angle2));
+            float x1 = t->pos.x-Camera::current->transform->pos.x + (dc->radius * cosf(angle1));
+            float y1 = t->pos.y-Camera::current->transform->pos.y + (dc->radius * sinf(angle1));
+            float x2 = t->pos.x-Camera::current->transform->pos.x + (dc->radius * cosf(angle2));
+            float y2 = t->pos.y-Camera::current->transform->pos.y + (dc->radius * sinf(angle2));
 
             // Draw a line between the two points to create the circle outline
             SDL_RenderLine(Window::current->get_sdl_renderer(), x1, y1, x2, y2);
@@ -224,10 +224,10 @@ namespace Pomegranate
 
     void Render::tilemap(Entity* entity)
     {
-        auto* t = entity->get_component<Transform>();
+        auto* t = entity->transform;
         auto* map = entity->get_component<Tilemap>();
 
-        auto* camera_transform = Camera::current->get_component<Transform>();
+        auto* camera_transform = Camera::current->transform;
 
         SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), map->color.r,map->color.g,map->color.b, map->color.a);
         // Calculate angle step for each segment

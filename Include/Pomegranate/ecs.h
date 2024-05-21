@@ -133,6 +133,17 @@ public:
     };
 #define register_system(T) System::register_system_with_name<T>(scuffy_demangle(typeid(T).name()))
 
+    class Transform : public Component
+    {
+    public:
+        Vec2 pos;
+        Vec2 scale;
+        float rot;
+        int z_index;
+        Transform();
+        static bool draw_sort(Entity* a, Entity* b);
+    };
+
     class Entity
     {
     private:
@@ -142,6 +153,7 @@ public:
     public:
         uint32_t id;
         std::string name;
+        Transform* transform;
         std::unordered_multimap<const std::type_info*,Component*> get_components();
         template <typename T> T* add_component();
         template <typename... T> void add_components();

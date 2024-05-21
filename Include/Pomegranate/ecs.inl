@@ -24,6 +24,10 @@ namespace Pomegranate
 
     template <typename T> inline T* Entity::get_component()
     {
+        if(typeid(T) == typeid(Transform))
+        {
+            return (T*)this->transform;
+        }
         if(this->has_component<T>())
         {
             T* component = (T*)this->components.equal_range(&typeid(T)).first->second;
@@ -37,6 +41,8 @@ namespace Pomegranate
     template <typename T> inline bool Entity::has_single_component()
     {
         const std::type_info* type = &typeid(T);
+        if(type == &typeid(Transform) && this->transform != nullptr)
+            return true;
         if(components.size() == 0)
             return false;
         return this->components.find(type) != this->components.end();
@@ -70,6 +76,10 @@ namespace Pomegranate
         component->init(this);
         std::pair<const std::type_info *, Component *> pair(&typeid(T), component);
         this->components.insert(pair);
+        if(typeid(T) == typeid(Transform))
+        {
+            this->transform = (Transform*)component;
+        }
         return component;
     }
     template<typename... T> inline void Entity::add_components()

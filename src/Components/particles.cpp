@@ -183,7 +183,7 @@ public:
         //Set camera position
         if(Camera::current != nullptr)
         {
-            Camera::current_render_position = Camera::current->get_component<Transform>()->pos;
+            Camera::current_render_position = Camera::current->transform->pos;
             Camera::current_render_zoom = Camera::current->get_component<Camera>()->zoom;
         }
     }
@@ -192,7 +192,7 @@ public:
         if(e->has_component<ParticleEmitter>())
         {
             auto* emitter = e->get_component<ParticleEmitter>();
-            auto* transform = e->get_component<Transform>();
+            auto* transform = e->transform;
             float d = delta_time * emitter->time_scale;
             if(emitter->particles.size() != emitter->max_particles)
             {

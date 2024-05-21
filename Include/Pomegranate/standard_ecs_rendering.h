@@ -13,9 +13,9 @@ namespace Pomegranate
 {
     static bool render_default_sort(EntityRef a, EntityRef b)
     {
-        if(a->has_component<Transform>() && b->has_component<Transform>()) {
-            Transform *a_transform = a->get_component<Transform>();
-            Transform *b_transform = b->get_component<Transform>();
+        if(a->transform && b->transform) {
+            Transform *a_transform = a->transform;
+            Transform *b_transform = b->transform;
             return a_transform->z_index < b_transform->z_index;
         }
         return false;
