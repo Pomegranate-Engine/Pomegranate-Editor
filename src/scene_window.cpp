@@ -355,6 +355,7 @@ void Window_SceneView::render() {
             Texture* tex = *(Texture**) payload->Data;
             std::string entity_name = tex->path;
             EntityRef entity = Entity::create(entity_name);
+            entity->name = entity_name;
             entity->add_component<Transform>();
             entity->add_component<Sprite>();
             entity->get_component<Sprite>()->texture = tex;
