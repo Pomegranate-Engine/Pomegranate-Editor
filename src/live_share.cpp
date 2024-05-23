@@ -695,7 +695,7 @@ void LiveShare::send_delete_component(EntityRef entity, std::string component)
 void LiveShare::send_delete_entity(EntityRef entity)
 {
     char* id = static_cast<char*>(static_cast<void*>(&entity->id));
-    send(LIVE_SHARE_PACKET_TYPE_DELETE_ENTITY,std::string(id));
+    send(LIVE_SHARE_PACKET_TYPE_DELETE_ENTITY,std::string(id,sizeof(int)));
 }
 
 void LiveShare::send_create_group(GroupRef entity)
