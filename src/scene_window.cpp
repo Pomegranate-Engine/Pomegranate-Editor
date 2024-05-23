@@ -363,6 +363,7 @@ void Window_SceneView::render() {
             Editor::current_scene->add_entity(entity);
 
             LiveShare::send_new_entity(entity);
+            LiveShare::send_change_entity_name(entity, entity_name);
             LiveShare::send_add_component(entity, typeid(Transform).name());
             LiveShare::send_add_component(entity, typeid(Sprite).name());
             LiveShare::send_change_property(entity, typeid(Sprite).name(), "texture", typeid(Texture*).hash_code(), &entity->get_component<Sprite>()->texture);
