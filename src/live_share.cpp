@@ -406,14 +406,15 @@ void LiveShare::update()
                                 break;
                             }
 
-                            int id = read_int_from_bytes(event.packet->data + 2);
+                            int parent_id = read_int_from_bytes(event.packet->data + 2);
+                            int id = read_int_from_bytes(event.packet->data + 6);
 
-                            std::string message = std::string((char*)event.packet->data + 6,event.packet->dataLength - 6);
+                            std::string message = std::string((char*)event.packet->data + 10,event.packet->dataLength - 10);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor creating system: " << message << std::endl;
                             if(System::system_types.find(message) != System::system_types.end()) {
                                 SystemRef system = System::system_types[message]();
                                 system->set_id(id);
-                                Group::groups_id[id]->add_system(system);
+                                Group::groups_id[parent_id]->add_system(system);
                             }
                             else
                             {
