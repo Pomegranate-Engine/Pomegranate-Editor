@@ -113,8 +113,8 @@ public:
     private:
         /* data */
         static std::vector<SystemRef> global_systems;
-        std::vector<GroupRef> parents;
     public:
+        std::vector<GroupRef> parents;
         bool active = true;
         System();
         ~System();
