@@ -141,6 +141,8 @@ if(APPLE)
 
     target_link_libraries(Pomegranate_LiveShareServer PRIVATE
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libenet.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libssl.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libcrypto.dylib
     )
 elseif(WIN32)
     find_package(OpenMP)

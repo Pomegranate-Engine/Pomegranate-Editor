@@ -2,6 +2,7 @@
 #include "live_share_shared_data.h"
 #include "enet/enet.h"
 #include <vector>
+#include<openssl/sha.h>
 
 ENetAddress address;
 ENetHost* server;
@@ -87,7 +88,7 @@ int main(int argc, char* argv[])
 
                     if(type == LIVE_SHARE_PACKET_TYPE_PASSWORD)
                     {
-                        std::string password = std::string((char*)event.packet->data + 2, event.packet->dataLength - 2);
+                        std::string password = std::string((char*)event.packet->data + 2 + SHA256_DIGEST_LENGTH, event.packet->dataLength - 2-SHA256_DIGEST_LENGTH);
                         std::cout << "Password received: " << password << std::endl;
                         if(password == passkey)
                         {
