@@ -745,8 +745,10 @@ void LiveShare::send_create_system(Pomegranate::SystemRef system)
 {
     std::string message;
     int parent_group = system->get_parent_groups()[0]->id;
+    int id = system->id;
     std::string name = scuffy_demangle(typeid(*(system.get())).name());
     message += std::string(static_cast<char*>(static_cast<void*>(&parent_group)),sizeof(int));
+    message += std::string(static_cast<char*>(static_cast<void*>(&id)),sizeof(int));
     message += name;
     send(LIVE_SHARE_PACKET_TYPE_CREATE_SYSTEM,message);
 }

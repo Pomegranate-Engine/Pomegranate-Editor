@@ -471,12 +471,17 @@ void SystemRef::destroy(System *system)
 
     System::~System()
     {
+        //Remove this system from parents
+        for(auto & parent : this->parents)
+        {
+            parent->remove_system(this);
+        }
         System::systems.erase(this->id);
+        SystemRef::destroy(this);
     }
 
     void System::force_destroy()
     {
-        SystemRef::destroy(this);
         delete this;
     }
 
