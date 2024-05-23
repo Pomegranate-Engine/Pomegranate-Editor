@@ -398,6 +398,24 @@ void LiveShare::update()
                             Group::groups_id[id]->force_destroy();
                             break;
                         }
+                        case LIVE_SHARE_PACKET_TYPE_CREATE_SYSTEM:
+                        {
+                            std::cout << "Recieved create system packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            std::string message = std::string((char*)event.packet->data + 2,event.packet->dataLength - 2);
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor creating system: " << message << std::endl;
+                            if(System::system_types.find(message) != System::system_types.end()) {
+                                SystemRef system = System::system_types[message]();
+                            }
+                            else
+                            {
+                                std::cout << "System type not found" << std::endl;
+                            }
+                            break;
+                        }
                         case LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS:
                         {
                             std::cout << "Recieved resource exists packet" << std::endl;
@@ -705,4 +723,10 @@ void LiveShare::send_change_entity_name(Pomegranate::EntityRef entity, std::stri
     message += std::string(id,sizeof(int));
     message += name;
     send(LIVE_SHARE_PACKET_TYPE_CHANGE_ENTITY_NAME,message);
+}
+
+void LiveShare::send_create_system(Pomegranate::SystemRef system)
+{
+    std::string name = scuffy_demangle(typeid(*(system.get())).name());
+    send(LIVE_SHARE_PACKET_TYPE_CREATE_SYSTEM,name);
 }
