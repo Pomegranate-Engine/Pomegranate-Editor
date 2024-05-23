@@ -529,6 +529,11 @@ void SystemRef::destroy(System *system)
         }
     }
 
+    std::vector<GroupRef> System::get_parent_groups()
+    {
+        return this->parents;
+    }
+
 #pragma endregion
 
 #pragma region Group
@@ -594,6 +599,7 @@ void SystemRef::destroy(System *system)
     void Group::add_system(SystemRef system)
     {
         this->systems.push_back(system);
+        system->parents.push_back(this);
     }
 
     void Group::remove_system(SystemRef system)
@@ -602,6 +608,7 @@ void SystemRef::destroy(System *system)
         {
             if(systems[i] == system)
             {
+                system->parents.erase(std::remove(system->parents.begin(), system->parents.end(), this), system->parents.end());
                 systems.erase(systems.begin() + i);
                 return;
             }

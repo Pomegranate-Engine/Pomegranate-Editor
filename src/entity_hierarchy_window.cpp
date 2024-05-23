@@ -319,9 +319,11 @@ void Window_EntityHierarchy::render()
                 {
                     if(selected_node->group != nullptr)
                     {
-                        selected_node->group->add_system(i->second());
+                        System* system = i->second();
+                        selected_node->group->add_system(system);
                         Editor::action();
                         create_system_popup = false;
+                        LiveShare::send_create_system(system);
                     }
                     else
                     {
@@ -342,6 +344,7 @@ void Window_EntityHierarchy::render()
                         }
                         Editor::action();
                         create_system_popup = false;
+                        LiveShare::send_create_system(system);
                     }
                 }
             }

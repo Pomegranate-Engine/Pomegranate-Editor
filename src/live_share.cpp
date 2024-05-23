@@ -405,10 +405,14 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            std::string message = std::string((char*)event.packet->data + 2,event.packet->dataLength - 2);
+
+                            int id = read_int_from_bytes(event.packet->data + 2);
+
+                            std::string message = std::string((char*)event.packet->data + 6,event.packet->dataLength - 2);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor creating system: " << message << std::endl;
                             if(System::system_types.find(message) != System::system_types.end()) {
                                 SystemRef system = System::system_types[message]();
+                                Group::groups_id[id]->add_system(system);
                             }
                             else
                             {
@@ -727,6 +731,10 @@ void LiveShare::send_change_entity_name(Pomegranate::EntityRef entity, std::stri
 
 void LiveShare::send_create_system(Pomegranate::SystemRef system)
 {
+    std::string message;
+    int parent_group = system->get_parent_groups()[0]->id;
     std::string name = scuffy_demangle(typeid(*(system.get())).name());
-    send(LIVE_SHARE_PACKET_TYPE_CREATE_SYSTEM,name);
+    message += (char)parent_group;
+    message += name;
+    send(LIVE_SHARE_PACKET_TYPE_CREATE_SYSTEM,message);
 }

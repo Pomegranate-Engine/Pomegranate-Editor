@@ -113,6 +113,7 @@ public:
     private:
         /* data */
         static std::vector<SystemRef> global_systems;
+        std::vector<GroupRef> parents;
     public:
         bool active = true;
         System();
@@ -128,6 +129,7 @@ public:
         static void remove_global_system(System*);
         static void global_system_tick();
         static void global_system_draw(const std::function<bool(Entity*, Entity*)>& sortingFunction);
+        std::vector<GroupRef> get_parent_groups();
         static std::unordered_map<std::string, std::function<System*()>> system_types;
         template<typename T> static void register_system_with_name(std::string name);
     };
