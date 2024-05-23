@@ -122,6 +122,7 @@ public:
         System();
         ~System();
         void force_destroy();
+        void set_id(int new_id);
         virtual void init(Entity*);
         virtual void pre_tick();
         virtual void tick(Entity*);

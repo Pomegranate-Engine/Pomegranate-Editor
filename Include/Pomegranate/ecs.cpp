@@ -480,6 +480,19 @@ void SystemRef::destroy(System *system)
         delete this;
     }
 
+    void System::set_id(int new_id)
+    {
+        //Remove the old id
+        System::systems.erase(this->id);
+        this->id = new_id;
+        //Add the new id
+        System::systems.emplace(this->id,this);
+        if(System::system_count <= new_id)
+        {
+            System::system_count = new_id + 1;
+        }
+    }
+
     void System::init(Entity*) {}
     void System::tick(Entity*) {}
     void System::draw(Entity*) {}
