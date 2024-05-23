@@ -420,6 +420,17 @@ void LiveShare::update()
                             }
                             break;
                         }
+                        case LIVE_SHARE_PACKET_TYPE_DELETE_SYSTEM:
+                        {
+                            std::cout << "Recieved delete system packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+                            int id = read_int_from_bytes(event.packet->data + 2);
+                            System::systems[id]->force_destroy();
+                            break;
+                        }
                         case LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS:
                         {
                             std::cout << "Recieved resource exists packet" << std::endl;
@@ -737,4 +748,12 @@ void LiveShare::send_create_system(Pomegranate::SystemRef system)
     message += std::string(static_cast<char*>(static_cast<void*>(&parent_group)),sizeof(int));
     message += name;
     send(LIVE_SHARE_PACKET_TYPE_CREATE_SYSTEM,message);
+}
+
+void LiveShare::send_delete_system(Pomegranate::SystemRef system)
+{
+    std::string message;
+    int id = system->id;
+    message += std::string(static_cast<char*>(static_cast<void*>(&id)),sizeof(int));
+    send(LIVE_SHARE_PACKET_TYPE_DELETE_SYSTEM,message);
 }

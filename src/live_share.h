@@ -43,6 +43,7 @@ public:
     static void send_query_file(std::string file);
     static void send_change_entity_name(EntityRef entity, std::string name);
     static void send_create_system(SystemRef system);
+    static void send_delete_system(SystemRef system);
 };
 
 #endif //POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_H

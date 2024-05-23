@@ -114,10 +114,14 @@ public:
         /* data */
         static std::vector<SystemRef> global_systems;
     public:
+        static uint32_t system_count;
+        static std::unordered_map<uint32_t,System*> systems;
+        uint32_t id;
         std::vector<GroupRef> parents;
         bool active = true;
         System();
         ~System();
+        void force_destroy();
         virtual void init(Entity*);
         virtual void pre_tick();
         virtual void tick(Entity*);

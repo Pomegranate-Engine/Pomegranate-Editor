@@ -5,10 +5,12 @@ namespace Pomegranate
     //Globals
     std::vector<SystemRef> System::global_systems = std::vector<SystemRef>();
     std::unordered_map<uint32_t ,Entity*> Entity::entities = std::unordered_map<uint32_t,Entity*>();
+    std::unordered_map<uint32_t, System*> System::systems = std::unordered_map<uint32_t, System*>();
     std::unordered_map<std::string, std::function<Component*()>> Component::component_types = std::unordered_map<std::string, std::function<Component*()>>();
     std::unordered_map<std::string, std::function<System*()>> System::system_types = std::unordered_map<std::string, std::function<System*()>>();
     uint32_t Entity::entity_count = 0;
     uint32_t Group::group_count = 0;
+    uint32_t System::system_count = 0;
     std::unordered_map<std::string, Group*> Group::groups = std::unordered_map<std::string, Group*>();
     std::unordered_map<uint32_t, Group*> Group::groups_id = std::unordered_map<uint32_t, Group*>();
     std::vector<Entity*> Entity::destroy_queue = std::vector<Entity*>();
@@ -460,9 +462,23 @@ void SystemRef::destroy(System *system)
 
 #pragma region System
 
-    System::System() = default;
+    System::System()
+    {
+        this->active = true;
+        this->id = System::system_count++;
+        System::systems.emplace(this->id,this);
+    }
 
-    System::~System() = default;
+    System::~System()
+    {
+        System::systems.erase(this->id);
+    }
+
+    void System::force_destroy()
+    {
+        SystemRef::destroy(this);
+        delete this;
+    }
 
     void System::init(Entity*) {}
     void System::tick(Entity*) {}
