@@ -15,12 +15,32 @@ namespace Pomegranate
         std::string path;
     };
 
+    class ResourceRef
+    {
+    private:
+        static std::map<std::string, void*> resources_refs;
+    public:
+        Resource* resource;
+        ResourceRef();
+        ResourceRef(Resource* resource);
+        ~ResourceRef();
+        template<typename T> T* operator->();
+        template<typename T> T* operator*();
+        template<typename T> T* get();
+        bool operator==(const ResourceRef& other);
+        bool operator!=(const ResourceRef& other);
+        explicit operator bool();
+        static void destroy(Resource* resource);
+        static void destroy(ResourceRef resource);
+    };
+
     class ResourceManager
     {
     private:
     public:
         static std::map<std::string,void*> resources;
-        template<typename T> static T* load(const std::string& path);
+        template<typename T> static ResourceRef load(const std::string& path);
+        template<typename T> static ResourceRef reload(const std::string& path);
         template<typename T> static void unload(const std::string& path); //Unsafe
         static bool exists(const std::string& path);
     };

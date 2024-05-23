@@ -207,7 +207,7 @@ void ResourcesWindow::render()
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
             if(file.type == ResourceType::RESOURCE_TYPE_TEXTURE)
             {
-                Texture *texture = ResourceManager::load<Texture>(file.path);
+                ResourceRef texture = ResourceManager::reload<Texture>(file.path);
                 ImGui::SetDragDropPayload("resource_texture", &texture, sizeof(Texture **));
                 ImGui::Text(file.path.c_str());
                 ImGui::SameLine();
@@ -216,7 +216,7 @@ void ResourcesWindow::render()
             }
             else if(file.type == ResourceType::RESOURCE_TYPE_AUDIO)
             {
-                Audio *audio = ResourceManager::load<Audio>(file.path);
+                ResourceRef audio = ResourceManager::reload<Audio>(file.path);
                 ImGui::SetDragDropPayload("resource_audio", &audio, sizeof(Audio **));
                 ImGui::Text(file.path.c_str());
                 ImGui::SameLine();
@@ -225,7 +225,7 @@ void ResourcesWindow::render()
             }
             else if(file.type == ResourceType::RESOURCE_TYPE_FONT)
             {
-                TTFFont *font = ResourceManager::load<TTFFont>(file.path);
+                ResourceRef font = ResourceManager::reload<TTFFont>(file.path);
                 ImGui::SetDragDropPayload("resource_font", &font, sizeof(TTFFont **));
                 ImGui::Text(file.path.c_str());
                 ImGui::SameLine();
@@ -336,10 +336,10 @@ void ResourcesWindow::load_resources()
                 file.first,
                 ResourceType::RESOURCE_TYPE_TEXTURE,
                 read_meta(file.second),
-                ResourceManager::load<Texture>("engine/image.png")
+                ResourceManager::reload<Texture>("engine/image.png")
             });
             //Load resource into resource manager
-            ResourceManager::load<Texture>(file.first);
+            ResourceManager::reload<Texture>(file.first);
         }
         else if (file.first.find(".lua") != std::string::npos)
         {
@@ -353,10 +353,10 @@ void ResourcesWindow::load_resources()
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_LUA_SCRIPT,
                                       read_meta(file.second),
-                                      ResourceManager::load<Texture>("engine/system.png")
+                                      ResourceManager::reload<Texture>("engine/system.png")
                               });
             //Load resource into resource manager
-            ResourceManager::load<Texture>(file.first);
+            ResourceManager::reload<Texture>(file.first);
         }
         else if (file.first.find(".wav") != std::string::npos)
         {
@@ -370,10 +370,10 @@ void ResourcesWindow::load_resources()
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_AUDIO,
                                       read_meta(file.second),
-                                      ResourceManager::load<Texture>("engine/headphones.png")
+                                      ResourceManager::reload<Texture>("engine/headphones.png")
                               });
             //Load resource into resource manager
-            ResourceManager::load<Audio>(file.first);
+            ResourceManager::reload<Audio>(file.first);
         }
         else if (file.first.find(".ttf") != std::string::npos)
         {
@@ -387,10 +387,10 @@ void ResourcesWindow::load_resources()
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_FONT,
                                       read_meta(file.second),
-                                      ResourceManager::load<Texture>("engine/font.png")
+                                      ResourceManager::reload<Texture>("engine/font.png")
                               });
             //Load resource into resource manager
-            ResourceManager::load<TTFFont>(file.first);
+            ResourceManager::reload<TTFFont>(file.first);
         }
         else if (file.first.find(".pscn") != std::string::npos)
         {
@@ -404,7 +404,7 @@ void ResourcesWindow::load_resources()
                                       file.first,
                                       ResourceType::RESOURCE_TYPE_SCENE,
                                       read_meta(file.second),
-                              ResourceManager::load<Texture>("engine/scene.png")});
+                              ResourceManager::reload<Texture>("engine/scene.png")});
             //Load resource into resource manager
         }
     }

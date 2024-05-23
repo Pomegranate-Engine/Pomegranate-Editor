@@ -57,7 +57,7 @@ public:
 class ResourceFile
 {
 public:
-    Texture* icon;
+    ResourceRef icon;
     std::string path;
     ResourceType type;
     Color get_color();

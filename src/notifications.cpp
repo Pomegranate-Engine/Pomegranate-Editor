@@ -3,7 +3,7 @@
 std::vector<Notification> Notify::notifications = std::vector<Notification>();
 uint32_t Notification::NotificationCount = 0;
 
-Notification::Notification(Texture *icon, Vec3 color, const std::string& title, const std::string& content, float lifetime)
+Notification::Notification(ResourceRef icon, Vec3 color, const std::string& title, const std::string& content, float lifetime)
 {
     this->icon = icon;
     this->title = title;
@@ -45,7 +45,7 @@ void Notify::render(float dt)
             ImGui::SetWindowSize(ImVec2(0,64),ImGuiCond_Always);
             if(notifications[i].icon != nullptr)
             {
-                ImGui::Image((void*)notifications[i].icon->get_sdl_texture(), ImVec2(18,18), ImVec2(0,0), ImVec2(1,1));
+                ImGui::Image((void*)notifications[i].icon.get<Texture>()->get_sdl_texture(), ImVec2(18,18), ImVec2(0,0), ImVec2(1,1));
                 ImGui::SameLine();
             }
             ImGui::Text("%s", notifications[i].title.c_str());

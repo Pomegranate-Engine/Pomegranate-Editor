@@ -29,7 +29,7 @@ public:
     std::vector<Node*> linked;
     float size;
     Color color;
-    Texture* texture;
+    ResourceRef texture;
     EntityRef entity;
     GroupRef group;
     SystemRef system;
