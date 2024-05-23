@@ -1010,6 +1010,8 @@ void Window_EntityHierarchy::delete_node()
                         parent = node->group.get();
                         //Remove the system from the parent group
                         parent->remove_system(selected_node->system.get());
+                        LiveShare::send_delete_system(selected_node->system);
+                        selected_node->system->force_destroy();
                         break;
                     }
                 }
