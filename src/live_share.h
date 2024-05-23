@@ -1,6 +1,7 @@
 #ifndef POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_H
 #define POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_H
 #include<enet/enet.h>
+#include<openssl/sha.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -42,8 +43,10 @@ public:
     static void send_entity_full(EntityRef entity);
     static void send_query_file(std::string file);
     static void send_change_entity_name(EntityRef entity, std::string name);
+    static void send_change_group_name(GroupRef group, std::string name);
     static void send_create_system(SystemRef system);
     static void send_delete_system(SystemRef system);
+    static std::string get_current_scene_sha();
 };
 
 #endif //POMEGRANATE_LIVESHARESERVER_LIVE_SHARE_H

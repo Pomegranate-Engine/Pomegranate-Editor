@@ -126,6 +126,8 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_mixer.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3_ttf.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libenet.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libssl.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libcrypto.dylib
             ${LUAJIT_LIBRARY}
     )
 

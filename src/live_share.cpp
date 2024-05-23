@@ -192,8 +192,15 @@ void LiveShare::update()
                                 break;
                             }
 
-                            int id = read_int_from_bytes(event.packet->data + 2);
-                            int group = read_int_from_bytes(event.packet->data + 6);
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes(event.packet->data + 2+SHA_DIGEST_LENGTH);
+                            int group = read_int_from_bytes(event.packet->data + 6+SHA_DIGEST_LENGTH);
                             std::cout << "Creating entity with ID: " << id << " as child of Group: " << group << std::endl;
                             EntityRef entity = Entity::create("New Entity");
                             entity->set_id(id);
@@ -207,14 +214,22 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2+SHA_DIGEST_LENGTH]);
                             EntityRef entity = EntityRef(Entity::entities[id]);
                             if(entity == nullptr)
                             {
                                 std::cout << "Entity not found" << std::endl;
                                 break;
                             }
-                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::string message = std::string((char *) event.packet->data + 6+SHA_DIGEST_LENGTH, event.packet->dataLength - 6-SHA_DIGEST_LENGTH);
                             std::vector<std::string> parts = split(message, '/');
                             std::string component = parts[0];
                             std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " adding component: " << component << std::endl;
@@ -228,14 +243,22 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2+SHA_DIGEST_LENGTH]);
                             EntityRef entity = EntityRef(Entity::entities[id]);
                             if(entity == nullptr)
                             {
                                 std::cout << "Entity not found" << std::endl;
                                 break;
                             }
-                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::string message = std::string((char *) event.packet->data + 6+SHA_DIGEST_LENGTH, event.packet->dataLength - 6-SHA_DIGEST_LENGTH);
                             std::vector<std::string> parts = split(message, '/');
                             std::string component = parts[0];
                             std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " deleting component: " << component << std::endl;
@@ -248,7 +271,15 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2+SHA_DIGEST_LENGTH]);
                             EntityRef entity = EntityRef(Entity::entities[id]);
                             if(entity == nullptr)
                             {
@@ -265,15 +296,23 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
                             std::string data = std::string((char *) event.packet->data, event.packet->dataLength);
-                            int id = read_int_from_bytes((unsigned char *) event.packet->data + 2);
+                            int id = read_int_from_bytes((unsigned char *) event.packet->data + 2+SHA_DIGEST_LENGTH);
                             EntityRef entity = EntityRef(Entity::entities[id]);
                             if(entity == nullptr)
                             {
                                 std::cout << "Entity not found" << std::endl;
                                 break;
                             }
-                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::string message = std::string((char *) event.packet->data + 6+SHA_DIGEST_LENGTH, event.packet->dataLength - 6-SHA_DIGEST_LENGTH);
                             std::vector<std::string> parts = split(message, (char)255);
                             std::string component = parts[0];
                             Component* comp = entity->get_component(component.c_str());
@@ -360,14 +399,22 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2]);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes((unsigned char *) &event.packet->data[2+SHA_DIGEST_LENGTH]);
                             EntityRef entity = EntityRef(Entity::entities[id]);
                             if(entity == nullptr)
                             {
                                 std::cout << "Entity not found" << std::endl;
                                 break;
                             }
-                            std::string message = std::string((char *) event.packet->data + 6, event.packet->dataLength - 6);
+                            std::string message = std::string((char *) event.packet->data + 6+SHA_DIGEST_LENGTH, event.packet->dataLength - 6-SHA_DIGEST_LENGTH);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor on entity: " << id << " changing name to: " << message << std::endl;
                             entity->name = message;
                             break;
@@ -379,8 +426,16 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes(event.packet->data + 2);
-                            int parent_group = read_int_from_bytes(event.packet->data + 6);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes(event.packet->data + 2+SHA_DIGEST_LENGTH);
+                            int parent_group = read_int_from_bytes(event.packet->data + 6+SHA_DIGEST_LENGTH);
                             std::cout << "Creating group with ID: " << id << std::endl;
                             GroupRef group = new Group("New Group");
                             group->set_id(id);
@@ -394,7 +449,15 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes(event.packet->data + 2);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes(event.packet->data + 2+SHA_DIGEST_LENGTH);
                             Group::groups_id[id]->force_destroy();
                             break;
                         }
@@ -406,10 +469,17 @@ void LiveShare::update()
                                 break;
                             }
 
-                            int parent_id = read_int_from_bytes(event.packet->data + 2);
-                            int id = read_int_from_bytes(event.packet->data + 6);
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
 
-                            std::string message = std::string((char*)event.packet->data + 10,event.packet->dataLength - 10);
+                            int parent_id = read_int_from_bytes(event.packet->data + 2+SHA_DIGEST_LENGTH);
+                            int id = read_int_from_bytes(event.packet->data + 6+SHA_DIGEST_LENGTH);
+
+                            std::string message = std::string((char*)event.packet->data + 10+SHA_DIGEST_LENGTH,event.packet->dataLength - 10-SHA_DIGEST_LENGTH);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor creating system: " << message << std::endl;
                             if(System::system_types.find(message) != System::system_types.end()) {
                                 SystemRef system = System::system_types[message]();
@@ -429,8 +499,37 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            int id = read_int_from_bytes(event.packet->data + 2);
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes(event.packet->data + 2+SHA_DIGEST_LENGTH);
                             System::systems[id]->force_destroy();
+                            break;
+                        }
+                        case LIVE_SHARE_PACKET_TYPE_CHANGE_GROUP_NAME:
+                        {
+                            std::cout << "Recieved change group name packet" << std::endl;
+                            char from = event.packet->data[1];
+                            if (from == user_id) {
+                                break;
+                            }
+
+                            std::string scene_sha = get_current_scene_sha();
+                            std::string packet_sha = std::string((char*)event.packet->data + 2,SHA_DIGEST_LENGTH);
+                            if(scene_sha != packet_sha)
+                            {
+                                break;
+                            }
+
+                            int id = read_int_from_bytes(event.packet->data + 2+SHA_DIGEST_LENGTH);
+                            std::string message = std::string((char*)event.packet->data + 6+SHA_DIGEST_LENGTH,event.packet->dataLength - 6-SHA_DIGEST_LENGTH);
+                            std::cout << "User: " << (int)event.packet->data[1] << " editor on group: " << id << " changing name to: " << message << std::endl;
+                            Group::groups_id[id]->name = message;
                             break;
                         }
                         case LIVE_SHARE_PACKET_TYPE_RESOURCE_EXISTS:
@@ -440,7 +539,7 @@ void LiveShare::update()
                             if (from == user_id) {
                                 break;
                             }
-                            std::string file = std::string((char*)event.packet->data + 2,event.packet->dataLength - 2);
+                            std::string file = std::string((char*)event.packet->data + 2+SHA_DIGEST_LENGTH,event.packet->dataLength - 2-SHA_DIGEST_LENGTH);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor checking if resource exists: " << file << std::endl;
                             std::replace(file.begin(),file.end(),'\\','/');
                             if(ResourceManager::exists(file))
@@ -466,14 +565,14 @@ void LiveShare::update()
                                 break;
                             }
                             //Get original sender
-                            char original_sender = event.packet->data[2];
+                            char original_sender = event.packet->data[2+SHA_DIGEST_LENGTH];
                             if(original_sender == user_id)
                             {
                                 print_info("I was the original sender");
                                 Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),
                                                 EditorTheme::color_palette_red, "Live Share", "User: " + std::to_string((int)event.packet->data[1]) + " editor requested resource that does not exist, sending file"});
                                 //Send the resource
-                                std::string file = std::string((char*)event.packet->data + 3,event.packet->dataLength - 3);
+                                std::string file = std::string((char*)event.packet->data + 3+SHA_DIGEST_LENGTH,event.packet->dataLength - 3-SHA_DIGEST_LENGTH);
                                 std::replace(file.begin(),file.end(),'\\','/');
                                 std::cout << "User: " << (int)event.packet->data[1] << " editor requesting resource: " << file << std::endl;
                                 //Load bytes from file
@@ -502,13 +601,13 @@ void LiveShare::update()
                             }
                             //Get original sender
                             //Get file path length
-                            char file_path_length = event.packet->data[3];
+                            char file_path_length = event.packet->data[3+SHA_DIGEST_LENGTH];
                             //Get file path
-                            std::string file = std::string((char*)event.packet->data + 4,file_path_length);
+                            std::string file = std::string((char*)event.packet->data + 4+SHA_DIGEST_LENGTH,file_path_length);
                             //Replace \ with / on m*c
                             std::replace(file.begin(),file.end(),'\\','/');
                             //Get bytes
-                            std::vector<char> bytes(event.packet->data + 4 + file_path_length,event.packet->data + event.packet->dataLength);
+                            std::vector<char> bytes(event.packet->data + 4 + SHA_DIGEST_LENGTH + file_path_length,event.packet->data + event.packet->dataLength);
                             std::cout << "User: " << (int)event.packet->data[1] << " editor sending resource: " << file << std::endl;
                             //Write bytes to file
                             std::ofstream file_stream(file,std::ios::binary);
@@ -537,6 +636,33 @@ void LiveShare::update()
     }
 }
 
+std::string hash_string_sha256(const std::string& str)
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX ctx;
+    SHA256((unsigned char*)str.c_str(),str.length(),hash);
+
+    // Convert hash to a hex string (you can also return raw bytes)
+    std::string hex_hash;
+    std::string number_hash;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        char byte_str[3];
+        hex_hash += byte_str;
+        number_hash += std::to_string(hash[i]);
+    }
+
+    Notify::notify({ResourceManager::load<Texture>("engine/check.png"),
+                    EditorTheme::color_palette_green, "Live Share", "SHA: " + number_hash});
+
+    return hex_hash;
+}
+
+std::string LiveShare::get_current_scene_sha()
+{
+    std::string current_scene_path = Editor::current_scene_path;
+    return hash_string_sha256(current_scene_path);
+}
+
 void LiveShare::send(LiveSharePacketType type,std::string message)
 {
     if(!live_sharing)
@@ -544,8 +670,13 @@ void LiveShare::send(LiveSharePacketType type,std::string message)
         return;
     }
     //Insert the type at the beginning
+    std::string current_scene_path = Editor::current_scene_path;
+
     message.insert(0,1,type);
     message.insert(1,1,user_id);
+
+    message.insert(2, hash_string_sha256(current_scene_path));
+
     ENetPacket* packet = enet_packet_create(message.c_str(),message.length(),ENET_PACKET_FLAG_RELIABLE);
     enet_peer_send(peer,0,packet);
 }
@@ -760,4 +891,13 @@ void LiveShare::send_delete_system(Pomegranate::SystemRef system)
     int id = system->id;
     message += std::string(static_cast<char*>(static_cast<void*>(&id)),sizeof(int));
     send(LIVE_SHARE_PACKET_TYPE_DELETE_SYSTEM,message);
+}
+
+void LiveShare::send_change_group_name(Pomegranate::GroupRef group, std::string name)
+{
+    char* id = static_cast<char*>(static_cast<void*>(&group->id));
+    std::string message;
+    message += std::string(id,sizeof(int));
+    message += name;
+    send(LIVE_SHARE_PACKET_TYPE_CHANGE_GROUP_NAME,message);
 }

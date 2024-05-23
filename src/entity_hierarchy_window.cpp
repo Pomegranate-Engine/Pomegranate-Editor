@@ -825,6 +825,10 @@ void Window_EntityHierarchy::simulate_node(Node *node)
 
 void Window_EntityHierarchy::build_graph(GroupRef group, Node* parent)
 {
+    if(group == nullptr)
+    {
+        return;
+    }
     std::vector<EntityRef> entities = group->get_entities();
     std::vector<GroupRef> groups = group->get_child_groups();
     std::vector<SystemRef> systems = group->get_systems();
