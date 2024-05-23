@@ -691,7 +691,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
     }
 
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
-    ImageRotated((void*)n->texture.get<Texture>()->get_sdl_texture(),ImVec2(node_pos.x, node_pos.y+node_size*3) ,ImVec2(node_size*2, node_size*2), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f),n->velocity.x*0.05f);
+    ImageRotated((void*)n->texture->get_sdl_texture(),ImVec2(node_pos.x, node_pos.y+node_size*3) ,ImVec2(node_size*2, node_size*2), ImVec4(color.r/255.0f, color.g/255.0f, color.b/255.0f, 1.0f),n->velocity.x*0.05f);
     //Make it DragDrop for the inspector
     ImGui::SetItemAllowOverlap();
     ImGui::SetCursorPos(ImVec2(node_pos.x-node_size, node_pos.y-node_size));
@@ -711,7 +711,7 @@ void Window_EntityHierarchy::draw_node(Node* n)
                 ImGui::SetDragDropPayload("Group", &n->group, sizeof(Group *));
             if(n->system != nullptr)
                 ImGui::SetDragDropPayload("System", &n->system, sizeof(System *));
-            ImGui::Image((void *) n->texture.get<Texture>()->get_sdl_texture(), ImVec2(node_size * 2, node_size * 2), ImVec2(0, 0),
+            ImGui::Image((void *) n->texture->get_sdl_texture(), ImVec2(node_size * 2, node_size * 2), ImVec2(0, 0),
                          ImVec2(1, 1), ImVec4(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, 1.0f));
             ImGui::EndDragDropSource();
         }

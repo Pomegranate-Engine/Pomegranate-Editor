@@ -1,7 +1,6 @@
 #include "resource_manager.h"
 namespace Pomegranate
 {
-    std::map<std::string, void*> ResourceRef::resources_refs = std::map<std::string, void*>();
 	std::map<std::string, void*> ResourceManager::resources = std::map<std::string, void*>();
 
     bool ResourceManager::exists(const std::string& path)

@@ -127,7 +127,7 @@ namespace Pomegranate
         SDL_FRect r;
         int w = 0;
         int h = 0;
-        SDL_QueryTexture(s->texture.get<Texture>()->get_sdl_texture(), nullptr, nullptr, &w, &h);
+        SDL_QueryTexture(s->texture->get_sdl_texture(), nullptr, nullptr, &w, &h);
         int screen_w = 0;
         int screen_h = 0;
         float render_scale_x = 1.0;
@@ -143,7 +143,7 @@ namespace Pomegranate
         auto* center = new SDL_FPoint();
         center->x = r.w*s->pivot.x;
         center->y = r.h*s->pivot.y;
-        SDL_SetTextureColorMod(s->texture.get<Texture>()->get_sdl_texture(), s->color.r, s->color.g, s->color.b);
+        SDL_SetTextureColorMod(s->texture->get_sdl_texture(), s->color.r, s->color.g, s->color.b);
         SDL_RendererFlip flip = SDL_FLIP_NONE;
         if(s->flip_horizontal)
         {
@@ -154,7 +154,7 @@ namespace Pomegranate
             flip = (SDL_RendererFlip)(flip|SDL_FLIP_VERTICAL);
         }
 
-        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture.get<Texture>()->get_sdl_texture(), nullptr, &r, t->rot*180.0/3.14159, center, flip);
+        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture->get_sdl_texture(), nullptr, &r, t->rot*180.0/3.14159, center, flip);
     }
 
     void Render::animated_sprite(Entity*e) {
@@ -163,7 +163,7 @@ namespace Pomegranate
         SDL_FRect r;
         int w = 0;
         int h = 0;
-        SDL_QueryTexture(s->texture.get<Texture>()->get_sdl_texture(), nullptr, nullptr, &w, &h);
+        SDL_QueryTexture(s->texture->get_sdl_texture(), nullptr, nullptr, &w, &h);
         int frame_width = w/s->horizontal_frames;
         int frame_height = h/s->vertical_frames;
         int screen_w = 0;
@@ -181,7 +181,7 @@ namespace Pomegranate
         auto* center = new SDL_FPoint();
         center->x = r.w*s->pivot.x;
         center->y = r.h*s->pivot.y;
-        SDL_SetTextureColorMod(s->texture.get<Texture>()->get_sdl_texture(), s->color.r, s->color.g, s->color.b);
+        SDL_SetTextureColorMod(s->texture->get_sdl_texture(), s->color.r, s->color.g, s->color.b);
         SDL_RendererFlip flip = SDL_FLIP_NONE;
         if(s->flip_horizontal)
         {
@@ -193,7 +193,7 @@ namespace Pomegranate
         }
         SDL_FRect src = {(float)(frame_width*s->frame_x),(float)(frame_height*s->frame_y),(float)frame_width,(float)frame_height};
 
-        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture.get<Texture>()->get_sdl_texture(), &src, &r, t->rot*180.0/3.14159, center, flip);
+        SDL_RenderTextureRotated(Window::current->get_sdl_renderer(), s->texture->get_sdl_texture(), &src, &r, t->rot*180.0/3.14159, center, flip);
 
     }
 
@@ -252,7 +252,7 @@ namespace Pomegranate
                         dst.x += t->pos.x;
                         dst.y += t->pos.y;
 
-                        SDL_RenderTexture(Window::current->get_sdl_renderer(), map->tileset_texture.get<Texture>()->get_sdl_texture(), &src, &dst);
+                        SDL_RenderTexture(Window::current->get_sdl_renderer(), map->tileset_texture->get_sdl_texture(), &src, &dst);
                     }
                     i++;
                 }
@@ -331,7 +331,7 @@ namespace Pomegranate
         this->tileset_tile_height = h;
         int wid = 0;
         int hei = 0;
-        SDL_QueryTexture(this->tileset_texture.get<Texture>()->get_sdl_texture(), nullptr, nullptr, &wid, &hei);
+        SDL_QueryTexture(this->tileset_texture->get_sdl_texture(), nullptr, nullptr, &wid, &hei);
         this->tileset_horizontal_tiles = 17;
         this->tileset_vertical_tiles = 8;
     }

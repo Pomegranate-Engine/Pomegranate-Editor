@@ -35,7 +35,7 @@ namespace Pomegranate
         Vec2 offset;
         bool flip_horizontal;
         bool flip_vertical;
-        ResourceRef texture;
+        Texture* texture;
         Color color;
         Sprite();
         void init(Pomegranate::Entity *) override;
@@ -45,7 +45,7 @@ namespace Pomegranate
     class AnimatedSprite : public Component
     {
     public:
-        ResourceRef texture;
+        Texture* texture;
         Color color;
         Vec2 pivot;
         Vec2 offset;
@@ -88,7 +88,7 @@ namespace Pomegranate
     private:
         std::vector<Vec2i*> tiles;
     public:
-        ResourceRef tileset_texture;
+        Texture* tileset_texture;
         int tileset_horizontal_tiles;
         int tileset_vertical_tiles;
         int tileset_tile_width;
