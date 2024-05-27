@@ -1,5 +1,6 @@
 #include "inspector_window.h"
 
+std::string InspectorWindow::resource_name = "";
 int InspectorWindow::element_index = 0;
 bool InspectorWindow::something_dropped = false;
 std::string InspectorWindow::component_search_buffer = "";
@@ -229,6 +230,24 @@ void InspectorWindow::render()
                     Editor::action();
                 }
             }
+        }
+    }
+    else if(ResourcesWindow::selected_resource_file != nullptr)
+    {
+        ResourceFile* resource_file = ResourcesWindow::selected_resource_file;
+        HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_I}, "Focus Inspector", focus});
+        if(resource_name.empty())
+        {
+            resource_name = resource_file->path;
+        }
+        property_field("Name", &resource_name);
+        if(ImGui::IsItemDeactivatedAfterEdit())
+        {
+            //Rename it with the new name
+            std::filesystem::rename(resource_file->path, resource_name);
+            resource_file->path = resource_name;
+            //Rename metadata file
+            std::filesystem::rename(resource_file->path + ".meta", resource_name + ".meta");
         }
     }
     else

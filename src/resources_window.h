@@ -1,6 +1,7 @@
 #ifndef POMEGRANATE_LIBRARY_RESOURCES_WINDOW_H
 #define POMEGRANATE_LIBRARY_RESOURCES_WINDOW_H
 #include "editor_window.h"
+#include "entity_hierarchy_window.h"
 #include "Pomegranate/resource_manager.h"
 #include "Pomegranate/ttf_font.h"
 #include "Pomegranate/texture.h"
@@ -68,10 +69,12 @@ public:
 class ResourcesWindow : public EditorWindow
 {
 public:
+    static std::string add_tag;
     static std::string search;
     static bool searching;
     static std::vector<std::string> search_tags;
     static std::vector<ResourceFile> resource_files;
+    static ResourceFile* selected_resource_file;
     static void add_resource_file(ResourceFile file);
     float time_since_last_reload;
     Resource* selected_resource;
