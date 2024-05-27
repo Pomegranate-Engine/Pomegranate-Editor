@@ -1,5 +1,6 @@
 #ifndef POMEGRANATE_LIBRARY_INSPECTOR_WINDOW_H
 #define POMEGRANATE_LIBRARY_INSPECTOR_WINDOW_H
+#include "resources_window.h"
 #include "entity_hierarchy_window.h"
 #include "Imgui/misc/cpp/imgui_stdlib.h"
 #include "Imgui/imgui_internal.h"
@@ -16,6 +17,7 @@ struct InspectorHeaderTag
 class InspectorWindow : public EditorWindow
 {
 public:
+    static std::string resource_name;
     static int element_index;
     static bool something_dropped;
     static std::string component_search_buffer;
