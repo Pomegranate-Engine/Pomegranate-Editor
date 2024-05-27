@@ -158,6 +158,8 @@ elseif(WIN32)
             ${LIBRARIES_DIR}/glew32.lib
             ${LIBRARIES_DIR}/glew32s.lib
             ${LIBRARIES_DIR}/enet64.lib
+            ${LIBRARIES_DIR}/libssl.lib
+            ${LIBRARIES_DIR}/libcrypto.lib
             winmm.lib
             ws2_32.lib
     )
@@ -173,6 +175,8 @@ elseif(WIN32)
     )
     target_link_libraries(Pomegranate_LiveShareServer PRIVATE
             ${LIBRARIES_DIR}/enet64.lib
+            ${LIBRARIES_DIR}/libssl.lib
+            ${LIBRARIES_DIR}/libcrypto.lib
             winmm.lib
             ws2_32.lib
     )
