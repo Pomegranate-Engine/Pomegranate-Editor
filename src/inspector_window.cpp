@@ -1,6 +1,7 @@
 #include "inspector_window.h"
 
 std::string InspectorWindow::resource_name = "";
+ResourceFile* InspectorWindow::resource = nullptr;
 int InspectorWindow::element_index = 0;
 bool InspectorWindow::something_dropped = false;
 std::string InspectorWindow::component_search_buffer = "";
@@ -236,7 +237,7 @@ void InspectorWindow::render()
     {
         ResourceFile* resource_file = ResourcesWindow::selected_resource_file;
         HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_I}, "Focus Inspector", focus});
-        if(resource_name.empty())
+        if(resource_name.empty() || resource != ResourcesWindow::selected_resource_file)
         {
             resource_name = resource_file->path;
         }

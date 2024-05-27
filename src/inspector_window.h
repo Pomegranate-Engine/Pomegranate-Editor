@@ -18,6 +18,7 @@ class InspectorWindow : public EditorWindow
 {
 public:
     static std::string resource_name;
+    static ResourceFile* resource;
     static int element_index;
     static bool something_dropped;
     static std::string component_search_buffer;
