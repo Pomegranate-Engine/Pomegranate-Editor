@@ -642,15 +642,15 @@ GroupRef open_scene(const char *path)
         GroupRef ref = open_scene_from_json(data);
         return ref;
     }
-    Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Scene Loading Error", "Failed to open scene file: " + std::string(path)});
+    Notify::notify({ResourceManager::load<Texture>("engine/error.png"),EditorTheme::color_palette_red,"Scene Loading Error", "Failed to open scene file: " + std::string(path)});
     return nullptr;
     try {
 
     }
     catch (std::exception& e)
     {
-        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Scene Loading Error", "Failed to open scene file: " + std::string(path)});
-        Notify::notify({ResourceManager::load<Texture>("assets/notify/error.png"),EditorTheme::color_palette_red,"Scene Loading Error", e.what()});
+        Notify::notify({ResourceManager::load<Texture>("engine/error.png"),EditorTheme::color_palette_red,"Scene Loading Error", "Failed to open scene file: " + std::string(path)});
+        Notify::notify({ResourceManager::load<Texture>("engine/error.png"),EditorTheme::color_palette_red,"Scene Loading Error", e.what()});
         return nullptr;
     }
 }

@@ -473,7 +473,7 @@ void ResourcesWindow::load_resources()
 
             add_resource_file(f);
             //Load resource into resource manager
-            ResourceManager::load<Texture>(file.first);
+            ResourceManager::load<LuaSystemScript>(file.first);
         }
         else if (file.first.find(".wav") != std::string::npos)
         {
