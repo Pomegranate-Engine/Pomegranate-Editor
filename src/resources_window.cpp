@@ -309,7 +309,7 @@ void ResourcesWindow::render()
             }
         }
 
-        if(ImGui::IsItemHovered() && ImGui::IsMouseClicked(0))
+        if(ImGui::IsItemHovered() && !ImGui::IsMouseDragging(0) && ImGui::IsMouseReleased(0))
         {
             selected_resource_file = &file;
             Window_EntityHierarchy::selected_node = nullptr;
