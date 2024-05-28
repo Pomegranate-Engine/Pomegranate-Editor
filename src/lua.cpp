@@ -100,37 +100,37 @@ LuaSystem::LuaSystem()
 #pragma region debug
 //Dubug functions register
 
-int lua_print_info(lua_State *L)
+static int lua_print_info(lua_State *L)
 {
     print_info(lua_tostring(L, 1));
     return 0;
 }
 
-int lua_print_error(lua_State *L)
+static int lua_print_error(lua_State *L)
 {
     print_error(lua_tostring(L, 1));
     return 0;
 }
 
-int lua_print_warn(lua_State *L)
+static int lua_print_warn(lua_State *L)
 {
     print_warn(lua_tostring(L, 1));
     return 0;
 }
 
-int lua_print_debug(lua_State *L)
+static int lua_print_debug(lua_State *L)
 {
     print_debug(lua_tostring(L, 1));
     return 0;
 }
 
-int lua_print_pass(lua_State *L)
+static int lua_print_pass(lua_State *L)
 {
     print_pass(lua_tostring(L, 1));
     return 0;
 }
 
-int lua_print_fail(lua_State *L)
+static int lua_print_fail(lua_State *L)
 {
     print_fail(lua_tostring(L, 1));
     return 0;
@@ -140,7 +140,7 @@ int lua_print_fail(lua_State *L)
 
 #pragma region editor
 
-int lua_notify_pass(lua_State *L)
+static int lua_notify_pass(lua_State *L)
 {
     const char* title = lua_tostring(L, 1);
     const char* message = lua_tostring(L, 2);
@@ -148,7 +148,7 @@ int lua_notify_pass(lua_State *L)
     return 0;
 }
 
-int lua_notify_error(lua_State *L)
+static int lua_notify_error(lua_State *L)
 {
     const char* title = lua_tostring(L, 1);
     const char* message = lua_tostring(L, 2);
@@ -156,7 +156,7 @@ int lua_notify_error(lua_State *L)
     return 0;
 }
 
-int lua_notify_warn(lua_State *L)
+static int lua_notify_warn(lua_State *L)
 {
     const char* title = lua_tostring(L, 1);
     const char* message = lua_tostring(L, 2);
@@ -169,14 +169,14 @@ int lua_notify_warn(lua_State *L)
 
 #pragma region math
 
-int lua_vec2_index(lua_State* L);
-int lua_vec2_set_index(lua_State* L);
-int lua_vec2_add(lua_State* L);
-int lua_vec2_sub(lua_State* L);
-int lua_vec2_mul(lua_State* L);
-int lua_vec2_div(lua_State* L);
+static int lua_vec2_index(lua_State* L);
+static int lua_vec2_set_index(lua_State* L);
+static int lua_vec2_add(lua_State* L);
+static int lua_vec2_sub(lua_State* L);
+static int lua_vec2_mul(lua_State* L);
+static int lua_vec2_div(lua_State* L);
 
-int lua_vec2_new(lua_State* L)
+static int lua_vec2_new(lua_State* L)
 {
     float x = lua_tonumber(L, 1);
     float y = lua_tonumber(L, 2);
@@ -207,7 +207,7 @@ int lua_vec2_new(lua_State* L)
 }
 
 //Index
-int lua_vec2_index(lua_State* L)
+static int lua_vec2_index(lua_State* L)
 {
     Vec2* vec = (Vec2*)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
@@ -225,7 +225,7 @@ int lua_vec2_index(lua_State* L)
 }
 
 //Set index
-int lua_vec2_set_index(lua_State* L)
+static int lua_vec2_set_index(lua_State* L)
 {
     Vec2* vec = (Vec2*)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
@@ -243,7 +243,7 @@ int lua_vec2_set_index(lua_State* L)
 }
 
 //Add
-int lua_vec2_add(lua_State* L)
+static int lua_vec2_add(lua_State* L)
 {
     Vec2* vec1 = (Vec2*)lua_touserdata(L, 1);
     Vec2* vec2 = (Vec2*)lua_touserdata(L, 2);
@@ -253,7 +253,7 @@ int lua_vec2_add(lua_State* L)
 }
 
 //Sub
-int lua_vec2_sub(lua_State* L)
+static int lua_vec2_sub(lua_State* L)
 {
     Vec2* vec1 = (Vec2*)lua_touserdata(L, 1);
     Vec2* vec2 = (Vec2*)lua_touserdata(L, 2);
@@ -263,7 +263,7 @@ int lua_vec2_sub(lua_State* L)
 }
 
 //Mul
-int lua_vec2_mul(lua_State* L)
+static int lua_vec2_mul(lua_State* L)
 {
     Vec2* vec1 = (Vec2*)lua_touserdata(L, 1);
     //Check if the second argument is a number
@@ -284,7 +284,7 @@ int lua_vec2_mul(lua_State* L)
 }
 
 //Div
-int lua_vec2_div(lua_State* L)
+static int lua_vec2_div(lua_State* L)
 {
     Vec2* vec1 = (Vec2*)lua_touserdata(L, 1);
     //Check if the second argument is a number
@@ -305,14 +305,14 @@ int lua_vec2_div(lua_State* L)
 }
 
 //Vec3
-int lua_vec3_index(lua_State* L);
-int lua_vec3_set_index(lua_State* L);
-int lua_vec3_add(lua_State* L);
-int lua_vec3_sub(lua_State* L);
-int lua_vec3_mul(lua_State* L);
-int lua_vec3_div(lua_State* L);
+static int lua_vec3_index(lua_State* L);
+static int lua_vec3_set_index(lua_State* L);
+static int lua_vec3_add(lua_State* L);
+static int lua_vec3_sub(lua_State* L);
+static int lua_vec3_mul(lua_State* L);
+static int lua_vec3_div(lua_State* L);
 
-int lua_vec3_new(lua_State* L)
+static int lua_vec3_new(lua_State* L)
 {
     float x = lua_tonumber(L, 1);
     float y = lua_tonumber(L, 2);
@@ -344,7 +344,7 @@ int lua_vec3_new(lua_State* L)
 }
 
 //Index
-int lua_vec3_index(lua_State* L)
+static int lua_vec3_index(lua_State* L)
 {
     Vec3* vec = (Vec3*)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
@@ -367,7 +367,7 @@ int lua_vec3_index(lua_State* L)
 }
 
 //Set index
-int lua_vec3_set_index(lua_State* L)
+static int lua_vec3_set_index(lua_State* L)
 {
     Vec3* vec = (Vec3*)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
@@ -390,7 +390,7 @@ int lua_vec3_set_index(lua_State* L)
 }
 
 //Add
-int lua_vec3_add(lua_State* L)
+static int lua_vec3_add(lua_State* L)
 {
     Vec3* vec1 = (Vec3*)lua_touserdata(L, 1);
     Vec3* vec2 = (Vec3*)lua_touserdata(L, 2);
@@ -400,7 +400,7 @@ int lua_vec3_add(lua_State* L)
 }
 
 //Sub
-int lua_vec3_sub(lua_State* L)
+static int lua_vec3_sub(lua_State* L)
 {
     Vec3* vec1 = (Vec3*)lua_touserdata(L, 1);
     Vec3* vec2 = (Vec3*)lua_touserdata(L, 2);
@@ -410,7 +410,7 @@ int lua_vec3_sub(lua_State* L)
 }
 
 //Mul
-int lua_vec3_mul(lua_State* L)
+static int lua_vec3_mul(lua_State* L)
 {
     Vec3* vec1 = (Vec3*)lua_touserdata(L, 1);
     //Check if the second argument is a number
@@ -431,7 +431,7 @@ int lua_vec3_mul(lua_State* L)
 }
 
 //Div
-int lua_vec3_div(lua_State* L)
+static int lua_vec3_div(lua_State* L)
 {
     Vec3* vec1 = (Vec3*)lua_touserdata(L, 1);
     //Check if the second argument is a number
@@ -450,6 +450,199 @@ int lua_vec3_div(lua_State* L)
         return 1;
     }
 }
+
+#pragma endregion
+
+#pragma region ecs
+
+static int lua_entity_index(lua_State* L);
+static int lua_entity_set_index(lua_State* L);
+
+static int lua_entity_new(lua_State* L)
+{
+    const char* name = lua_tostring(L, 1);
+    Entity* e = new Entity();
+    e->name = name;
+    lua_pushlightuserdata(L, e);
+
+    lua_newtable(L);
+    lua_pushcfunction(L, lua_entity_index);
+    lua_setfield(L, -2, "__index");
+
+    lua_pushcfunction(L, lua_entity_set_index);
+    lua_setfield(L, -2, "__newindex");
+
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
+static int lua_entity_index(lua_State* L)
+{
+    Entity* e = (Entity*)lua_touserdata(L, 1);
+    const char* key = lua_tostring(L, 2);
+    if(strcmp(key, "name") == 0)
+    {
+        lua_pushstring(L, e->name.c_str());
+        return 1;
+    }
+    else if(strcmp(key, "id") == 0)
+    {
+        lua_pushnumber(L, e->get_id());
+        return 1;
+    }
+    return 0;
+}
+
+static int lua_entity_set_index(lua_State* L)
+{
+    Entity* e = (Entity*)lua_touserdata(L, 1);
+    const char* key = lua_tostring(L, 2);
+    if(strcmp(key, "name") == 0)
+    {
+        e->name = lua_tostring(L, 3);
+        return 0;
+    }
+    else if(strcmp(key, "id"))
+    {
+        e->set_id(lua_tonumber(L, 3));
+        return 0;
+    }
+    return 0;
+}
+
+static int lua_group_set_index(lua_State* L)
+{
+    Group* g = (Group*)lua_touserdata(L, 1);
+    const char* key = lua_tostring(L, 2);
+
+    if(strcmp(key, "name") == 0)
+    {
+        g->name = lua_tostring(L, 3);
+        return 0;
+    }
+    else if(strcmp(key, "id") == 0)
+    {
+        g->set_id(lua_tonumber(L, 3));
+        return 0;
+    }
+    return 0;
+}
+
+static int lua_group_add_entity(lua_State* L)
+{
+    Group* g = (Group*)lua_touserdata(L, 1);
+    Entity* e = (Entity*)lua_touserdata(L, 2);
+    g->add_entity(e);
+
+    return 0;
+}
+
+static int lua_group_add_group(lua_State* L)
+{
+    Group* g = (Group*)lua_touserdata(L, 1);
+    Group* g2 = (Group*)lua_touserdata(L, 2);
+    g->add_group(g2);
+
+    return 0;
+}
+
+static int lua_group_add_system(lua_State* L)
+{
+    Group* g = (Group*)lua_touserdata(L, 1);
+    System* s = (System*)lua_touserdata(L, 2);
+    g->add_system(s);
+
+    return 0;
+}
+
+static int lua_group_index(lua_State* L)
+{
+    // Ensure the first argument is a userdata (Group*)
+    Group* g = static_cast<Group*>(luaL_checkudata(L, 1, "Group"));
+    if (!g) {
+        luaL_error(L, "Expected a Group userdata");
+        return 0; // Although luaL_error doesn't return, this is good practice
+    }
+
+    // Ensure the second argument is a string (key)
+    const char* key = luaL_checkstring(L, 2);
+    if (!key) {
+        luaL_error(L, "Expected a string as key");
+        return 0; // Again, good practice
+    }
+
+    if (strcmp(key, "add_system") == 0)
+    {
+        lua_pushcfunction(L, lua_group_add_system);
+        return 1;
+    }
+    else if (strcmp(key, "add_entity") == 0)
+    {
+        lua_pushcfunction(L,lua_group_add_entity);
+        return 1;
+    }
+    else if (strcmp(key, "add_group") == 0)
+    {
+        lua_pushcfunction(L, lua_group_add_group);
+        return 1;
+    }
+    else if (strcmp(key, "name") == 0)
+    {
+        lua_pushstring(L, g->name.c_str());
+        return 1;
+    }
+    else if (strcmp(key, "id") == 0)
+    {
+        lua_pushnumber(L, g->id);
+        return 1;
+    }
+
+    return 0;
+}
+
+static int lua_find_group(lua_State* L)
+{
+    const char* name = lua_tostring(L, 1);
+    GroupRef g = Group::get_group(name);
+    Group* group = g.get();
+
+    if(group == nullptr)
+    {
+        lua_pushnil(L);
+        return 1;
+    }
+
+    lua_pushlightuserdata(L, group);
+
+    lua_newtable(L);
+    lua_pushcfunction(L, lua_group_index);
+    lua_setfield(L, -2, "__index");
+
+    lua_pushcfunction(L, lua_group_set_index);
+    lua_setfield(L, -2, "__newindex");
+
+    lua_setmetatable(L, -2);
+
+    return 1;
+}
+
+static int lua_group_new(lua_State* L)
+{
+    const char* name = lua_tostring(L, 1);
+    Group* g = new Group(name);
+    lua_pushlightuserdata(L, g);
+
+    lua_newtable(L);
+    lua_pushcfunction(L, lua_group_index);
+    lua_setfield(L, -2, "__index");
+
+    lua_pushcfunction(L, lua_group_set_index);
+    lua_setfield(L, -2, "__newindex");
+
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
 
 #pragma endregion
 
@@ -477,7 +670,17 @@ luaL_Reg lua_pomegranate_math[] = {
         {nullptr, nullptr}
 };
 
-int luaL_openpomegranate(lua_State *L)
+luaL_Reg lua_pomegranate_ecs[] = {
+        {"Entity", lua_entity_new},
+        {"Group", lua_group_new},
+        {"find_group", lua_find_group},
+        {"group_add_entity", lua_group_add_entity},
+        {"group_add_group", lua_group_add_group},
+        {"group_add_system", lua_group_add_system},
+        {nullptr, nullptr}
+};
+
+static int luaL_openpomegranate(lua_State *L)
 {
     lua_newtable(L);
 
@@ -501,5 +704,12 @@ int luaL_openpomegranate(lua_State *L)
 
     // Set the math subtable into the pomegranate table
     lua_setfield(L, -2, "math");
+
+    // Create the ecs subtable
+    lua_newtable(L);
+    luaL_setfuncs(L, lua_pomegranate_ecs, 0);
+
+    // Set the ecs subtable into the pomegranate table
+    lua_setfield(L, -2, "ecs");
     return 1;
 }
