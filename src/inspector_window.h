@@ -25,6 +25,7 @@ public:
     Component* right_clicked_component = nullptr;
     static void property_field(const char* name, std::string* value);
     static void property_field(const char* name, float* value);
+    static void property_field(const char* name, double* value);
     static void property_field(const char* name, int* value);
     static void property_field(const char* name, bool* value);
     static void property_field(const char* name, Vec2* value);
@@ -34,6 +35,7 @@ public:
     static void property_field(const char* name, TTFFont** value);
     static void property_field(const char* name, Entity** value);
     static void property_field(const char* name, LuaComponentScript** value);
+    static void property_field(const char* name, LuaSystemScript** value);
     static std::string get_element(std::string name);
 
     InspectorWindow();

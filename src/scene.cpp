@@ -272,95 +272,81 @@ json save_scene_as_json(GroupRef scene)
                             j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"]["data"].back()["data"] = json::object();
                             for (auto [key,value] : script->component_data)
                             {
-                                if (value.type() == typeid(int)) {
+                                if (value.first == &typeid(int)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "int";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = std::any_cast<int>(
-                                            value);
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = *(int*)value.second;
                                 }
-                                else if (value.type() == typeid(float)) {
+                                else if (value.first == &typeid(float)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "float";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = std::any_cast<float>(
-                                            value);
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = *(float*)value.second;
                                 }
-                                else if (value.type() == typeid(double)) {
+                                else if (value.first == &typeid(double)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "double";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = std::any_cast<double>(
-                                            value);
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = *(double*)value.second;
                                 }
-                                else if (value.type() == typeid(bool)) {
+                                else if (value.first == &typeid(bool)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "bool";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = std::any_cast<bool>(
-                                            value);
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = *(bool*)value.second;
                                 }
-                                else if (value.type() == typeid(std::string)) {
+                                else if (value.first == &typeid(std::string)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "string";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = std::any_cast<std::string>(
-                                            value);
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["value"] = *(std::string*)value.second;
                                 }
-                                else if (value.type() == typeid(Vec2)) {
+                                else if (value.first == &typeid(Vec2)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "vec2";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["x"] = std::any_cast<Vec2>(
-                                            value).x;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["x"] = (*(Vec2*)value.second).x;
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["y"] = std::any_cast<Vec2>(
-                                            value).y;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["y"] = (*(Vec2*)value.second).y;
                                 }
-                                else if (value.type() == typeid(Vec3)) {
+                                else if (value.first == &typeid(Vec3)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "vec3";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["x"] = std::any_cast<Vec3>(
-                                            value).x;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["x"] = (*(Vec3*)value.second).x;
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["y"] = std::any_cast<Vec3>(
-                                            value).y;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["y"] = (*(Vec3*)value.second).y;
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["z"] = std::any_cast<Vec3>(
-                                            value).z;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["z"] = (*(Vec3*)value.second).z;
                                 }
-                                else if (value.type() == typeid(Color)) {
+                                else if (value.first == &typeid(Color)) {
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key] = json::object();
                                     j["entities"][std::to_string(
                                             entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["type"] = "color";
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["r"] = std::any_cast<Color>(
-                                            value).r;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["r"] = (*(Color*)value.second).r;
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["g"] = std::any_cast<Color>(
-                                            value).g;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["g"] = (*(Color*)value.second).g;
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["b"] = std::any_cast<Color>(
-                                            value).b;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["b"] = (*(Color*)value.second).b;
                                     j["entities"][std::to_string(
-                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["a"] = std::any_cast<Color>(
-                                            value).a;
+                                            entity->id)]["components"][type_name][name]["value"]["data"].back()["data"][key]["a"] = (*(Color*)value.second).a;
                                 }
                             }
                         }
@@ -582,28 +568,28 @@ GroupRef open_scene_from_json(json data)
                             for (auto& [key, value] : script["data"].items())
                             {
                                 if (value["type"] == "int") {
-                                    s->set(key, value["value"].get<int>());
+                                    *(int*)s->component_data[key].second = value["value"].get<int>();
                                 }
                                 else if (value["type"] == "float") {
-                                    s->set(key, value["value"].get<float>());
+                                    *(float*)s->component_data[key].second = value["value"].get<float>();
                                 }
                                 else if (value["type"] == "double") {
-                                    s->set(key, value["value"].get<double>());
+                                    *(double*)s->component_data[key].second = value["value"].get<double>();
                                 }
                                 else if (value["type"] == "bool") {
-                                    s->set(key, value["value"].get<bool>());
+                                    *(bool*)s->component_data[key].second = value["value"].get<bool>();
                                 }
                                 else if (value["type"] == "string") {
-                                    s->set(key, value["value"].get<std::string>());
+                                    *(std::string*)s->component_data[key].second = value["value"].get<std::string>();
                                 }
                                 else if (value["type"] == "vec2") {
-                                    s->set(key, Vec2(value["x"].get<float>(), value["y"].get<float>()));
+                                    *(Vec2*)s->component_data[key].second = Vec2(value["x"].get<float>(), value["y"].get<float>());
                                 }
                                 else if (value["type"] == "vec3") {
-                                    s->set(key, Vec3(value["x"].get<float>(), value["y"].get<float>(), value["z"].get<float>()));
+                                    *(Vec3*)s->component_data[key].second = Vec3(value["x"].get<float>(), value["y"].get<float>(), value["z"].get<float>());
                                 }
                                 else if (value["type"] == "color") {
-                                    s->set(key, Color(value["r"].get<uint8_t>(), value["g"].get<uint8_t>(), value["b"].get<uint8_t>(), value["a"].get<uint8_t>()));
+                                    *(Color*)s->component_data[key].second = Color(value["r"].get<uint8_t>(), value["g"].get<uint8_t>(), value["b"].get<uint8_t>(), value["a"].get<uint8_t>());
                                 }
                             }
                             scripts.push_back(s);

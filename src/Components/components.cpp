@@ -17,34 +17,6 @@ public:
         push_data<Vec2>("velocity", &velocity);
     }
 };
-class PlayerController : public System
-{
-    void tick(Pomegranate::Entity *e) override
-    {
-        if(e->has_component<LuaComponent>())
-        {
-            auto* player = e->get_component<LuaComponent>()->get_component("PlayerComponent");
-            auto* transform = e->transform;
-            Vec2 v = player->get<Vec2>("velocity");
-            if (InputManager::get_key(SDL_SCANCODE_W)) {
-                v.y -= 1*player->get<double>("speed");
-            }
-            if (InputManager::get_key(SDL_SCANCODE_S)) {
-                v.y += 1*player->get<double>("speed");
-            }
-            if (InputManager::get_key(SDL_SCANCODE_A)) {
-                v.x -= 1*player->get<double>("speed");
-            }
-            if (InputManager::get_key(SDL_SCANCODE_D)) {
-                v.x += 1*player->get<double>("speed");
-            }
-            float deceleration = player->get<double>("deceleration");
-            v -= v * deceleration*delta_time;
-            transform->pos += v;
-            player->set("velocity",v);
-        }
-    }
-};
 class CameraFollow : public Component
 {
 public:

@@ -9,15 +9,18 @@ using namespace Pomegranate;
 #include <any>
 #include"notifications.h"
 
+extern lua_State* lua_state;
+
 class LuaComponentScript : public Resource
 {
 public:
     std::string script;
     std::string name;
-    std::unordered_map<std::string, std::any> component_data;
+
+    std::unordered_map<std::string, std::pair<const std::type_info*, void*>> component_data;
     LuaComponentScript(std::string path);
     void run_script();
-    void set(std::string name, std::any value);
+    template <typename T> void set(std::string name, void* value);
     template <typename T> T get(std::string name);
 };
 
@@ -27,6 +30,7 @@ public:
     std::vector<LuaComponentScript*> scripts;
     void init(Entity *e) override;
     LuaComponentScript* get_component(std::string name);
+    int lua_get_component(lua_State* L);
 };
 
 class LuaSystemScript : public Resource
@@ -35,8 +39,6 @@ public:
     std::string script;
     std::string name;
 
-    lua_State* L;
-
     LuaSystemScript(std::string path);
     ~LuaSystemScript();
     void run_script();
@@ -44,7 +46,10 @@ public:
 
 class LuaSystem : public System
 {
+private:
+    LuaSystemScript* previous_script = nullptr;
 public:
+
     LuaSystemScript* script;
     LuaSystem();
     void tick(Entity* e) override;

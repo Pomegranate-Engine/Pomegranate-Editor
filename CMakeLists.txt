@@ -128,6 +128,7 @@ if(APPLE)
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libenet.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libssl.dylib
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libcrypto.dylib
+            ${CMAKE_SOURCE_DIR}/Lib/Arm/libtea.a
             ${LUAJIT_LIBRARY}
     )
 

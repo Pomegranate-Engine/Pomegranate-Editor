@@ -55,6 +55,11 @@ void InspectorWindow::render()
                         for (auto j = component->component_data.begin(); j != component->component_data.end(); j++) {
                             something_dropped = false;
                             std::string property_name = std::string(j->first);
+                            if(property_name[0] == '_')
+                            {
+                                continue;
+                            }
+
                             if (j->second.second != nullptr) {
                                 element_index++;
                                 if(header_open)
@@ -232,6 +237,14 @@ void InspectorWindow::render()
                 }
             }
         }
+        else if(Node::selected->system != nullptr)
+        {
+            //Check if it's lua system
+            if(typeid(*Node::selected->system.get()).hash_code() == typeid(LuaSystem).hash_code()) {
+                LuaSystem *system = (LuaSystem *) Node::selected->system.get();
+                property_field("script", &system->script);
+            }
+        }
     }
     else if(ResourcesWindow::selected_resource_file != nullptr)
     {
@@ -276,6 +289,11 @@ void InspectorWindow::property_field(const char *name, std::string* value)
 void InspectorWindow::property_field(const char *name, float* value)
 {
     ImGui::InputFloat(get_element(name).c_str(), value);
+}
+
+void InspectorWindow::property_field(const char *name, double* value)
+{
+    ImGui::InputDouble(get_element(name).c_str(), value);
 }
 
 void InspectorWindow::property_field(const char *name, int* value)
@@ -408,7 +426,7 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
     {
         const ImGuiPayload* pay = ImGui::GetDragDropPayload();
         print_info(pay->DataType);
-        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_script"))
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_component_script"))
         {
             InspectorWindow::something_dropped = true;
             LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
@@ -426,71 +444,84 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
         {
             for (auto [key,value] : lua->component_data)
             {
-                if(value.has_value())
+                if(key[0] == '_')
                 {
-                    if(&value.type() == &typeid(double))
+                    continue;
+                }
+                if(value.second!=nullptr)
+                {
+                    if(value.first == &typeid(double))
                     {
-                        float v = (float)std::any_cast<double>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = (double)v;
+                        property_field(key.c_str(), (double*)value.second);
                     }
-                    else if(&value.type() == &typeid(int))
+                    if(value.first == &typeid(float))
                     {
-                        int v = std::any_cast<int>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (float*)value.second);
                     }
-                    else if(&value.type() == &typeid(bool))
+                    else if(value.first == &typeid(int))
                     {
-                        bool v = std::any_cast<bool>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (int*)value.second);
                     }
-                    else if(&value.type() == &typeid(std::string))
+                    else if(value.first == &typeid(bool))
                     {
-                        std::string v = std::any_cast<std::string>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (bool*)value.second);
                     }
-                    else if(&value.type() == &typeid(Vec2))
+                    else if(value.first == &typeid(std::string))
                     {
-                        Vec2 v = std::any_cast<Vec2>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (std::string*)value.second);
                     }
-                    else if(&value.type() == &typeid(Vec3))
+                    else if(value.first == &typeid(Vec2))
                     {
-                        Vec3 v = std::any_cast<Vec3>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (Vec2*)value.second);
                     }
-                    else if(&value.type() == &typeid(Color))
+                    else if(value.first == &typeid(Vec3))
                     {
-                        Color v = std::any_cast<Color>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (Vec3*)value.second);
                     }
-                    else if(&value.type() == &typeid(Texture*))
+                    else if(value.first == &typeid(Color))
                     {
-                        Texture* v = std::any_cast<Texture*>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (Color*)value.second);
                     }
-                    else if(&value.type() == &typeid(TTFFont*))
+                    else if(value.first == &typeid(Texture*))
                     {
-                        TTFFont* v = std::any_cast<TTFFont*>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (Texture**)value.second);
                     }
-                    else if(&value.type() == &typeid(Entity*))
+                    else if(value.first == &typeid(TTFFont*))
                     {
-                        Entity* v = std::any_cast<Entity*>(value);
-                        property_field(key.c_str(), &v);
-                        lua->component_data[key] = v;
+                        property_field(key.c_str(), (TTFFont**)value.second);
+                    }
+                    else if(value.first == &typeid(Entity*))
+                    {
+                        property_field(key.c_str(), (Entity**)value.second);
                     }
                 }
             }
         }
+    }
+}
+
+void InspectorWindow::property_field(const char *name, LuaSystemScript **value)
+{
+    //This will be a drag and drop field
+    ImGui::Text("%s", name);
+    //Create button to open file dialog and be drop target
+    ImGui::SameLine();
+    if(ImGui::Button(*value==nullptr?"None":(*value)->path.c_str()))
+    {
+        //Open file dialog
+        //Set the texture to the selected texture
+    }
+    //Drop target
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_system_script"))
+        {
+            InspectorWindow::something_dropped = true;
+            LuaSystemScript* lua = *(LuaSystemScript**)payload->Data;
+            *value = lua;
+            print_info("Texture Dropped");
+        }
+        ImGui::EndDragDropTarget();
     }
 }
 

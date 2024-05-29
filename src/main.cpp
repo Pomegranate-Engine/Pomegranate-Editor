@@ -98,7 +98,6 @@ int main(int argc, char* argv[])
     register_component(ParticleEmitter);
 
     //Register systems
-    register_system(PlayerController);
     register_system(Render);
     register_system(RigidBody);
     register_system(KinematicBody);

@@ -82,8 +82,10 @@ std::string resource_type_2_string(ResourceType type)
             return "Texture";
         case ResourceType::RESOURCE_TYPE_AUDIO:
             return "Audio";
-        case ResourceType::RESOURCE_TYPE_LUA_SCRIPT:
-            return "Lua Script";
+        case ResourceType::RESOURCE_TYPE_LUA_COMPONENT_SCRIPT:
+            return "Lua Component Script";
+        case ResourceType::RESOURCE_TYPE_LUA_SYSTEM_SCRIPT:
+            return "Lua System Script";
         case ResourceType::RESOURCE_TYPE_FONT:
             return "Font";
         case ResourceType::RESOURCE_TYPE_SHADER:
@@ -353,9 +355,19 @@ void ResourcesWindow::render()
                 ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
                 ImGui::EndDragDropSource();
             }
-            else if(file.type == ResourceType::RESOURCE_TYPE_LUA_SCRIPT)
+            else if(file.type == ResourceType::RESOURCE_TYPE_LUA_SYSTEM_SCRIPT)
             {
-                ImGui::SetDragDropPayload("resource_lua_script", file.path.c_str(), file.path.size());
+                LuaSystemScript *script = ResourceManager::load<LuaSystemScript>(file.path);
+                ImGui::SetDragDropPayload("resource_lua_system_script", &script, sizeof(LuaSystemScript **) );
+                ImGui::Text(file.path.c_str());
+                ImGui::SameLine();
+                ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
+                ImGui::EndDragDropSource();
+            }
+            else if(file.type == ResourceType::RESOURCE_TYPE_LUA_COMPONENT_SCRIPT)
+            {
+                LuaSystemScript *script = ResourceManager::load<LuaSystemScript>(file.path);
+                ImGui::SetDragDropPayload("resource_lua_component_script", &script, sizeof(LuaSystemScript **) );
                 ImGui::Text(file.path.c_str());
                 ImGui::SameLine();
                 ImGui::Image((ImTextureID) file.icon->get_sdl_texture(), ImVec2(24, 24));
@@ -459,9 +471,29 @@ void ResourcesWindow::load_resources()
                 ResourceTag tag("Script", Color(255,255,255,255), 0);
                 tags.push_back(tag);
             }
+            //Read the file
+            std::string first_line = "";
+            std::ifstream lua_file(file.first);
+            if(lua_file.is_open())
+            {
+                std::getline(lua_file, first_line);
+                lua_file.close();
+            }
+
+            ResourceType type = ResourceType::RESOURCE_TYPE_LUA_COMPONENT_SCRIPT;
+
+            if(first_line.starts_with("--system"))
+            {
+                type = ResourceType::RESOURCE_TYPE_LUA_SYSTEM_SCRIPT;
+            }
+            else if(first_line.starts_with("--component"))
+            {
+                type = ResourceType::RESOURCE_TYPE_LUA_COMPONENT_SCRIPT;
+            }
+
             ResourceFile f = {
                     file.first,
-                    ResourceType::RESOURCE_TYPE_LUA_SCRIPT,
+                    type,
                     tags,
                     ResourceManager::load<Texture>("engine/system.png")
             };
@@ -473,7 +505,14 @@ void ResourcesWindow::load_resources()
 
             add_resource_file(f);
             //Load resource into resource manager
-            ResourceManager::load<LuaSystemScript>(file.first);
+            if(type == ResourceType::RESOURCE_TYPE_LUA_SYSTEM_SCRIPT)
+            {
+                ResourceManager::load<LuaSystemScript>(file.first);
+            }
+            else if(type == ResourceType::RESOURCE_TYPE_LUA_COMPONENT_SCRIPT)
+            {
+                ResourceManager::load<LuaComponentScript>(file.first);
+            }
         }
         else if (file.first.find(".wav") != std::string::npos)
         {
