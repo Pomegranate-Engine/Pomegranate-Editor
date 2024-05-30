@@ -422,6 +422,7 @@ static int lua_vec3_index(lua_State* L)
     }
     if(strcmp(key, "z") == 0)
     {
+        print_info("Getting z");
         lua_pushnumber(L, vec->z);
         return 1;
     }
@@ -445,7 +446,10 @@ static int lua_vec3_set_index(lua_State* L)
     }
     if(strcmp(key, "z") == 0)
     {
+        print_info("Setting z");
         vec->z = lua_tonumber(L, 3);
+        print_info(std::to_string(lua_tonumber(L, 3)));
+        print_info(std::to_string(vec->z));
         return 0;
     }
     return 0;
@@ -522,7 +526,6 @@ static int lua_component_index(lua_State* L)
 {
     Component* c = *(Component**)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
-    print_info("Getting key: " + std::string(key));
     if(c->component_data.find(std::string(key)) != c->component_data.end())
     {
         if(c->component_data[std::string(key)].first == &typeid(std::string))
@@ -553,7 +556,6 @@ static int lua_component_index(lua_State* L)
         else if(c->component_data[std::string(key)].first == &typeid(Vec2))
         {
             //Create full user data with metatable don't make a new vec2
-            print_info("Getting vec2");
             Vec2* vec = (Vec2*)c->component_data[std::string(key)].second;
             lua_pushlightuserdata(L, vec);
             //Add metatable and functions
@@ -597,12 +599,6 @@ static int lua_component_index(lua_State* L)
             lua_setmetatable(L, -2);
             return 1;
         }
-        else if(c->component_data[std::string(key)].first == &typeid(Vec3))
-        {
-            Vec3* vec = new Vec3(*(Vec3*)c->component_data[std::string(key)].second);
-            lua_pushlightuserdata(L, vec);
-            return 1;
-        }
         else if(c->component_data[std::string(key)].first == &typeid(Texture*))
         {
             Texture* tex = *(Texture**)c->component_data[std::string(key)].second;
@@ -625,7 +621,6 @@ static int lua_component_set_index(lua_State* L)
 {
     Component* c = *(Component**)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
-    print_info("Setting key: " + std::string(key));
     if(c->component_data[std::string(key)].first == &typeid(std::string))
     {
         *(std::string*)c->component_data[std::string(key)].second = lua_tostring(L, 3);
@@ -712,7 +707,7 @@ static int lua_lua_component_index(lua_State* L)
         }
         else if(c->component_data[key].first == &typeid(Vec2))
         {
-            Vec2* vec = new Vec2(*(Vec2*)c->component_data[key].second);
+            Vec2* vec = (Vec2*)c->component_data[key].second;
             lua_pushlightuserdata(L, vec);
             lua_newtable(L);
             lua_pushcfunction(L, lua_vec2_index);
@@ -734,7 +729,7 @@ static int lua_lua_component_index(lua_State* L)
         }
         else if(c->component_data[key].first == &typeid(Vec3))
         {
-            Vec3 *vec = new Vec3(*(Vec3*)c->component_data[key].second);
+            Vec3 *vec = (Vec3*)c->component_data[key].second;
             lua_pushlightuserdata(L, vec);
             lua_newtable(L);
             lua_pushcfunction(L, lua_vec3_index);
@@ -1340,6 +1335,187 @@ int luaL_openpomegranate(lua_State *L)
 
     lua_newtable(L);
     luaL_setfuncs(L, lua_pomegranate_input, 0);
+    //Push all scancodes
+#pragma region scancodes
+    lua_pushnumber(L, SDL_SCANCODE_UNKNOWN);
+    lua_setfield(L, -2, "KEY_UNKNOWN");
+    lua_pushnumber(L, SDL_SCANCODE_A);
+    lua_setfield(L, -2, "KEY_A");
+    lua_pushnumber(L, SDL_SCANCODE_B);
+    lua_setfield(L, -2, "KEY_B");
+    lua_pushnumber(L, SDL_SCANCODE_C);
+    lua_setfield(L, -2, "KEY_C");
+    lua_pushnumber(L, SDL_SCANCODE_D);
+    lua_setfield(L, -2, "KEY_D");
+    lua_pushnumber(L, SDL_SCANCODE_E);
+    lua_setfield(L, -2, "KEY_E");
+    lua_pushnumber(L, SDL_SCANCODE_F);
+    lua_setfield(L, -2, "KEY_F");
+    lua_pushnumber(L, SDL_SCANCODE_G);
+    lua_setfield(L, -2, "KEY_G");
+    lua_pushnumber(L, SDL_SCANCODE_H);
+    lua_setfield(L, -2, "KEY_H");
+    lua_pushnumber(L, SDL_SCANCODE_I);
+    lua_setfield(L, -2, "KEY_I");
+    lua_pushnumber(L, SDL_SCANCODE_J);
+    lua_setfield(L, -2, "KEY_J");
+    lua_pushnumber(L, SDL_SCANCODE_K);
+    lua_setfield(L, -2, "KEY_K");
+    lua_pushnumber(L, SDL_SCANCODE_L);
+    lua_setfield(L, -2, "KEY_L");
+    lua_pushnumber(L, SDL_SCANCODE_M);
+    lua_setfield(L, -2, "KEY_M");
+    lua_pushnumber(L, SDL_SCANCODE_N);
+    lua_setfield(L, -2, "KEY_N");
+    lua_pushnumber(L, SDL_SCANCODE_O);
+    lua_setfield(L, -2, "KEY_O");
+    lua_pushnumber(L, SDL_SCANCODE_P);
+    lua_setfield(L, -2, "KEY_P");
+    lua_pushnumber(L, SDL_SCANCODE_Q);
+    lua_setfield(L, -2, "KEY_Q");
+    lua_pushnumber(L, SDL_SCANCODE_R);
+    lua_setfield(L, -2, "KEY_R");
+    lua_pushnumber(L, SDL_SCANCODE_S);
+    lua_setfield(L, -2, "KEY_S");
+    lua_pushnumber(L, SDL_SCANCODE_T);
+    lua_setfield(L, -2, "KEY_T");
+    lua_pushnumber(L, SDL_SCANCODE_U);
+    lua_setfield(L, -2, "KEY_U");
+    lua_pushnumber(L, SDL_SCANCODE_V);
+    lua_setfield(L, -2, "KEY_V");
+    lua_pushnumber(L, SDL_SCANCODE_W);
+    lua_setfield(L, -2, "KEY_W");
+    lua_pushnumber(L, SDL_SCANCODE_X);
+    lua_setfield(L, -2, "KEY_X");
+    lua_pushnumber(L, SDL_SCANCODE_Y);
+    lua_setfield(L, -2, "KEY_Y");
+    lua_pushnumber(L, SDL_SCANCODE_Z);
+    lua_setfield(L, -2, "KEY_Z");
+    lua_pushnumber(L, SDL_SCANCODE_1);
+    lua_setfield(L, -2, "KEY_1");
+    lua_pushnumber(L, SDL_SCANCODE_2);
+    lua_setfield(L, -2, "KEY_2");
+    lua_pushnumber(L, SDL_SCANCODE_3);
+    lua_setfield(L, -2, "KEY_3");
+    lua_pushnumber(L, SDL_SCANCODE_4);
+    lua_setfield(L, -2, "KEY_4");
+    lua_pushnumber(L, SDL_SCANCODE_5);
+    lua_setfield(L, -2, "KEY_5");
+    lua_pushnumber(L, SDL_SCANCODE_6);
+    lua_setfield(L, -2, "KEY_6");
+    lua_pushnumber(L, SDL_SCANCODE_7);
+    lua_setfield(L, -2, "KEY_7");
+    lua_pushnumber(L, SDL_SCANCODE_8);
+    lua_setfield(L, -2, "KEY_8");
+    lua_pushnumber(L, SDL_SCANCODE_9);
+    lua_setfield(L, -2, "KEY_9");
+    lua_pushnumber(L, SDL_SCANCODE_0);
+    lua_setfield(L, -2, "KEY_0");
+    lua_pushnumber(L, SDL_SCANCODE_RETURN);
+    lua_setfield(L, -2, "KEY_RETURN");
+    lua_pushnumber(L, SDL_SCANCODE_ESCAPE);
+    lua_setfield(L, -2, "KEY_ESCAPE");
+    lua_pushnumber(L, SDL_SCANCODE_BACKSPACE);
+    lua_setfield(L, -2, "KEY_BACKSPACE");
+    lua_pushnumber(L, SDL_SCANCODE_TAB);
+    lua_setfield(L, -2, "KEY_TAB");
+    lua_pushnumber(L, SDL_SCANCODE_SPACE);
+    lua_setfield(L, -2, "KEY_SPACE");
+    lua_pushnumber(L, SDL_SCANCODE_MINUS);
+    lua_setfield(L, -2, "KEY_MINUS");
+    lua_pushnumber(L, SDL_SCANCODE_EQUALS);
+    lua_setfield(L, -2, "KEY_EQUALS");
+    lua_pushnumber(L, SDL_SCANCODE_LEFTBRACKET);
+    lua_setfield(L, -2, "KEY_LEFTBRACKET");
+    lua_pushnumber(L, SDL_SCANCODE_RIGHTBRACKET);
+    lua_setfield(L, -2, "KEY_RIGHTBRACKET");
+    lua_pushnumber(L, SDL_SCANCODE_BACKSLASH);
+    lua_setfield(L, -2, "KEY_BACKSLASH");
+    lua_pushnumber(L, SDL_SCANCODE_NONUSHASH);
+    lua_setfield(L, -2, "KEY_NONUSHASH");
+    lua_pushnumber(L, SDL_SCANCODE_SEMICOLON);
+    lua_setfield(L, -2, "KEY_SEMICOLON");
+    lua_pushnumber(L, SDL_SCANCODE_APOSTROPHE);
+    lua_setfield(L, -2, "KEY_APOSTROPHE");
+    lua_pushnumber(L, SDL_SCANCODE_GRAVE);
+    lua_setfield(L, -2, "KEY_GRAVE");
+    lua_pushnumber(L, SDL_SCANCODE_COMMA);
+    lua_setfield(L, -2, "KEY_COMMA");
+    lua_pushnumber(L, SDL_SCANCODE_PERIOD);
+    lua_setfield(L, -2, "KEY_PERIOD");
+    lua_pushnumber(L, SDL_SCANCODE_SLASH);
+    lua_setfield(L, -2, "KEY_SLASH");
+    lua_pushnumber(L, SDL_SCANCODE_CAPSLOCK);
+    lua_setfield(L, -2, "KEY_CAPSLOCK");
+    lua_pushnumber(L, SDL_SCANCODE_F1);
+    lua_setfield(L, -2, "KEY_F1");
+    lua_pushnumber(L, SDL_SCANCODE_F2);
+    lua_setfield(L, -2, "KEY_F2");
+    lua_pushnumber(L, SDL_SCANCODE_F3);
+    lua_setfield(L, -2, "KEY_F3");
+    lua_pushnumber(L, SDL_SCANCODE_F4);
+    lua_setfield(L, -2, "KEY_F4");
+    lua_pushnumber(L, SDL_SCANCODE_F5);
+    lua_setfield(L, -2, "KEY_F5");
+    lua_pushnumber(L, SDL_SCANCODE_F6);
+    lua_setfield(L, -2, "KEY_F6");
+    lua_pushnumber(L, SDL_SCANCODE_F7);
+    lua_setfield(L, -2, "KEY_F7");
+    lua_pushnumber(L, SDL_SCANCODE_F8);
+    lua_setfield(L, -2, "KEY_F8");
+    lua_pushnumber(L, SDL_SCANCODE_F9);
+    lua_setfield(L, -2, "KEY_F9");
+    lua_pushnumber(L, SDL_SCANCODE_F10);
+    lua_setfield(L, -2, "KEY_F10");
+    lua_pushnumber(L, SDL_SCANCODE_F11);
+    lua_setfield(L, -2, "KEY_F11");
+    lua_pushnumber(L, SDL_SCANCODE_F12);
+    lua_setfield(L, -2, "KEY_F12");
+    lua_pushnumber(L, SDL_SCANCODE_PRINTSCREEN);
+    lua_setfield(L, -2, "KEY_PRINTSCREEN");
+    lua_pushnumber(L, SDL_SCANCODE_SCROLLLOCK);
+    lua_setfield(L, -2, "KEY_SCROLLLOCK");
+    lua_pushnumber(L, SDL_SCANCODE_PAUSE);
+    lua_setfield(L, -2, "KEY_PAUSE");
+    lua_pushnumber(L, SDL_SCANCODE_INSERT);
+    lua_setfield(L, -2, "KEY_INSERT");
+    lua_pushnumber(L, SDL_SCANCODE_HOME);
+    lua_setfield(L, -2, "KEY_HOME");
+    lua_pushnumber(L, SDL_SCANCODE_PAGEUP);
+    lua_setfield(L, -2, "KEY_PAGEUP");
+    lua_pushnumber(L, SDL_SCANCODE_DELETE);
+    lua_setfield(L, -2, "KEY_DELETE");
+    lua_pushnumber(L, SDL_SCANCODE_END);
+    lua_setfield(L, -2, "KEY_END");
+    lua_pushnumber(L, SDL_SCANCODE_PAGEDOWN);
+    lua_setfield(L, -2, "KEY_PAGEDOWN");
+    lua_pushnumber(L, SDL_SCANCODE_RIGHT);
+    lua_setfield(L, -2, "KEY_RIGHT");
+    lua_pushnumber(L, SDL_SCANCODE_LEFT);
+    lua_setfield(L, -2, "KEY_LEFT");
+    lua_pushnumber(L, SDL_SCANCODE_DOWN);
+    lua_setfield(L, -2, "KEY_DOWN");
+    lua_pushnumber(L, SDL_SCANCODE_UP);
+    lua_setfield(L, -2, "KEY_UP");
+    lua_pushnumber(L, SDL_SCANCODE_NUMLOCKCLEAR);
+    lua_setfield(L, -2, "KEY_NUMLOCKCLEAR");
+    lua_pushnumber(L, SDL_SCANCODE_LCTRL);
+    lua_setfield(L, -2, "KEY_LCTRL");
+    lua_pushnumber(L, SDL_SCANCODE_LSHIFT);
+    lua_setfield(L, -2, "KEY_LSHIFT");
+    lua_pushnumber(L, SDL_SCANCODE_LALT);
+    lua_setfield(L, -2, "KEY_LALT");
+    lua_pushnumber(L, SDL_SCANCODE_LGUI);
+    lua_setfield(L, -2, "KEY_LGUI");
+    lua_pushnumber(L, SDL_SCANCODE_RCTRL);
+    lua_setfield(L, -2, "KEY_RCTRL");
+    lua_pushnumber(L, SDL_SCANCODE_RSHIFT);
+    lua_setfield(L, -2, "KEY_RSHIFT");
+    lua_pushnumber(L, SDL_SCANCODE_RALT);
+    lua_setfield(L, -2, "KEY_RALT");
+    lua_pushnumber(L, SDL_SCANCODE_RGUI);
+    lua_setfield(L, -2, "KEY_RGUI");
+#pragma endregion
     lua_setfield(L, -2, "input");
 
     lua_newtable(L);
