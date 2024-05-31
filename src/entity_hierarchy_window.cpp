@@ -82,6 +82,16 @@ void draw_filled_circle(SDL_Renderer* renderer, int32_t centreX, int32_t centreY
 
 void Window_EntityHierarchy::render()
 {
+    //Accept drops
+    if(ImGui::BeginDragDropTarget())
+    {
+        if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("resource_lua_system_script"))
+        {
+
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     HotkeyManager::add_hotkey({{SDL_SCANCODE_LCTRL, SDL_SCANCODE_H}, "Focus Hierarchy", focus});
     if(ImGui::IsWindowFocused())
     {

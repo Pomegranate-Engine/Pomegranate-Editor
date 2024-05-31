@@ -8,6 +8,7 @@ using namespace Pomegranate;
 #include <sol/sol.hpp>
 #include <any>
 #include"notifications.h"
+#include<filesystem>
 
 extern lua_State* lua_state;
 

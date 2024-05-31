@@ -8,6 +8,16 @@ LuaComponentScript::LuaComponentScript(std::string path)
 {
     print_info("Loading Lua component script: " + path);
     this->path = path;
+    //Load script into std::string
+    std::ifstream file(path);
+    std::string str;
+    std::string line;
+    while (std::getline(file, line))
+    {
+        str += line + "\n";
+    }
+    this->script = str;
+
     if(lua_state == nullptr)
         lua_state = luaL_newstate();
     run_script();
@@ -19,7 +29,7 @@ void LuaComponentScript::run_script()
     luaL_openpomegranate(lua_state);
     luaL_requiref(lua_state, "pomegranate", luaL_openpomegranate, 1);
     lua_pop(lua_state, 1);
-    if (luaL_dofile(lua_state, path.c_str())) {
+    if (luaL_dostring(lua_state, script.c_str())) {
         printf("Error: %s\n", lua_tostring(lua_state, -1));
     }
 
@@ -133,6 +143,17 @@ LuaSystemScript::LuaSystemScript(std::string path)
 {
     print_info("Loading Lua script: " + path);
     this->path = path;
+
+    //Load script into std::string
+    std::ifstream file(path);
+    std::string str;
+    std::string line;
+    while (std::getline(file, line))
+    {
+        str += line + "\n";
+    }
+    this->script = str;
+
     if(lua_state == nullptr)
         lua_state = luaL_newstate();
     run_script();
@@ -149,7 +170,7 @@ void LuaSystemScript::run_script()
     luaL_openpomegranate(lua_state);
     luaL_requiref(lua_state, "pomegranate", luaL_openpomegranate, 1);
     lua_pop(lua_state, 1);
-    luaL_dofile(lua_state, path.c_str());
+    luaL_dostring(lua_state, script.c_str());
 
     //Check errors
     if(lua_isstring(lua_state, -1))
