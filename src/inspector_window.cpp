@@ -39,7 +39,20 @@ void InspectorWindow::render()
                 Component* component = i->second;
                 if(component != nullptr)
                 {
+                    if(i->first == &typeid(LuaComponent))
+                    {
+                        LuaComponent* lua_component = (LuaComponent*)component;
+                        for(auto& s : lua_component->scripts)
+                        {
+                            if(s != nullptr)
+                            {
+                                property_field("", &s);
+                            }
+                        }
+                        continue;
+                    }
                     std::string name = std::string(i->first->name());
+                    //Check if it is a lua component
 
                     bool component_open = ImGui::CollapsingHeader((scuffy_demangle(name.c_str())+ "##" + std::to_string(element_index)).c_str(), ImGuiTreeNodeFlags_DefaultOpen);
                     //Add a break
@@ -187,6 +200,35 @@ void InspectorWindow::render()
                         }
                     }
                 }
+
+                for(auto l = LuaComponentScript::lua_component_types.begin(); l != LuaComponentScript::lua_component_types.end(); l++)
+                {
+                    std::string lower_case_name = l->first;
+                    std::transform(lower_case_name.begin(), lower_case_name.end(), lower_case_name.begin(), ::tolower);
+                    std::string lower_case_search = component_search_buffer;
+                    std::transform(lower_case_search.begin(), lower_case_search.end(), lower_case_search.begin(), ::tolower);
+                    if (lower_case_name.find(lower_case_search) != std::string::npos) {
+                        if (ImGui::MenuItem(l->first.c_str())) {
+                            LuaComponent* lc = entity->get_component<LuaComponent>();
+                            if(lc == nullptr)
+                            {
+                                lc = entity->add_component<LuaComponent>();
+                            }
+                            LuaComponentScript* component = lc->get_component(l->first);
+                            if (component == nullptr) {
+                                lc->add_component(l->first);
+                            } else {
+                                Notify::notify({ResourceManager::load<Texture>("engine/warning.png"),
+                                                EditorTheme::color_palette_red, "Component already exists!",
+                                                "Component " + l->first +
+                                                " already exists on this entity. Not added!"});
+                                //LiveShare::send_add_component(entity, l->first);
+                            }
+                            Editor::action();
+                        }
+                    }
+                }
+
                 ImGui::EndPopup();
             }
         }
@@ -416,10 +458,13 @@ void InspectorWindow::property_field(const char *name, Entity **value)
 
 void InspectorWindow::property_field(const char *name, LuaComponentScript **value)
 {
-    //This will be a drag and drop field
-    ImGui::Text("%s", name);
-    //Create button to open file dialog and be drop target
-    ImGui::SameLine();
+    if(!std::string(name).empty())
+    {
+        //This will be a drag and drop field
+        ImGui::Text("%s", name);
+        //Create button to open file dialog and be drop target
+        ImGui::SameLine();
+    }
     bool open = ImGui::CollapsingHeader(*value==nullptr?"None":(*value)->name.c_str());
     //Drop target
     if(ImGui::BeginDragDropTarget())

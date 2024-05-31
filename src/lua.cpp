@@ -1,5 +1,7 @@
 #include "lua.h"
 
+std::unordered_map<std::string,LuaComponentScript*> LuaComponentScript::lua_component_types;
+
 lua_State* lua_state;
 
 LuaComponentScript::LuaComponentScript(std::string path)
@@ -76,6 +78,7 @@ void LuaComponentScript::run_script()
                 if (strcmp(key, "name") == 0) {
                     name = *value;
                     print_info("Name: " + name);
+                    lua_component_types[name] = this;
                 }
                 else
                 {
@@ -104,6 +107,17 @@ LuaComponentScript* LuaComponent::get_component(std::string name)
         {
             return script;
         }
+    }
+    return nullptr;
+}
+
+LuaComponentScript* LuaComponent::add_component(std::string name)
+{
+    if(LuaComponentScript::lua_component_types.find(name) != LuaComponentScript::lua_component_types.end())
+    {
+        LuaComponentScript* script = LuaComponentScript::lua_component_types[name];
+        scripts.push_back(script);
+        return script;
     }
     return nullptr;
 }

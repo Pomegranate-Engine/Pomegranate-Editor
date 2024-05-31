@@ -14,6 +14,7 @@ extern lua_State* lua_state;
 class LuaComponentScript : public Resource
 {
 public:
+    static std::unordered_map<std::string,LuaComponentScript*> lua_component_types;
     std::string script;
     std::string name;
 
@@ -30,6 +31,7 @@ public:
     std::vector<LuaComponentScript*> scripts;
     void init(Entity *e) override;
     LuaComponentScript* get_component(std::string name);
+    LuaComponentScript* add_component(std::string name);
     int lua_get_component(lua_State* L);
 };
 
