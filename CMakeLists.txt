@@ -106,6 +106,9 @@ set(MINE_SOURCES
     Include/mine/mine.cc
     Include/mine/mine.h
 )
+
+add_compile_definitions(EDITOR_MODE)
+
 # Add executable
 add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES} ${MINE_SOURCES})
 
@@ -118,7 +121,6 @@ set(LUAJIT_LIBRARY ${CMAKE_SOURCE_DIR}/Lib/Arm/libluajit-5.1.dylib)  # Adjust th
 
 # Link SDL libraries
 if(APPLE)
-
     # OpenMP is not supported on Apple Silicon to my knowledge.
     target_link_libraries(Pomegranate_Engine PRIVATE
             ${CMAKE_SOURCE_DIR}/Lib/Arm/libSDL3.dylib

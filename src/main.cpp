@@ -34,8 +34,6 @@ using namespace Pomegranate;
 Window main_window = Window("Pomegranate Editor", 1024, 720);
 const std::string VERSION = "0.0.1";
 
-#define EDITOR_MODE
-
 
 #include "Components/components.cpp"
 

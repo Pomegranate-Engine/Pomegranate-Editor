@@ -263,7 +263,11 @@ static int lua_vec2_new(lua_State* L)
     float x = lua_tonumber(L, 1);
     float y = lua_tonumber(L, 2);
     Vec2* vec = new Vec2(x, y);
-    lua_pushlightuserdata(L, vec);
+    //Create a new user data (not light)
+    lua_newuserdata(L, sizeof(Vec2));
+    //Set the user data
+    *(Vec2*)lua_touserdata(L, -1) = *vec;
+    //Create a new table
 
     lua_newtable(L);
     lua_pushcfunction(L, lua_vec2_index);
@@ -411,7 +415,8 @@ static int lua_vec3_new(lua_State* L)
     float y = lua_tonumber(L, 2);
     float z = lua_tonumber(L, 3);
     Vec3* vec = new Vec3(x, y, z);
-    lua_pushlightuserdata(L, vec);
+    lua_newuserdata(L, sizeof(Vec3));
+    *(Vec3*)lua_touserdata(L, -1) = *vec;
 
     lua_newtable(L);
     lua_pushcfunction(L, lua_vec3_index);
@@ -1285,6 +1290,241 @@ static int lua_get_delta_time(lua_State* L)
 
 #pragma endregion
 
+#pragma region color
+
+static int lua_color_index(lua_State* L)
+{
+    Color* c = (Color*)lua_touserdata(L, 1);
+    const char* key = lua_tostring(L, 2);
+    if(strcmp(key, "r") == 0)
+    {
+        lua_pushnumber(L, c->r);
+        return 1;
+    }
+    if(strcmp(key, "g") == 0)
+    {
+        lua_pushnumber(L, c->g);
+        return 1;
+    }
+    if(strcmp(key, "b") == 0)
+    {
+        lua_pushnumber(L, c->b);
+        return 1;
+    }
+    if(strcmp(key, "a") == 0)
+    {
+        lua_pushnumber(L, c->a);
+        return 1;
+    }
+    return 0;
+}
+
+static int lua_color_set_index(lua_State* L)
+{
+    Color* c = (Color*)lua_touserdata(L, 1);
+    const char* key = lua_tostring(L, 2);
+    if(strcmp(key, "r") == 0)
+    {
+        c->r = lua_tonumber(L, 3);
+        return 0;
+    }
+    if(strcmp(key, "g") == 0)
+    {
+        c->g = lua_tonumber(L, 3);
+        return 0;
+    }
+    if(strcmp(key, "b") == 0)
+    {
+        c->b = lua_tonumber(L, 3);
+        return 0;
+    }
+    if(strcmp(key, "a") == 0)
+    {
+        c->a = lua_tonumber(L, 3);
+        return 0;
+    }
+    return 0;
+}
+
+static int lua_color_new(lua_State* L)
+{
+    int r = lua_tonumber(L, 1);
+    int g = lua_tonumber(L, 2);
+    int b = lua_tonumber(L, 3);
+    int a = lua_tonumber(L, 4);
+
+    Color* col = new Color(r, g, b, a);
+    //Create a new user data (not light)
+    lua_newuserdata(L, sizeof(Color));
+    //Set the user data
+    *(Color*)lua_touserdata(L, -1) = *col;
+    lua_newtable(L);
+    lua_pushcfunction(L, lua_color_index);
+    lua_setfield(L, -2, "__index");
+    lua_pushcfunction(L, lua_color_set_index);
+    lua_setfield(L, -2, "__newindex");
+    lua_setmetatable(L, -2);
+    return 1;
+}
+
+#pragma endregion
+
+#pragma region draw
+
+bool debug_draw = false;
+
+static int lua_begin_debug_draw(lua_State* L)
+{
+    debug_draw = true;
+    return 0;
+}
+
+static int lua_end_debug_draw(lua_State* L)
+{
+    debug_draw = false;
+    return 0;
+}
+
+static int lua_draw_set_color(lua_State* L)
+{
+    if(debug_draw)
+    {
+#ifndef EDITOR_MODE
+        return 0;
+#endif
+    }
+    Color c = *(Color*)lua_touserdata(L, 1);
+    SDL_SetRenderDrawColor(Window::current->get_sdl_renderer(), c.r, c.g, c.b, c.a);
+    return 0;
+}
+
+static int lua_draw_point(lua_State* L)
+{
+    if(debug_draw)
+    {
+#ifndef EDITOR_MODE
+        return 0;
+#endif
+    }
+    Vec2 vec = *(Vec2*)lua_touserdata(L, 1);
+    vec -= Camera::current_render_position;
+    vec *= Camera::current_render_zoom;
+    int w = 0;
+    int h = 0;
+    //Get renderer scale
+    SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &w, &h);
+    vec += Vec2(w / 2, h / 2);
+    SDL_RenderPoint(Window::current->get_sdl_renderer(), vec.x, vec.y);
+    return 0;
+}
+
+static int lua_draw_points(lua_State* L)
+{
+    if(debug_draw)
+    {
+#ifndef EDITOR_MODE
+        return 0;
+#endif
+    }
+    int n = luaL_len(L, 1);
+    int w = 0;
+    int h = 0;
+    SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &w, &h);
+    SDL_FPoint* points = new SDL_FPoint[n];
+    for(int i = 1; i <= n; i++)
+    {
+        lua_rawgeti(L, 1, i); // Pushes the value at index 'i' from the table at stack index 1
+        Vec2 vec = *(Vec2*)lua_touserdata(L, -1);
+        vec -= Camera::current_render_position;
+        vec *= Camera::current_render_zoom;
+        vec += Vec2(w / 2, h / 2);
+        SDL_FPoint point = {vec.x, vec.y};
+        points[i - 1] = point;
+    }
+
+    SDL_RenderPoints(Window::current->get_sdl_renderer(), points, n);
+    delete[] points;
+
+    return 0;
+}
+
+static int draw_line(lua_State* L)
+{
+    if(debug_draw)
+    {
+#ifndef EDITOR_MODE
+        return 0;
+#endif
+    }
+    Vec2 vec1 = *(Vec2*)lua_touserdata(L, 1);
+    Vec2 vec2 = *(Vec2*)lua_touserdata(L, 2);
+    vec1 -= Camera::current_render_position;
+    vec1 *= Camera::current_render_zoom;
+    vec2 -= Camera::current_render_position;
+    vec2 *= Camera::current_render_zoom;
+    int w = 0;
+    int h = 0;
+    SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &w, &h);
+    vec1 += Vec2(w / 2, h / 2);
+    vec2 += Vec2(w / 2, h / 2);
+    SDL_RenderLine(Window::current->get_sdl_renderer(), vec1.x, vec1.y, vec2.x, vec2.y);
+    return 0;
+}
+
+static int draw_lines(lua_State* L)
+{
+    if(debug_draw)
+    {
+#ifndef EDITOR_MODE
+        return 0;
+#endif
+    }
+    int n = luaL_len(L, 1);
+    int w = 0;
+    int h = 0;
+    SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &w, &h);
+    SDL_FPoint* points = new SDL_FPoint[n];
+    for(int i = 1; i <= n; i++)
+    {
+        lua_rawgeti(L, 1, i); // Pushes the value at index 'i' from the table at stack index 1
+        Vec2 vec = *(Vec2*)lua_touserdata(L, -1);
+        vec -= Camera::current_render_position;
+        vec *= Camera::current_render_zoom;
+        vec += Vec2(w / 2, h / 2);
+        SDL_FPoint point = {vec.x, vec.y};
+        points[i - 1] = point;
+    }
+
+    SDL_RenderLines(Window::current->get_sdl_renderer(), points, n);
+    delete[] points;
+
+    return 0;
+}
+
+static int draw_rect(lua_State* L)
+{
+    if(debug_draw)
+    {
+#ifndef EDITOR_MODE
+        return 0;
+#endif
+    }
+    Vec2 pos = *(Vec2*)lua_touserdata(L, 1);
+    Vec2 size = *(Vec2*)lua_touserdata(L, 2);
+    pos -= Camera::current_render_position;
+    pos *= Camera::current_render_zoom;
+    size *= Camera::current_render_zoom;
+    int w = 0;
+    int h = 0;
+    SDL_GetCurrentRenderOutputSize(Window::current->get_sdl_renderer(), &w, &h);
+    pos += Vec2(w / 2, h / 2);
+    SDL_FRect rect = {pos.x, pos.y, size.x, size.y};
+    SDL_RenderRect(Window::current->get_sdl_renderer(), &rect);
+    return 0;
+}
+
+#pragma endregion
+
 luaL_Reg lua_pomegranate_debug[] = {
         {"print_info", lua_print_info},
         {"print_error", lua_print_error},
@@ -1336,6 +1576,23 @@ luaL_Reg lua_pomegranate_input[] = {
 
 luaL_Reg lua_pomegranate_time[]= {
         {"getDeltaTime", lua_get_delta_time},
+        {nullptr, nullptr}
+};
+
+luaL_Reg lua_pomegranate_color[] = {
+        {"new", lua_color_new},
+        {nullptr, nullptr}
+};
+
+luaL_Reg lua_pomegranate_draw[] = {
+        {"point", lua_draw_point},
+        {"points", lua_draw_points},
+        {"line", draw_line},
+        {"lines", draw_lines},
+        {"rect", draw_rect},
+        {"setColor", lua_draw_set_color},
+        {"beginDebugDraw", lua_begin_debug_draw},
+        {"endDebugDraw", lua_end_debug_draw},
         {nullptr, nullptr}
 };
 
@@ -1557,6 +1814,13 @@ int luaL_openpomegranate(lua_State *L)
     luaL_setfuncs(L, lua_pomegranate_time, 0);
     lua_setfield(L, -2, "time");
 
+    lua_newtable(L);
+    luaL_setfuncs(L, lua_pomegranate_draw, 0);
+    lua_setfield(L, -2, "draw");
+
+    lua_newtable(L);
+    luaL_setfuncs(L, lua_pomegranate_color, 0);
+    lua_setfield(L, -2, "color");
 
     return 1;
 }
