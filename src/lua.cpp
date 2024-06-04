@@ -247,7 +247,6 @@ static int lua_notify_warn(lua_State *L)
 }
 
 #pragma endregion
-//Vec2
 
 #pragma region math
 
@@ -1363,6 +1362,8 @@ static int lua_color_new(lua_State* L)
     lua_setfield(L, -2, "__index");
     lua_pushcfunction(L, lua_color_set_index);
     lua_setfield(L, -2, "__newindex");
+    lua_pushstring(L, "Color");
+    lua_setfield(L, -2, "type");
     lua_setmetatable(L, -2);
     return 1;
 }
