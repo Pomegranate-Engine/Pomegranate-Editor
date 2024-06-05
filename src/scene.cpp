@@ -255,20 +255,20 @@ json save_scene_as_json(GroupRef scene)
                     else
                         j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"] = -1;
                 }
-                else if(data.first == &typeid(std::vector<LuaComponentScript*>))
+                else if(data.first == &typeid(std::vector<LuaComponentData*>))
                 {
                     j["entities"][std::to_string(entity->id)]["components"][type_name][name] = json::object();
                     j["entities"][std::to_string(entity->id)]["components"][type_name][name]["type"] = "vector_lua";
                     j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"] = json::object();
                     j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"]["length"] = (*(std::vector<LuaComponentScript*>*)data.second).size();
                     j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"]["data"] = json::array();
-                    for(auto& script : (*(std::vector<LuaComponentScript*>*)data.second))
+                    for(auto& script : (*(std::vector<LuaComponentData*>*)data.second))
                     {
                         if(script != nullptr) {
                             j["entities"][std::to_string(
                                     entity->id)]["components"][type_name][name]["value"]["data"].push_back(
                                     json::object());
-                            j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"]["data"].back()["path"] = script->path;
+                            j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"]["data"].back()["path"] = script->component->path;
                             j["entities"][std::to_string(entity->id)]["components"][type_name][name]["value"]["data"].back()["data"] = json::object();
                             for (auto [key,value] : script->component_data)
                             {
@@ -558,12 +558,11 @@ GroupRef open_scene_from_json(json data)
                 }
                 else if(data["type"] == "vector_lua")
                 {
-                    std::vector<LuaComponentScript*> scripts;
+                    std::vector<LuaComponentData*> scripts;
                     for(auto& script : data["value"]["data"])
                     {
                         if(script["path"].get<std::string>() != "") {
-                            LuaComponentScript *s = ResourceManager::load<LuaComponentScript>(script["path"].get<std::string>());
-                            s->run_script();
+                            LuaComponentData *s = new LuaComponentData(ResourceManager::load<LuaComponentScript>(script["path"].get<std::string>()));
                             //Set data
                             for (auto& [key, value] : script["data"].items())
                             {
@@ -598,7 +597,7 @@ GroupRef open_scene_from_json(json data)
                             scripts.push_back(nullptr);
                         }
                     }
-                    *(std::vector<LuaComponentScript*>*)c->component_data[name].second = scripts;
+                    *(std::vector<LuaComponentData*>*)c->component_data[name].second = scripts;
                 }
             }
         }

@@ -2,7 +2,7 @@
 
 std::unordered_map<std::string,LuaComponentScript*> LuaComponentScript::lua_component_types;
 
-lua_State* lua_state;
+lua_State* lua_state = luaL_newstate();
 
 LuaComponentScript::LuaComponentScript(std::string path)
 {
@@ -23,8 +23,9 @@ LuaComponentScript::LuaComponentScript(std::string path)
     run_script();
 }
 
-void LuaComponentScript::run_script()
+std::unordered_map<std::string, std::pair<const std::type_info*, void*>> LuaComponentScript::run_script()
 {
+    std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data;
     luaL_openlibs(lua_state);
     luaL_openpomegranate(lua_state);
     luaL_requiref(lua_state, "pomegranate", luaL_openpomegranate, 1);
@@ -57,11 +58,11 @@ void LuaComponentScript::run_script()
             }
             else if (lua_isnumber(lua_state, -1)) {
                 double* value = new double(lua_tonumber(lua_state, -1));
-                set<double>(key,value);
+                data[std::string(key)] = {&typeid(double),value};
             }
             else if (lua_isboolean(lua_state, -1)) {
                 bool* value = new bool(lua_toboolean(lua_state, -1));
-                set<bool>(key,value);
+                data[std::string(key)] = {&typeid(bool),value};
             }
             else if (lua_isuserdata(lua_state, -1)) {
                 if (lua_getmetatable(lua_state, -1)) {
@@ -69,12 +70,12 @@ void LuaComponentScript::run_script()
                     const char *type = lua_tostring(lua_state, -1);
                     if (strcmp(type, "Vec2") == 0) {
                         Vec2* vec = new Vec2(*(Vec2*)lua_touserdata(lua_state, -3));
-                        set<Vec2>(key,vec);
+                        data[std::string(key)] = {&typeid(Vec2),vec};
                         lua_pop(lua_state, 1);
                     }
                     else if (strcmp(type, "Vec3") == 0) {
                         Vec3* vec = new Vec3(*(Vec3*)lua_touserdata(lua_state, -3));
-                        set<Vec3>(key,vec);
+                        data[std::string(key)] = {&typeid(Vec3),vec};
                         lua_pop(lua_state, 1);
                     }
                     else {
@@ -92,7 +93,7 @@ void LuaComponentScript::run_script()
                 }
                 else
                 {
-                    set<std::string>(key,value);
+                    data[std::string(key)] = {&typeid(std::string),value};
                 }
             }
             lua_pop(lua_state, 1);
@@ -100,6 +101,20 @@ void LuaComponentScript::run_script()
     } else {
         printf("Unexpected result type\n");
     }
+    return data;
+}
+
+LuaComponentData::LuaComponentData(LuaComponentScript *component)
+{
+    this->component = component;
+    this->name = component->name;
+    if(component != nullptr)
+        init();
+}
+
+void LuaComponentData::init()
+{
+    component_data = component->run_script();
 }
 
 void LuaComponent::init(Entity *e)
@@ -108,11 +123,10 @@ void LuaComponent::init(Entity *e)
     push_data<std::vector<LuaComponentScript*>>("scripts", &scripts);
 }
 
-LuaComponentScript* LuaComponent::get_component(std::string name)
+LuaComponentData* LuaComponent::get_component(std::string name)
 {
     for(auto script : scripts)
     {
-
         if(script!= nullptr && script->name == name)
         {
             return script;
@@ -121,11 +135,11 @@ LuaComponentScript* LuaComponent::get_component(std::string name)
     return nullptr;
 }
 
-LuaComponentScript* LuaComponent::add_component(std::string name)
+LuaComponentData* LuaComponent::add_component(std::string name)
 {
     if(LuaComponentScript::lua_component_types.find(name) != LuaComponentScript::lua_component_types.end())
     {
-        LuaComponentScript* script = LuaComponentScript::lua_component_types[name];
+        LuaComponentData* script = new LuaComponentData(LuaComponentScript::lua_component_types[name]);
         scripts.push_back(script);
         return script;
     }
@@ -714,7 +728,7 @@ static int push_component(lua_State* L, Component* c)
 
 static int lua_lua_component_index(lua_State* L)
 {
-    LuaComponentScript* c = *(LuaComponentScript**)lua_touserdata(L, 1);
+    LuaComponentData* c = *(LuaComponentData**)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
     //Get user data
     if(c->component_data.find(std::string(key)) != c->component_data.end())
@@ -794,7 +808,7 @@ static int lua_lua_component_index(lua_State* L)
 
 static int lua_lua_component_set_index(lua_State* L)
 {
-    LuaComponentScript* c = *(LuaComponentScript**)lua_touserdata(L, 1);
+    LuaComponentData* c = *(LuaComponentData**)lua_touserdata(L, 1);
     const char* key = lua_tostring(L, 2);
     if(c->component_data.find(std::string(key)) != c->component_data.end())
     {
@@ -832,10 +846,10 @@ static int lua_lua_component_set_index(lua_State* L)
     return 0;
 }
 
-static int push_lua_component(lua_State* L, LuaComponentScript* c)
+static int push_lua_component(lua_State* L, LuaComponentData* c)
 {
-    lua_newuserdata(L, sizeof(LuaComponentScript*));
-    *(LuaComponentScript**)lua_touserdata(L, -1) = c;
+    lua_newuserdata(L, sizeof(LuaComponentData*));
+    *(LuaComponentData**)lua_touserdata(L, -1) = c;
     lua_newtable(L);
     lua_pushcfunction(L, lua_lua_component_index);
     lua_setfield(L, -2, "__index");
@@ -866,7 +880,7 @@ static int lua_entity_get_component(lua_State* L)
         LuaComponent *lc = e->get_component<LuaComponent>();
         if(lc != nullptr)
         {
-            LuaComponentScript* script = lc->get_component(name);
+            LuaComponentData* script = lc->get_component(name);
             print_info("Pushing lua component");
             push_lua_component(L, script);
         }
@@ -890,7 +904,7 @@ static int lua_entity_has_component(lua_State* L)
         LuaComponent *lc = e->get_component<LuaComponent>();
         if(lc != nullptr)
         {
-            LuaComponentScript* script = lc->get_component(name);
+            LuaComponentData* script = lc->get_component(name);
             if(script != nullptr)
             {
                 lua_pushboolean(L, true);

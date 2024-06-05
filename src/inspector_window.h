@@ -34,7 +34,7 @@ public:
     static void property_field(const char* name, Texture** value);
     static void property_field(const char* name, TTFFont** value);
     static void property_field(const char* name, Entity** value);
-    static void property_field(const char* name, LuaComponentScript** value);
+    static void property_field(const char* name, LuaComponentData** value);
     static void property_field(const char* name, LuaSystemScript** value);
     static std::string get_element(std::string name);
 

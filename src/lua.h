@@ -19,20 +19,29 @@ public:
     std::string script;
     std::string name;
 
-    std::unordered_map<std::string, std::pair<const std::type_info*, void*>> component_data;
     LuaComponentScript(std::string path);
-    void run_script();
+    std::unordered_map<std::string, std::pair<const std::type_info*, void*>> run_script();
+};
+
+class LuaComponentData
+{
+public:
+    LuaComponentScript* component;
+    std::string name;
+    std::unordered_map<std::string, std::pair<const std::type_info*, void*>> component_data;
+    void init();
     template <typename T> void set(std::string name, void* value);
     template <typename T> T get(std::string name);
+    LuaComponentData(LuaComponentScript* component);
 };
 
 class LuaComponent : public Component
 {
 public:
-    std::vector<LuaComponentScript*> scripts;
+    std::vector<LuaComponentData*> scripts;
     void init(Entity *e) override;
-    LuaComponentScript* get_component(std::string name);
-    LuaComponentScript* add_component(std::string name);
+    LuaComponentData* get_component(std::string name);
+    LuaComponentData* add_component(std::string name);
     int lua_get_component(lua_State* L);
 };
 

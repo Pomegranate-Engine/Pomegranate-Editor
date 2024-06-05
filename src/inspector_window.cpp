@@ -107,14 +107,14 @@ void InspectorWindow::render()
                                     } else if (j->second.first->hash_code() == typeid(Entity *).hash_code()) {
                                         auto **value = (Entity **) j->second.second;
                                         property_field(property_name.c_str(), value);
-                                    } else if (j->second.first->hash_code() == typeid(std::vector<LuaComponentScript *>).hash_code()) {
-                                        auto *value = (std::vector<LuaComponentScript *> *) j->second.second;
+                                    } else if (j->second.first->hash_code() == typeid(std::vector<LuaComponentData *>).hash_code()) {
+                                        auto *value = (std::vector<LuaComponentData *> *) j->second.second;
                                         if (ImGui::CollapsingHeader(property_name.c_str())) {
                                             for (int i = 0; i < value->size(); i++) {
                                                 //Add imgui tab
                                                 ImGui::Text("    ");
                                                 ImGui::SameLine();
-                                                LuaComponentScript **script = &value->at(i);
+                                                LuaComponentData **script = &value->at(i);
                                                 property_field((property_name + " [" + std::to_string(i) + "]").c_str(),
                                                                script);
                                                 if (ImGui::IsItemDeactivatedAfterEdit()) {
@@ -214,7 +214,7 @@ void InspectorWindow::render()
                             {
                                 lc = entity->add_component<LuaComponent>();
                             }
-                            LuaComponentScript* component = lc->get_component(l->first);
+                            LuaComponentData* component = lc->get_component(l->first);
                             if (component == nullptr) {
                                 lc->add_component(l->first);
                             } else {
@@ -456,7 +456,7 @@ void InspectorWindow::property_field(const char *name, Entity **value)
     }
 }
 
-void InspectorWindow::property_field(const char *name, LuaComponentScript **value)
+void InspectorWindow::property_field(const char *name, LuaComponentData **value)
 {
     if(!std::string(name).empty())
     {
@@ -476,7 +476,7 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
             InspectorWindow::something_dropped = true;
             LuaComponentScript* lua = *(LuaComponentScript**)payload->Data;
             lua->run_script();
-            *value = lua;
+            *value = new LuaComponentData(lua);
             print_info("Texture Dropped");
         }
         ImGui::EndDragDropTarget();
@@ -484,7 +484,7 @@ void InspectorWindow::property_field(const char *name, LuaComponentScript **valu
     if(open)
     {
         //Display component properties
-        LuaComponentScript* lua = *value;
+        LuaComponentData* lua = *value;
         if(lua!=nullptr)
         {
             for (auto [key,value] : lua->component_data)
