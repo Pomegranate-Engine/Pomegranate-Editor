@@ -4,37 +4,11 @@ std::unordered_map<std::string,LuaComponentScript*> LuaComponentScript::lua_comp
 
 lua_State* lua_state = luaL_newstate();
 
-LuaComponentScript::LuaComponentScript(std::string path)
-{
-    print_info("Loading Lua component script: " + path);
-    this->path = path;
-    //Load script into std::string
-    std::ifstream file(path);
-    std::string str;
-    std::string line;
-    while (std::getline(file, line))
-    {
-        str += line + "\n";
-    }
-    this->script = str;
-
-    if(lua_state == nullptr)
-        lua_state = luaL_newstate();
-    run_script();
-}
-
-std::unordered_map<std::string, std::pair<const std::type_info*, void*>> LuaComponentScript::run_script()
+std::pair<std::string, std::unordered_map<std::string, std::pair<const std::type_info*, void*>>> lua_component_data_map_from_table(lua_State* L, int i)
 {
     std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data;
-    luaL_openlibs(lua_state);
-    luaL_openpomegranate(lua_state);
-    luaL_requiref(lua_state, "pomegranate", luaL_openpomegranate, 1);
-    lua_pop(lua_state, 1);
-    if (luaL_dostring(lua_state, script.c_str())) {
-        printf("Error: %s\n", lua_tostring(lua_state, -1));
-    }
-
-    if (lua_istable(lua_state, -1)) {
+    std::string name;
+    if (lua_istable(lua_state, i)) {
         print_info("Script loaded successfully");
         //Get all the fields
         lua_pushnil(lua_state);
@@ -89,7 +63,6 @@ std::unordered_map<std::string, std::pair<const std::type_info*, void*>> LuaComp
                 if (strcmp(key, "name") == 0) {
                     name = *value;
                     print_info("Name: " + name);
-                    lua_component_types[name] = this;
                 }
                 else
                 {
@@ -101,6 +74,48 @@ std::unordered_map<std::string, std::pair<const std::type_info*, void*>> LuaComp
     } else {
         printf("Unexpected result type\n");
     }
+    return std::pair<std::string, std::unordered_map<std::string, std::pair<const std::type_info*, void*>>>(name,data);
+}
+
+
+LuaComponentScript::LuaComponentScript(std::string path)
+{
+    print_info("Loading Lua component script: " + path);
+    this->path = path;
+    //Load script into std::string
+    std::ifstream file(path);
+    std::string str;
+    std::string line;
+    while (std::getline(file, line))
+    {
+        str += line + "\n";
+    }
+    this->script = str;
+
+    if(lua_state == nullptr)
+        lua_state = luaL_newstate();
+    run_script();
+}
+
+std::unordered_map<std::string, std::pair<const std::type_info*, void*>> LuaComponentScript::run_script()
+{
+    std::unordered_map<std::string, std::pair<const std::type_info*, void*>> data;
+    luaL_openlibs(lua_state);
+    luaL_openpomegranate(lua_state);
+    luaL_requiref(lua_state, "pomegranate", luaL_openpomegranate, 1);
+    lua_pop(lua_state, 1);
+    if (luaL_dostring(lua_state, script.c_str())) {
+        printf("Error: %s\n", lua_tostring(lua_state, -1));
+    }
+
+    auto result = lua_component_data_map_from_table(lua_state, -1);
+    data = result.second;
+    name = result.first;
+
+    lua_pop(lua_state, 1);
+
+    lua_component_types[name] = this;
+
     return data;
 }
 
