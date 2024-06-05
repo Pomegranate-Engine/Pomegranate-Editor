@@ -163,7 +163,7 @@ LuaComponentData* LuaComponent::add_component(std::string name)
 
 int LuaComponent::lua_get_component(lua_State *L)
 {
-
+    return 0;
 }
 
 //Lua systems
