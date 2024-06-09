@@ -87,22 +87,14 @@ set(POMEGRANATE_SOURCES
 
 set(IMGUI_SOURCES
         ${IMGUI_DIR}/imgui.cpp
-        ${IMGUI_DIR}/imgui.h
-        ${IMGUI_DIR}/imconfig.h
-        ${IMGUI_DIR}/imgui_demo.cpp
         ${IMGUI_DIR}/imgui_draw.cpp
-        ${IMGUI_DIR}/imgui_internal.h
-        ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/imgui_widgets.cpp
-        ${IMGUI_DIR}/imstb_rectpack.h
-        ${IMGUI_DIR}/imstb_textedit.h
-        ${IMGUI_DIR}/imstb_truetype.h
+        ${IMGUI_DIR}/imgui_demo.cpp
         ${IMGUI_DIR}/backends/imgui_impl_sdl3.cpp
-        ${IMGUI_DIR}/backends/imgui_impl_sdl3.h
         ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer3.cpp
-        ${IMGUI_DIR}/backends/imgui_impl_sdlrenderer3.h
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        ${IMGUI_DIR}/imgui_tables.cpp
         ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
-        ${IMGUI_DIR}/misc/cpp/imgui_stdlib.h
 )
 
 set(LIVE_SHARE_SERVER_SOURCES
@@ -110,14 +102,19 @@ set(LIVE_SHARE_SERVER_SOURCES
         src/LiveShare/live_share_shared_data.cpp
 )
 
+set(MINE_SOURCES
+    Include/mine/mine.cc
+    Include/mine/mine.h
+)
+
 add_compile_definitions(EDITOR_MODE)
 
 # Add executable
-add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES})
+add_executable(Pomegranate_Engine ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES} ${SOURCE_FILES} ${MINE_SOURCES})
 
 add_library(Pomegranate SHARED ${POMEGRANATE_SOURCES} ${IMGUI_SOURCES})
 
-add_executable(Pomegranate_LiveShareServer ${LIVE_SHARE_SERVER_SOURCES})
+add_executable(Pomegranate_LiveShareServer ${LIVE_SHARE_SERVER_SOURCES} ${MINE_SOURCES})
 
 # Set the path to LuaJIT (Mac)
 set(LUAJIT_LIBRARY ${CMAKE_SOURCE_DIR}/Lib/Arm/libluajit-5.1.dylib)  # Adjust the library name if necessary

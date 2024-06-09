@@ -53,7 +53,6 @@ int main(int argc, char* argv[])
     //Set std::filesystem working directory
     std::filesystem::current_path(working_directory);
     //region init
-    std::cout << ImGui::GetVersion() << std::endl;
     pomegranate_init(); //Init
     main_window.open(); //Open window
     main_window.make_current(); //Make window current
@@ -65,7 +64,6 @@ int main(int argc, char* argv[])
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
     io.ConfigWindowsMoveFromTitleBarOnly = true;
 
     //Set font
