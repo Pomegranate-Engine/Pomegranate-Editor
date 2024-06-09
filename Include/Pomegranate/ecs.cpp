@@ -429,7 +429,7 @@ void SystemRef::destroy(System *system)
             auto* c = entity->get_component(scuffy_demangle(component.first->name()).c_str());
             for (auto& [type,data] : c->component_data)
             {
-                std::memcpy(data.second, my->component_data[type].second, sizeof(data.first));
+                memcpy(data.second, my->component_data[type].second, sizeof(data.first));
             }
         }
         return entity;
