@@ -1,6 +1,7 @@
 #include "resources_window.h"
 
 std::string ResourcesWindow::add_tag;
+ImVec4 ResourcesWindow::add_tag_color = ImVec4(255,255,255,255);
 std::vector<ResourceFile> ResourcesWindow::resource_files;
 ResourceFile* ResourcesWindow::selected_resource_file;
 std::string ResourcesWindow::search;
@@ -142,22 +143,22 @@ void ResourcesWindow::render()
     ImGui::InputText("##Search", &search);
     std::transform(search.begin(), search.end(), search.begin(), ::tolower);
 
+    std::vector<std::string> tags;
+    for(auto file : resource_files)
+    {
+        for(auto tag : file.tags)
+        {
+            if(std::find(tags.begin(), tags.end(), tag.name) == tags.end())
+            {
+                tags.push_back(tag.name);
+            }
+        }
+    }
     for (int i = 0; i < search_tags.size(); i++)
     {
         ImGui::SetNextItemWidth(128);
         if(ImGui::BeginCombo((std::string("##tags") + std::to_string(i)).c_str(), search_tags[i].c_str()))
         {
-            std::vector<std::string> tags;
-            for(auto file : resource_files)
-            {
-                for(auto tag : file.tags)
-                {
-                    if(std::find(tags.begin(), tags.end(), tag.name) == tags.end())
-                    {
-                        tags.push_back(tag.name);
-                    }
-                }
-            }
             for(auto tag : tags)
             {
                 bool is_selected = (search_tags[i] == tag);
@@ -266,11 +267,48 @@ void ResourcesWindow::render()
             {
                 bool add = ImGui::InputText("Add Tag:##tag_name", &add_tag, ImGuiInputTextFlags_EnterReturnsTrue);
                 if (add) {
-                    ResourceTag tag(add_tag, Color(255, 255, 255, 255), 0);
+                    ResourceTag tag(add_tag, Color(add_tag_color.x,add_tag_color.y,add_tag_color.z,1.0f), 1);
                     file.tags.push_back(tag);
                     add_tag = "";
                     create_meta(&file);
                 }
+
+                bool is_input_text_active = ImGui::IsItemActive();
+                bool is_input_text_activated = ImGui::IsItemActivated();
+
+                if (is_input_text_activated)
+                    ImGui::OpenPopup("##auto_complete");
+
+                {
+                    ImGui::SetNextWindowPos(ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y));
+                    //ImGui::SetNextWindowSize({ ImGui::GetItemRectSize().x, 0 });
+                    if (ImGui::BeginPopup("##auto_complete", ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_ChildWindow))
+                    {
+                        for (int i = 0; i < tags.size(); i++)
+                        {
+                            //if (strstr(autocomplete[i], input) == NULL)
+                            //    continue;
+                            if(tags[i].contains(add_tag))
+                            {
+                                if (ImGui::Selectable(tags[i].c_str()))
+                                {
+                                    ImGui::ClearActiveID();
+                                    add_tag = tags[i];
+                                }
+                            }
+                        }
+
+                        if (add || (!is_input_text_active && !ImGui::IsWindowFocused()))
+                            ImGui::CloseCurrentPopup();
+
+                        ImGui::EndPopup();
+                    }
+                }
+                float col[3] = {add_tag_color.x,add_tag_color.y,add_tag_color.z};
+                ImGui::ColorPicker3("##tag_color", col);
+                add_tag_color.x = col[0];
+                add_tag_color.y = col[1];
+                add_tag_color.z = col[2];
 
                 for (auto tag : file.tags)
                 {
@@ -443,7 +481,7 @@ void ResourcesWindow::load_resources()
             std::vector<ResourceTag> tags = read_meta(file.second);
             if(tags.size() == 0)
             {
-                ResourceTag tag("Texture", Color(255,255,255,255), 0);
+                ResourceTag tag("Texture", Color(EditorTheme::color_palette_green.x/255.0f,EditorTheme::color_palette_green.y/255.0f,EditorTheme::color_palette_green.z/255.0f,1.0f), 0);
                 tags.push_back(tag);
             }
             ResourceFile f = {
@@ -468,7 +506,7 @@ void ResourcesWindow::load_resources()
             std::vector<ResourceTag> tags = read_meta(file.second);
             if(tags.size() == 0)
             {
-                ResourceTag tag("Script", Color(255,255,255,255), 0);
+                ResourceTag tag("Script", Color(EditorTheme::color_palette_blue.x/255.0f,EditorTheme::color_palette_blue.y/255.0f,EditorTheme::color_palette_blue.z/255.0f,1.0f), 0);
                 tags.push_back(tag);
             }
             //Read the file
@@ -519,7 +557,7 @@ void ResourcesWindow::load_resources()
             std::vector<ResourceTag> tags = read_meta(file.second);
             if(tags.size() == 0)
             {
-                ResourceTag tag("Audio", Color(255,255,255,255), 0);
+                ResourceTag tag("Audio", Color(EditorTheme::color_palette_red.x/255.0f,EditorTheme::color_palette_red.y/255.0f,EditorTheme::color_palette_red.z/255.0f,1.0f), 0);
                 tags.push_back(tag);
             }
             ResourceFile f = {
@@ -543,7 +581,7 @@ void ResourcesWindow::load_resources()
             std::vector<ResourceTag> tags = read_meta(file.second);
             if(tags.size() == 0)
             {
-                ResourceTag tag("Font", Color(255,255,255,255), 0);
+                ResourceTag tag("Font", Color(EditorTheme::color_palette_green.x/255.0f,EditorTheme::color_palette_green.y/255.0f,EditorTheme::color_palette_green.z/255.0f,1.0f), 0);
                 tags.push_back(tag);
             }
             ResourceFile f = {
@@ -568,7 +606,7 @@ void ResourcesWindow::load_resources()
             std::vector<ResourceTag> tags = read_meta(file.second);
             if(tags.size() == 0)
             {
-                ResourceTag tag("Scene", Color(255,255,255,255), 0);
+                ResourceTag tag("Scene", Color(EditorTheme::color_palette_white.x/255.0f,EditorTheme::color_palette_white.y/255.0f,EditorTheme::color_palette_white.z/255.0f,1.0f), 0);
                 tags.push_back(tag);
             }
             ResourceFile f = {

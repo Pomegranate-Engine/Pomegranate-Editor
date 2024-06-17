@@ -71,6 +71,7 @@ class ResourcesWindow : public EditorWindow
 {
 public:
     static std::string add_tag;
+    static ImVec4 add_tag_color;
     static std::string search;
     static bool searching;
     static std::vector<std::string> search_tags;
