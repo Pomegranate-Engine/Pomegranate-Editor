@@ -288,7 +288,7 @@ void ResourcesWindow::render()
                         {
                             //if (strstr(autocomplete[i], input) == NULL)
                             //    continue;
-                            if(tags[i].contains(add_tag))
+                            if(std::find(tags.begin(), tags.end(), add_tag) == tags.end())
                             {
                                 if (ImGui::Selectable(tags[i].c_str()))
                                 {

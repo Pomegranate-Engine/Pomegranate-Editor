@@ -1873,6 +1873,7 @@ void LuaSystem::tick(Entity *e)
     //Check if the function exists
     if(lua_isnil(lua_state, -1))
     {
+        lua_pop(lua_state, 1);
         return;
     }
 
@@ -1909,6 +1910,7 @@ void LuaSystem::draw(Entity *e)
     //Check if the function exists
     if(lua_isnil(lua_state, -1))
     {
+        lua_pop(lua_state, 1);
         return;
     }
 
@@ -1945,6 +1947,7 @@ void LuaSystem::pre_tick()
     //Check if the function exists
     if(lua_isnil(lua_state, -1))
     {
+        lua_pop(lua_state, 1);
         return;
     }
 
@@ -1970,6 +1973,7 @@ void LuaSystem::post_tick() {
     //Check if the function exists
     if(lua_isnil(lua_state, -1))
     {
+        lua_pop(lua_state, 1);
         return;
     }
 
@@ -1995,6 +1999,7 @@ void LuaSystem::pre_draw() {
     //Check if the function exists
     if(lua_isnil(lua_state, -1))
     {
+        lua_pop(lua_state, 1);
         return;
     }
 
@@ -2020,6 +2025,7 @@ void LuaSystem::post_draw() {
     //Check if the function exists
     if(lua_isnil(lua_state, -1))
     {
+        lua_pop(lua_state, 1);
         return;
     }
 
