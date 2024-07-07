@@ -56,6 +56,8 @@ set(SOURCE_FILES src/main.cpp
         src/live_share.h
         src/LiveShare/live_share_shared_data.cpp
         src/LiveShare/live_share_shared_data.h
+        src/run.cpp
+        src/run.h
 )
 
 set(POMEGRANATE_DIR ${CMAKE_SOURCE_DIR}/Include/Pomegranate)

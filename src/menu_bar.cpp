@@ -94,7 +94,7 @@ void run_scene()
         compile_project("Game", Editor::current_scene_path);
         //Run
         Notify::notify({ResourceManager::load<Texture>("engine/check.png"), EditorTheme::color_palette_green,"Running","Starting"});
-        run_project();
+        new ProjectDebugger();
     }
     else
     {

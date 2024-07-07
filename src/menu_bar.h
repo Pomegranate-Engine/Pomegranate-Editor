@@ -18,7 +18,7 @@
 #include <future>
 #include "notifications.h"
 #include "hotkey_manager.h"
-
+#include "run.h"
 using json = nlohmann::json;
 using namespace Pomegranate;
 void draw_menu_bar();

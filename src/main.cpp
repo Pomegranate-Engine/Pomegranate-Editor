@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
 
         draw_menu_bar();
         windows_manager.render(); //Render windows
+        ProjectDebugger::tick_debuggers();
         Notify::render(delta_time);
         ImGui::Render();
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData());

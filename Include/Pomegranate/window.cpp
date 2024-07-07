@@ -37,14 +37,18 @@ namespace Pomegranate
         return this->renderer;
     }
 
-    int Window::open()
+    int Window::open(bool maximized)
     {
         make_current();
         bool HIGH_DPI = false;
 #if defined(__APPLE__) //TODO: Implement better solution for HIGH_DPI
         HIGH_DPI = false;
 #endif
-        int flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED | SDL_WINDOW_OPENGL;
+        int flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL;
+        if(maximized)
+        {
+            flags |= SDL_WINDOW_MAXIMIZED;
+        }
         if(HIGH_DPI)
         {
             flags = flags | SDL_WINDOW_HIGH_PIXEL_DENSITY;

@@ -32,7 +32,7 @@ namespace Pomegranate
         [[nodiscard]] SDL_Window* get_sdl_window() const;
         [[nodiscard]] SDL_Renderer* get_sdl_renderer() const;
         [[nodiscard]] SDL_GLContext get_gl_context() const;
-        int open();
+        int open(bool maximized = true);
         void close();
         void make_current();
         static const Window* current;
